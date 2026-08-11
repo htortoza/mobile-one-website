@@ -165,30 +165,10 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     line-height: 1.08;
     letter-spacing: -0.02em;
   }
-  .hero-split__word-outer { overflow: hidden; padding-bottom: 0.14em; margin-bottom: -0.14em; }
+  .hero-split__word-outer { overflow: hidden; padding-bottom: 0.06em; margin-bottom: -0.06em; }
   .hero-split__word { display: block; }
-  /* Texto siempre sólido (var(--on-accent)) — nunca pierde contraste sobre el panel azul.
-     El resaltado es un subrayado degradado que se dibuja, no un cambio de color del texto. */
   .hero-split__word--accent {
-    position: relative;
     font-weight: 500;
-  }
-  .hero-split__word--accent::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0.02em;
-    height: 0.08em;
-    border-radius: var(--radius-full);
-    background: linear-gradient(90deg, var(--accent-grad-end), var(--on-accent));
-    transform: scaleX(0);
-    transform-origin: left;
-    animation: hero-underline 0.8s var(--ease-out) forwards;
-    animation-delay: 1.2s;
-  }
-  @keyframes hero-underline {
-    to { transform: scaleX(1); }
   }
   .hero-split__sub {
     font-size: var(--text-lg);
@@ -327,7 +307,4 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     .mock-cart { margin-top: 12%; }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .hero-split__word--accent::after { animation: none; transform: scaleX(1); }
-  }
 </style>
