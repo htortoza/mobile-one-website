@@ -113,14 +113,19 @@ const normalize = (w) => w.replace(/[.,]/g, '').toLowerCase();
     min-height: 100svh;
   }
 
-  /* ── Panel azul ── */
+  /* ── Panel azul ──
+     Fondo full-bleed (llena el 70% del viewport siempre), pero el contenido
+     nunca supera ~1444px combinado entre ambos paneles: el padding exterior
+     (hacia el borde de la pantalla) crece con max() en pantallas gigantes. */
   .hero-split__blue {
     min-width: 0;
     background: var(--accent-gradient);
     color: var(--on-accent);
     display: flex;
     align-items: center;
-    padding: var(--space-xl) var(--container-pad) var(--space-lg) var(--space-sm);
+    padding-block: var(--space-xl) var(--space-lg);
+    padding-inline-start: max(var(--container-pad), calc((100vw - var(--content-max-xl)) / 2));
+    padding-inline-end: var(--space-lg);
   }
   .hero-split__blue-inner {
     min-width: 0;
@@ -217,7 +222,9 @@ const normalize = (w) => w.replace(/[.,]/g, '').toLowerCase();
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--space-lg) var(--container-pad);
+    padding-block: var(--space-lg);
+    padding-inline-start: var(--space-lg);
+    padding-inline-end: max(var(--container-pad), calc((100vw - var(--content-max-xl)) / 2));
   }
   .hero-split__mockups {
     position: relative;

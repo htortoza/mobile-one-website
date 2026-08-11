@@ -72,6 +72,7 @@ h1, h2, h3, h4, h5, h6 {
   /* Contenedor */
   --container-max: 1280px;
   --container-pad: var(--space-md);
+  --content-max-xl: 1444px; /* tope de contenido en secciones full-bleed (fondo infinito, contenido centrado) */
 
   /* Bordes */
   --radius-sm: 4px;
