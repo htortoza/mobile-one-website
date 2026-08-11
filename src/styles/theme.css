@@ -46,6 +46,13 @@ h1, h2, h3, h4, h5, h6 {
   --accent-gradient:    linear-gradient(135deg, var(--accent-grad-start), var(--accent-grad-end));
   --on-accent:          #ffffff;
 
+  /* Tono ambiental por pasarela de pago (sección "Compatibilidad") — no son el
+     hex exacto de marca de terceros, solo un acento de color para diferenciar
+     cada capítulo. Transbank reusa el azul propio de Mobile One. */
+  --tone-transbank:   var(--accent-grad-start);
+  --tone-getnet:      #e8531f;
+  --tone-mercadopago: #ffcc00;
+
   /* Tipografías — Satoshi (Fontshare), tope de peso 600 — la URL se pasa via BaseHead */
   --font-heading: 'Satoshi', sans-serif;
   --font-body:    'Satoshi', sans-serif;

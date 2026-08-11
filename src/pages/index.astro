@@ -3,7 +3,7 @@
 import Layout from '../layouts/Layout.astro';
 import TrustBar from '../components/home/TrustBar.astro';
 import HeroSplit from '../components/home/HeroSplit.astro';
-import ScrollStory from '../components/home/ScrollStory.astro';
+import BrandCompat from '../components/home/BrandCompat.astro';
 import ProblemLedger from '../components/home/ProblemLedger.astro';
 import SolutionBento from '../components/home/SolutionBento.astro';
 import HowItWorksFlow from '../components/home/HowItWorksFlow.astro';
@@ -33,7 +33,7 @@ const schemaData = {
     ctaText="Agendar demo"
     ctaHref="/contacto"
     ctaSecondaryText="Ver cómo funciona"
-    ctaSecondaryHref="#terminal-narrativo"
+    ctaSecondaryHref="#compatibilidad"
   />
 
   <TrustBar
@@ -46,7 +46,10 @@ const schemaData = {
     ]}
   />
 
-  <ScrollStory />
+  <BrandCompat
+    eyebrow="Compatibilidad total"
+    title="El mismo terminal que ya usas para cobrar"
+  />
 
   <ProblemLedger
     title="El retail físico sigue perdiendo ventas que el e-commerce ya resolvió hace años"
