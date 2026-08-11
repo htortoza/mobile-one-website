@@ -4,7 +4,7 @@
 const {
   eyebrow,
   headline,
-  accentWord,
+  accentPhrase,
   subheadline,
   ctaText,
   ctaHref,
@@ -14,6 +14,19 @@ const {
 
 const words = headline ? headline.split(' ') : [];
 const normalize = (w) => w.replace(/[.,]/g, '').toLowerCase();
+
+// Ubica la frase a resaltar como subsecuencia contigua de palabras (soporta 1 o varias palabras)
+const phraseWords = accentPhrase ? accentPhrase.split(' ').map(normalize) : [];
+let accentStart = -1;
+if (phraseWords.length) {
+  for (let i = 0; i <= words.length - phraseWords.length; i++) {
+    if (phraseWords.every((pw, j) => normalize(words[i + j]) === pw)) {
+      accentStart = i;
+      break;
+    }
+  }
+}
+const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart + phraseWords.length;
 ---
 
 <section class="hero-split" data-gsap-section="hero-split">
@@ -22,9 +35,9 @@ const normalize = (w) => w.replace(/[.,]/g, '').toLowerCase();
       {eyebrow && <p class="hero-split__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
 
       <h1 class="hero-split__headline" data-gsap-split="words">
-        {words.map((word) => (
+        {words.map((word, i) => (
           <span class="hero-split__word-outer">
-            <span class={`hero-split__word ${accentWord && normalize(word) === normalize(accentWord) ? 'hero-split__word--accent' : ''}`}>{word}</span>
+            <span class={`hero-split__word ${isAccent(i) ? 'hero-split__word--accent' : ''}`}>{word}</span>
           </span>
         ))}
       </h1>
@@ -152,24 +165,30 @@ const normalize = (w) => w.replace(/[.,]/g, '').toLowerCase();
     line-height: 1.08;
     letter-spacing: -0.02em;
   }
-  .hero-split__word-outer { overflow: hidden; padding-bottom: 0.06em; margin-bottom: -0.06em; }
+  .hero-split__word-outer { overflow: hidden; padding-bottom: 0.14em; margin-bottom: -0.14em; }
   .hero-split__word { display: block; }
+  /* Texto siempre sólido (var(--on-accent)) — nunca pierde contraste sobre el panel azul.
+     El resaltado es un subrayado degradado que se dibuja, no un cambio de color del texto. */
   .hero-split__word--accent {
+    position: relative;
     font-weight: 500;
-    background-image: linear-gradient(100deg,
-      var(--on-accent) 0%, var(--on-accent) 30%,
-      var(--accent-grad-end) 45%,
-      var(--on-accent) 60%, var(--on-accent) 100%);
-    background-size: 220% 100%;
-    background-position: 0% 0;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: hero-shimmer 4.5s linear infinite;
   }
-  @keyframes hero-shimmer {
-    from { background-position: 0% 0; }
-    to   { background-position: -220% 0; }
+  .hero-split__word--accent::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.02em;
+    height: 0.08em;
+    border-radius: var(--radius-full);
+    background: linear-gradient(90deg, var(--accent-grad-end), var(--on-accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: hero-underline 0.8s var(--ease-out) forwards;
+    animation-delay: 1.2s;
+  }
+  @keyframes hero-underline {
+    to { transform: scaleX(1); }
   }
   .hero-split__sub {
     font-size: var(--text-lg);
@@ -309,6 +328,6 @@ const normalize = (w) => w.replace(/[.,]/g, '').toLowerCase();
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero-split__word--accent { animation: none; background-position: -70% 0; }
+    .hero-split__word--accent::after { animation: none; transform: scaleX(1); }
   }
 </style>
