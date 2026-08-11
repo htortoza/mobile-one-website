@@ -1,0 +1,32 @@
+{
+  "_comment": "Schema para páginas de servicio. Especialmente relevante para SEO local. El agente DEBE completar todos los campos 'required: true'.",
+  "schema_version": "1.0",
+  "page_type": "service",
+  "fields": {
+    "seo": {
+      "required": true,
+      "fields": {
+        "title":          { "required": true,  "type": "string", "max": 60 },
+        "description":    { "required": true,  "type": "string", "max": 155 },
+        "googleFontsUrl": { "required": false, "type": "string" },
+        "schemaData":     { "required": false, "type": "object", "_comment": "Si ausente, el validador auto-genera schema.org/Service" }
+      }
+    },
+    "service": {
+      "required": true,
+      "fields": {
+        "name":        { "required": true,  "type": "string" },
+        "description": { "required": true,  "type": "string" },
+        "areaServed":  { "required": true,  "type": "string", "_comment": "Ciudad, región o país donde se presta el servicio — clave para SEO local" },
+        "features":    {
+          "required": false,
+          "type": "array",
+          "_comment": "Lista de características o beneficios del servicio",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

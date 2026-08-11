@@ -1,0 +1,168 @@
+---
+// src/components/home/HowItWorksFlow.astro
+// Home §4.6 — Cómo funciona. Diagrama de nodos conectados con paquete animado (§20.2, §21.3).
+const { title, steps } = Astro.props;
+const list = steps ?? [];
+---
+
+<section class="flow" data-gsap-section="flow">
+  <div class="container flow__inner">
+    <h2 class="flow__title" data-gsap-animate="fade-up">{title}</h2>
+
+    <div class="flow__diagram">
+      <svg class="flow__cables" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        {list.slice(0, -1).map((_, i) => {
+          const total = list.length;
+          const x1 = (100 / total) * (i + 0.5);
+          const x2 = (100 / total) * (i + 1.5);
+          return (
+            <path
+              d={`M ${x1} 50 L ${x2} 50`}
+              class="flow__cable"
+              vector-effect="non-scaling-stroke"
+              data-flow-cable
+            />
+          );
+        })}
+      </svg>
+
+      {list.map((step, i) => (
+        <div class="flow__node" data-flow-node style={`--node-i:${i}; --node-total:${list.length}`}>
+          <span class="flow__node-dot">{i + 1}</span>
+          <p class="flow__node-text">{step}</p>
+        </div>
+      ))}
+
+      {list.slice(0, -1).map((_, i) => (
+        <span class="flow__packet" data-flow-packet style={`--node-i:${i}; --node-total:${list.length}`}></span>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initFlow() {
+    const section = document.querySelector('[data-gsap-section="flow"]');
+    if (!section) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const nodes = section.querySelectorAll('[data-flow-node]');
+    if (!reduced) {
+      gsap.from(nodes, {
+        opacity: 0,
+        y: 20,
+        duration: 0.6,
+        stagger: 0.15,
+        ease: 'expo.out',
+        scrollTrigger: { trigger: section, start: 'top 75%' },
+      });
+
+      section.querySelectorAll('[data-flow-cable]').forEach((cable) => {
+        gsap.fromTo(cable, { opacity: 0 }, {
+          opacity: 1,
+          duration: 0.5,
+          scrollTrigger: { trigger: section, start: 'top 70%' },
+        });
+      });
+
+      section.querySelectorAll('[data-flow-packet]').forEach((packet, i) => {
+        gsap.fromTo(packet, { xPercent: 0 }, {
+          xPercent: 100,
+          duration: 1.4,
+          repeat: -1,
+          delay: i * 0.3,
+          ease: 'power1.inOut',
+        });
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', initFlow);
+</script>
+
+<style>
+  .flow { padding-block: var(--space-2xl); background-color: var(--bg-primary); }
+  .flow__inner { display: grid; gap: var(--space-xl); }
+  .flow__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    max-width: 22ch;
+  }
+
+  .flow__diagram {
+    position: relative;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: var(--space-md);
+    padding-block: var(--space-lg);
+  }
+
+  .flow__cables {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+  .flow__cable {
+    stroke: var(--border);
+    stroke-width: 2;
+    fill: none;
+    opacity: 0;
+  }
+
+  .flow__node {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-sm);
+    text-align: center;
+  }
+  .flow__node-dot {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    background: var(--accent-gradient);
+    color: var(--on-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+  }
+  .flow__node-text { color: var(--text-secondary); max-width: 20ch; }
+
+  .flow__packet {
+    position: absolute;
+    top: calc(50% - 4px);
+    left: calc((100% / var(--node-total)) * (var(--node-i) + 0.5));
+    width: calc((100% / var(--node-total)) - 0px);
+    max-width: calc(100% / var(--node-total));
+    height: 8px;
+    pointer-events: none;
+  }
+  .flow__packet::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background-color: var(--accent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+
+  @media (max-width: 767px) {
+    .flow__diagram { grid-auto-flow: row; }
+    .flow__cables, .flow__packet { display: none; }
+  }
+</style>

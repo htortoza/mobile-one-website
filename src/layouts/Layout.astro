@@ -1,0 +1,97 @@
+---
+// src/layouts/Layout.astro
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import StickyCTA from '../components/StickyCTA.astro';
+import { ClientRouter } from 'astro:transitions';
+
+const {
+  title,
+  description,
+  image,
+  googleFontsUrl,
+  schemaData,
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <BaseHead
+      title={title}
+      description={description}
+      image={image}
+      googleFontsUrl={googleFontsUrl}
+    />
+
+    <!-- View Transitions: fade suave entre páginas (Astro 5) -->
+    <ClientRouter />
+
+    <!-- JSON-LD inyectado por el Agente SEO -->
+    {schemaData && (
+      <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+    )}
+  </head>
+
+  <body>
+    <Header />
+
+    <div id="smooth-wrapper">
+      <div id="smooth-content">
+        <main>
+          <slot />
+        </main>
+        <Footer />
+      </div>
+    </div>
+
+    <StickyCTA />
+
+
+    <!-- Motor de movimiento global — Lenis + GSAP -->
+    <script>
+      import Lenis from 'lenis';
+      import { gsap } from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+      // Registrar plugin una sola vez a nivel de módulo
+      gsap.registerPlugin(ScrollTrigger);
+
+      let lenis: InstanceType<typeof Lenis> | undefined;
+      let rafCallback: ((time: number) => void) | undefined;
+
+      function init() {
+        lenis = new Lenis({
+          duration: 1.2,
+          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          orientation: 'vertical',
+          smoothWheel: true,
+        });
+
+        // Sincronizar ScrollTrigger con Lenis
+        lenis.on('scroll', ScrollTrigger.update);
+
+        rafCallback = (time: number) => {
+          lenis!.raf(time * 1000);
+        };
+        gsap.ticker.add(rafCallback);
+        gsap.ticker.lagSmoothing(0);
+      }
+
+      // Antes del swap: destruir Lenis y matar todos los ScrollTriggers
+      // para evitar fugas de memoria y triggers duplicados
+      document.addEventListener('astro:before-swap', () => {
+        lenis?.destroy();
+        if (rafCallback) {
+          gsap.ticker.remove(rafCallback);
+          rafCallback = undefined;
+        }
+        ScrollTrigger.killAll();
+      });
+
+      // Inicializar en cada carga de página (navegación inicial + View Transitions)
+      document.addEventListener('astro:page-load', init);
+    </script>
+  </body>
+</html>

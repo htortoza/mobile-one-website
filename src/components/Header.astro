@@ -1,0 +1,235 @@
+---
+// src/components/Header.astro
+// Chrome global del sitio. Lee contracts/site.json (fuente única de marca + navegación).
+import site from '../../contracts/site.json';
+
+const { siteName } = site.site;
+const nav = site.navigation ?? [];
+const orderUrl = site.orderUrl ?? '#';
+---
+
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <a href="/" class="logo" aria-label={`${siteName} — Inicio`}>
+      <img src="/brand/Imagotipo-logo.svg" alt={siteName} class="logo__img" />
+    </a>
+
+    <nav class="main-nav" aria-label="Navegación principal">
+      <ul role="list">
+        {nav.map((item) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <a href={orderUrl} class="header-cta">
+      Agendar demo
+    </a>
+
+    <button
+      class="nav-toggle"
+      aria-label="Abrir menú"
+      aria-expanded="false"
+      aria-controls="mobile-overlay"
+      data-nav-toggle
+    >
+      <span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Overlay móvil -->
+  <div class="mobile-overlay" id="mobile-overlay" data-overlay hidden>
+    <nav aria-label="Navegación móvil">
+      <ul role="list">
+        {nav.map((item) => (
+          <li><a href={item.href} data-overlay-link>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <a href={orderUrl} class="overlay-cta">
+      Agendar demo
+    </a>
+  </div>
+</header>
+
+<script>
+  const header  = document.querySelector('[data-header]');
+  const toggle  = document.querySelector('[data-nav-toggle]');
+  const overlay = document.querySelector('[data-overlay]');
+
+  // Header se vuelve sólido al hacer scroll
+  if (header) {
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  // Toggle del overlay móvil
+  if (toggle && overlay) {
+    const setOpen = (open) => {
+      overlay.toggleAttribute('hidden', !open);
+      overlay.classList.toggle('is-open', open);
+      toggle.classList.toggle('is-active', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+
+    toggle.addEventListener('click', () => setOpen(overlay.hasAttribute('hidden')));
+    overlay.querySelectorAll('[data-overlay-link]').forEach((a) =>
+      a.addEventListener('click', () => setOpen(false))
+    );
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !overlay.hasAttribute('hidden')) setOpen(false);
+    });
+    document.addEventListener('astro:before-swap', () => { document.body.style.overflow = ''; }, { once: true });
+  }
+</script>
+
+<style>
+  /* Glass siempre activo (no transparente): el Hero tiene un panel azul debajo
+     y uno claro — un header transparente perdería contraste contra el azul. */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-overlay);
+    transition: box-shadow var(--transition-fast);
+    background-color: color-mix(in srgb, var(--bg-primary) 78%, transparent);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+  }
+
+  .site-header.is-scrolled {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-block: var(--space-sm);
+  }
+
+  /* ── Logo ── */
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .logo__img {
+    height: 28px;
+    width: auto;
+    display: block;
+  }
+
+  /* ── Nav desktop ── */
+  .main-nav ul {
+    display: flex;
+    gap: var(--space-md);
+    list-style: none;
+  }
+  .main-nav a {
+    position: relative;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+  .main-nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 1px;
+    background-color: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition-fast);
+  }
+  .main-nav a:hover { color: var(--text-primary); }
+  .main-nav a:hover::after { transform: scaleX(1); }
+
+  /* ── CTA header ── */
+  .header-cta {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--bg-primary);
+    background-color: var(--accent);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+  }
+  .header-cta:hover { background-color: var(--accent-hover); transform: translateY(-2px); }
+
+  /* ── Toggle móvil ── */
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+  }
+  .nav-toggle span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background-color: var(--text-primary);
+    transition: transform var(--transition-fast), opacity var(--transition-fast);
+  }
+  .nav-toggle.is-active span:nth-child(1) { transform: translateY(4px) rotate(45deg); }
+  .nav-toggle.is-active span:nth-child(2) { transform: translateY(-4px) rotate(-45deg); }
+
+  /* ── Overlay móvil ── */
+  .mobile-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+    background-color: color-mix(in srgb, var(--bg-primary) 96%, transparent);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+  }
+  .mobile-overlay.is-open { opacity: 1; }
+  .mobile-overlay[hidden] { display: none; }
+  .mobile-overlay ul { list-style: none; text-align: center; display: grid; gap: var(--space-md); }
+  .mobile-overlay a {
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+  .mobile-overlay a:hover { color: var(--accent); }
+  .overlay-cta {
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: var(--bg-primary);
+    background-color: var(--accent);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 860px) {
+    .main-nav, .header-cta { display: none; }
+    .nav-toggle { display: flex; }
+  }
+</style>

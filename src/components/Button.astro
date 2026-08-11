@@ -1,0 +1,78 @@
+---
+// src/components/Button.astro
+// AGENTE: usa este componente para todos los CTAs — nunca crees botones ad-hoc
+
+const {
+  href,
+  variant = 'primary',  // 'primary' | 'secondary' | 'ghost'
+  size = 'md',          // 'sm' | 'md' | 'lg'
+  external = false,
+  class: className = '',
+} = Astro.props;
+
+const tag = href ? 'a' : 'button';
+const externalProps = external
+  ? { target: '_blank', rel: 'noopener noreferrer' }
+  : {};
+---
+
+<tag
+  href={href}
+  class={`btn btn--${variant} btn--${size} ${className}`}
+  {...externalProps}
+>
+  <slot />
+</tag>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast),
+                color var(--transition-fast),
+                border-color var(--transition-fast);
+  }
+
+  /* Tamaños */
+  .btn--sm { font-size: var(--text-sm);  padding: var(--space-xs) var(--space-sm); }
+  .btn--md { font-size: var(--text-base); padding: var(--space-sm) var(--space-md); }
+  .btn--lg { font-size: var(--text-lg);  padding: var(--space-sm) var(--space-lg); }
+
+  /* Variantes — todas usan variables del tema */
+  .btn--primary {
+    background-color: var(--accent);
+    color: var(--bg-primary);
+    border-color: var(--accent);
+  }
+  .btn--primary:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+
+  .btn--secondary {
+    background-color: transparent;
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .btn--secondary:hover {
+    background-color: var(--accent);
+    color: var(--bg-primary);
+  }
+
+  .btn--ghost {
+    background-color: transparent;
+    color: var(--text-primary);
+    border-color: transparent;
+  }
+  .btn--ghost:hover {
+    color: var(--accent);
+  }
+</style>

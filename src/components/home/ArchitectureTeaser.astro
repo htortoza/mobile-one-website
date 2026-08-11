@@ -1,0 +1,107 @@
+---
+// src/components/home/ArchitectureTeaser.astro
+// Home §4.7 — Arquitectura (teaser). Badges grandes + mini-diagrama hacia /integraciones.
+const { title, text, badges, nodes } = Astro.props;
+const badgeList = badges ?? [];
+const nodeList = nodes ?? [];
+---
+
+<section class="arch" data-gsap-section="arch">
+  <div class="container arch__inner">
+    <div class="arch__copy">
+      <h2 class="arch__title" data-gsap-animate="fade-up">{title}</h2>
+      <p class="arch__text">{text}</p>
+      <a href="/integraciones" class="arch__link">Ver arquitectura completa →</a>
+
+      <div class="arch__badges">
+        {badgeList.map((b) => (
+          <span class="arch__badge" data-count-badge>{b}</span>
+        ))}
+      </div>
+    </div>
+
+    <div class="arch__mini" aria-hidden="true">
+      {nodeList.map((n, i) => (
+        <span class="arch__node" data-arch-node style={`--i:${i}`}>{n}</span>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initArch() {
+    const section = document.querySelector('[data-gsap-section="arch"]');
+    if (!section || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    gsap.from(section.querySelectorAll('[data-count-badge]'), {
+      opacity: 0,
+      y: 16,
+      duration: 0.5,
+      stagger: 0.08,
+      ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 78%' },
+    });
+
+    gsap.from(section.querySelectorAll('[data-arch-node]'), {
+      opacity: 0,
+      scale: 0.9,
+      duration: 0.5,
+      stagger: 0.08,
+      ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 70%' },
+    });
+  }
+
+  document.addEventListener('astro:page-load', initArch);
+</script>
+
+<style>
+  .arch { padding-block: var(--space-2xl); background-color: var(--bg-secondary); }
+  .arch__inner { display: grid; gap: var(--space-lg); }
+  .arch__title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .arch__text { color: var(--text-secondary); max-width: 60ch; line-height: 1.6; margin-block: var(--space-sm); }
+  .arch__link { color: var(--accent); font-weight: 600; text-decoration: none; }
+
+  .arch__badges { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-md); }
+  .arch__badge {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--navy);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+  }
+
+  .arch__mini {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    padding: var(--space-lg);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+  }
+  .arch__node {
+    font-size: var(--text-xs);
+    color: var(--accent-hover);
+    background-color: color-mix(in srgb, var(--accent) 10%, transparent);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-full);
+  }
+
+  @media (min-width: 1024px) {
+    .arch__inner { grid-template-columns: 1fr 1fr; align-items: center; gap: var(--space-2xl); }
+  }
+</style>

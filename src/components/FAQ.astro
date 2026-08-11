@@ -1,0 +1,222 @@
+---
+// src/components/FAQ.astro
+// AGENTE FRONTEND: pasa title e items[] desde el contrato JSON
+// AGENTE MOTION: fade-up de sección + stagger de ítems con ScrollTrigger
+// Acordeón: cero JS de interacción — grid-template-rows: 0fr→1fr, solo CSS
+
+interface Item {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  title: string;
+  items: Item[];
+}
+
+const { title, items = [] } = Astro.props;
+
+// JSON-LD FAQPage generado automáticamente desde los items
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": items.map((item) => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.answer,
+    },
+  })),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+<section class="faq" data-gsap-section="faq">
+  <div class="container">
+
+    <h2 class="faq__title" data-gsap-animate="faq-title">{title}</h2>
+
+    <div class="faq__list">
+      {items.map((item) => (
+        <details class="faq__item" data-gsap-animate="faq-item">
+          <summary class="faq__question">
+            <span>{item.question}</span>
+            <span class="faq__icon" aria-hidden="true"></span>
+          </summary>
+          <!-- outer: track animado; inner: overflow:hidden para 0fr funcione -->
+          <div class="faq__body-outer">
+            <div class="faq__body-inner">
+              <p class="faq__answer">{item.answer}</p>
+            </div>
+          </div>
+        </details>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const section = document.querySelector('[data-gsap-section="faq"]');
+  if (section && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const titleEl = section.querySelector('[data-gsap-animate="faq-title"]');
+    const items   = section.querySelectorAll('[data-gsap-animate="faq-item"]');
+
+    gsap.from(titleEl, {
+      y: 24,
+      opacity: 0,
+      duration: 0.8,
+      ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 80%' },
+    });
+
+    gsap.from(items, {
+      y: 20,
+      opacity: 0,
+      stagger: 0.08,
+      duration: 0.7,
+      ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 75%' },
+    });
+  }
+</script>
+
+<style>
+  .faq {
+    padding-block: var(--space-xl);
+    background-color: var(--bg-primary);
+  }
+
+  .faq__title {
+    font-family: var(--font-heading);
+    font-size: clamp(var(--text-2xl), 5vw, var(--text-3xl));
+    line-height: 1.05;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    margin-bottom: var(--space-xl);
+  }
+
+  .faq__list {
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Ítem ── */
+  .faq__item {
+    border-bottom: 1px solid var(--border);
+    box-shadow: inset 3px 0 0 0 transparent;
+    transition:
+      background-color var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  .faq__item:hover {
+    background-color: var(--bg-secondary);
+    box-shadow: inset 3px 0 0 0 var(--accent);
+  }
+
+  /* ── Pregunta (summary) ── */
+  .faq__question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-block: var(--space-md);
+    padding-inline: var(--space-sm);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  /* Oculta el marcador nativo en todos los navegadores */
+  .faq__question::-webkit-details-marker { display: none; }
+  .faq__question::marker              { display: none; }
+
+  .faq__question span:first-child {
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    transition: color var(--transition-fast);
+  }
+
+  .faq__item:hover .faq__question span:first-child {
+    color: var(--accent);
+  }
+
+  /* ── Indicador +/× (solo CSS, sin JS) ── */
+  .faq__icon {
+    position: relative;
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--accent);
+  }
+
+  /* Barra horizontal del + */
+  .faq__icon::before,
+  .faq__icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    background-color: currentColor;
+    border-radius: var(--radius-full);
+    transition: transform var(--transition-fast);
+  }
+
+  .faq__icon::before {
+    width: 100%;
+    height: 2px;
+  }
+
+  /* Barra vertical del + */
+  .faq__icon::after {
+    width: 2px;
+    height: 100%;
+  }
+
+  /* Al abrir: barra vertical rota → queda alineada con la horizontal → forma × */
+  details[open] .faq__icon::after {
+    transform: rotate(90deg);
+  }
+
+  details[open] .faq__icon::before,
+  details[open] .faq__icon::after {
+    transform: rotate(45deg);
+  }
+
+  /* ── Cuerpo animado (grid-template-rows: 0fr → 1fr) ── */
+  .faq__body-outer {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--transition-smooth);
+  }
+
+  details[open] .faq__body-outer {
+    grid-template-rows: 1fr;
+  }
+
+  /* overflow:hidden es necesario para que 0fr colapse a cero */
+  .faq__body-inner {
+    overflow: hidden;
+  }
+
+  .faq__answer {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    line-height: 1.7;
+    padding-bottom: var(--space-md);
+    padding-inline: var(--space-sm);
+    max-width: 680px;
+  }
+</style>

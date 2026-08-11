@@ -1,0 +1,37 @@
+{
+  "_comment": "EJEMPLO de contrato global de sitio. Copia a contracts/site.json y edita con los datos reales del cliente, luego ejecuta: node src/utils/apply-theme.js contracts/site.json",
+  "contract_type": "site",
+  "site": {
+    "domain": "https://cliente.com",
+    "siteName": "Tu Marca",
+    "language": "es",
+    "defaultOgImage": "/images/og-card.png"
+  },
+  "company": {
+    "legalName": "Tu Marca SpA",
+    "email": "hola@cliente.com",
+    "phone": "+56 9 0000 0000",
+    "address": "Ciudad, País"
+  },
+  "orderUrl": "#contacto",
+  "navigation": [
+    { "label": "Inicio",    "href": "/" },
+    { "label": "Servicios", "href": "/servicios" },
+    { "label": "Nosotros",  "href": "/nosotros" },
+    { "label": "Contacto",  "href": "/contacto" }
+  ],
+  "footerLinks": [
+    { "label": "Privacidad", "href": "/privacidad" },
+    { "label": "Términos",   "href": "/terminos" }
+  ],
+  "theme": {
+    "--bg-primary":     "#0a0e14",
+    "--bg-secondary":   "#121821",
+    "--text-primary":   "#f2f5f7",
+    "--text-secondary": "#8a97a3",
+    "--accent":         "#4f8cff",
+    "--accent-hover":   "#6ea0ff",
+    "--font-heading":   "'Sora', sans-serif",
+    "--font-body":      "'Inter', sans-serif"
+  }
+}

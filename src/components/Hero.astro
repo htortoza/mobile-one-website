@@ -1,0 +1,220 @@
+---
+// src/components/Hero.astro
+// AGENTE FRONTEND: rellena las props con los datos del contrato JSON
+// AGENTE MOTION: usa los data-attributes para inyectar animaciones GSAP
+
+import Button from './Button.astro';
+
+const {
+  headline,
+  subheadline,
+  ctaText,
+  ctaHref,
+  ctaSecondaryText,
+  ctaSecondaryHref,
+  backgroundImage,
+} = Astro.props;
+
+const words = headline ? headline.split(' ') : [];
+---
+
+<section
+  class="hero"
+  data-gsap-section="hero"
+  style={backgroundImage ? `--hero-bg: url('${backgroundImage}')` : ''}
+>
+  <div class="container hero__inner">
+    <div class="hero__content" data-gsap-animate="hero-content">
+
+      <h1 class="hero__headline" data-gsap-split="words">
+        {words.map((word) => (
+          <span class="hero__word-outer">
+            <span class="hero__word">{word}</span>
+          </span>
+        ))}
+      </h1>
+
+      <!-- Asymmetric bottom row: subtitle left / CTA right on desktop -->
+      <div class="hero__bottom">
+        {subheadline && (
+          <p class="hero__sub" data-gsap-animate="fade-up">
+            {subheadline}
+          </p>
+        )}
+
+        <div class="hero__cta" data-gsap-animate="fade-up-delay">
+          {ctaText && (
+            <Button href={ctaHref} variant="primary" size="lg">
+              {ctaText}
+            </Button>
+          )}
+          {ctaSecondaryText && (
+            <Button href={ctaSecondaryHref} variant="secondary" size="lg">
+              {ctaSecondaryText}
+            </Button>
+          )}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const section = document.querySelector('[data-gsap-section="hero"]');
+  if (section && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const words = section.querySelectorAll('.hero__word');
+    const sub   = section.querySelector('[data-gsap-animate="fade-up"]');
+    const cta   = section.querySelector('[data-gsap-animate="fade-up-delay"]');
+
+    const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+
+    tl.from(words, { y: 48, opacity: 0, stagger: 0.06, duration: 1 });
+    if (sub) tl.from(sub, { y: 24, opacity: 0, duration: 0.9 }, '-=0.4');
+    if (cta) tl.from(cta, { y: 24, opacity: 0, duration: 0.8 }, '-=0.5');
+
+    // Magnetic CTA — desktop (pointer: fine) only
+    const primaryBtn = section.querySelector('.hero__cta .btn--primary');
+    if (primaryBtn && window.matchMedia('(pointer: fine)').matches) {
+      const qx = gsap.quickTo(primaryBtn, 'x', { duration: 0.5, ease: 'power3.out' });
+      const qy = gsap.quickTo(primaryBtn, 'y', { duration: 0.5, ease: 'power3.out' });
+
+      primaryBtn.addEventListener('mousemove', (e) => {
+        const r  = primaryBtn.getBoundingClientRect();
+        const cx = r.left + r.width  / 2;
+        const cy = r.top  + r.height / 2;
+        qx((e.clientX - cx) * 0.4);
+        qy((e.clientY - cy) * 0.4);
+      });
+
+      primaryBtn.addEventListener('mouseleave', () => {
+        gsap.to(primaryBtn, { x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1, 0.3)' });
+      });
+    }
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background-color: var(--bg-primary);
+    overflow: hidden;
+  }
+
+  /* Imagen de fondo (var --hero-bg, set inline cuando hay backgroundImage) */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--hero-bg);
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+    transform: scale(1.04);
+  }
+
+  /* Velo para legibilidad del texto sobre la imagen */
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      to top,
+      var(--bg-primary) 6%,
+      color-mix(in srgb, var(--bg-primary) 38%, transparent) 55%,
+      color-mix(in srgb, var(--bg-primary) 78%, transparent) 100%
+    );
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: 2;
+    padding-top: var(--space-2xl);
+    padding-bottom: var(--space-2xl);
+  }
+
+  .hero__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  /* ── Headline protagonista ── */
+  .hero__headline {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.25em;
+    row-gap: 0.05em;
+    align-items: flex-end;
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 8vw, 8rem);
+    line-height: 1;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+  }
+
+  /* Mask container: overflow:hidden recorta el y:48 inicial */
+  .hero__word-outer {
+    overflow: hidden;
+    padding-bottom: 0.06em;
+    margin-bottom: -0.06em;
+  }
+
+  .hero__word {
+    display: block;
+  }
+
+  /* ── Bottom asimétrico: sub izq / CTA der en desktop ── */
+  .hero__bottom {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .hero__sub {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 480px;
+  }
+
+  .hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  @media (min-width: 1024px) {
+    .hero__bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: end;
+      gap: var(--space-xl);
+    }
+
+    .hero__cta {
+      justify-content: flex-end;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero__cta {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .hero__cta :global(.btn) {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

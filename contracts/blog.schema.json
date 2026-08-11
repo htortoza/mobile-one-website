@@ -1,0 +1,27 @@
+{
+  "_comment": "Schema para páginas de artículo/blog. El agente DEBE completar todos los campos 'required: true'.",
+  "schema_version": "1.0",
+  "page_type": "blog",
+  "fields": {
+    "seo": {
+      "required": true,
+      "fields": {
+        "title":          { "required": true,  "type": "string", "max": 60 },
+        "description":    { "required": true,  "type": "string", "max": 155 },
+        "googleFontsUrl": { "required": false, "type": "string" },
+        "schemaData":     { "required": false, "type": "object", "_comment": "Si ausente, el validador auto-genera schema.org/Article" }
+      }
+    },
+    "post": {
+      "required": true,
+      "fields": {
+        "title":       { "required": true,  "type": "string" },
+        "date":        { "required": true,  "type": "string", "_comment": "ISO 8601: 2025-06-12" },
+        "author":      { "required": true,  "type": "string" },
+        "excerpt":     { "required": true,  "type": "string", "max": 300, "_comment": "Resumen corto — usado en listados y JSON-LD description" },
+        "body":        { "required": true,  "type": "string", "_comment": "Contenido en Markdown" },
+        "coverImage":  { "required": false, "type": "string", "_comment": "Path relativo a /public o URL absoluta" }
+      }
+    }
+  }
+}

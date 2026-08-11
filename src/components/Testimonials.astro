@@ -1,0 +1,200 @@
+---
+// src/components/Testimonials.astro
+// AGENTE FRONTEND: pasa title e items[] desde el contrato JSON
+// AGENTE MOTION: marquee horizontal infinito, pausable en hover
+
+interface Item {
+  quote: string;
+  author: string;
+  role?: string;
+}
+
+interface Props {
+  title: string;
+  items: Item[];
+}
+
+const { title, items = [] } = Astro.props;
+
+// Duplicar items para el loop sin costuras
+const loopItems = [...items, ...items];
+---
+
+<section class="testimonials" data-gsap-section="testimonials">
+  <div class="container">
+    <h2 class="testimonials__title" data-gsap-animate="testimonials-title">
+      {title}
+    </h2>
+  </div>
+
+  <!-- Full-bleed marquee: fuera del container -->
+  <div class="testimonials__marquee">
+    <ul class="testimonials__track" data-gsap-animate="testimonials-track" role="list">
+      {loopItems.map((item) => (
+        <li class="testimonials__card" data-gsap-animate="testimonial-card">
+          <blockquote class="testimonials__quote">
+            <p>{item.quote}</p>
+          </blockquote>
+          <footer class="testimonials__attribution">
+            <span class="testimonials__author">{item.author}</span>
+            {item.role && (
+              <span class="testimonials__role">{item.role}</span>
+            )}
+          </footer>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const section = document.querySelector('[data-gsap-section="testimonials"]');
+  const marquee = section && section.querySelector('.testimonials__marquee');
+  const track   = section && section.querySelector('[data-gsap-animate="testimonials-track"]');
+  const titleEl = section && section.querySelector('[data-gsap-animate="testimonials-title"]');
+
+  if (section && track && marquee) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Título: fade-up scroll-triggered
+    if (titleEl && !reduced) {
+      gsap.from(titleEl, {
+        y: 24,
+        opacity: 0,
+        duration: 0.9,
+        ease: 'expo.out',
+        scrollTrigger: { trigger: section, start: 'top 80%' },
+      });
+    }
+
+    if (reduced) {
+      // Fallback: eliminar duplicados y hacer scrollable horizontal
+      const allCards = Array.from(track.querySelectorAll('.testimonials__card'));
+      allCards.slice(allCards.length / 2).forEach((el) => el.remove());
+      marquee.style.overflowX = 'auto';
+    } else {
+      // Marquee infinito: anima x de 0 → -(scrollWidth / 2)
+      // repeat: -1 reinicia a 0 → seamless porque los ítems están duplicados
+      const anim = gsap.to(track, {
+        x: () => -(track.scrollWidth / 2),
+        duration: 30,
+        ease: 'none',
+        repeat: -1,
+      });
+
+      marquee.addEventListener('mouseenter', () => anim.pause());
+      marquee.addEventListener('mouseleave', () => anim.resume());
+
+      // Limpiar antes de View Transition
+      document.addEventListener('astro:before-swap', () => anim.kill(), { once: true });
+    }
+  }
+</script>
+
+<style>
+  .testimonials {
+    padding-top: var(--space-xl);
+    padding-bottom: var(--space-xl);
+    background-color: var(--bg-secondary);
+    overflow: hidden;
+  }
+
+  .testimonials__title {
+    font-family: var(--font-heading);
+    font-size: clamp(var(--text-2xl), 5vw, var(--text-3xl));
+    line-height: 1.05;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    margin-bottom: var(--space-xl);
+  }
+
+  /* ── Marquee ── */
+  .testimonials__marquee {
+    /* Extend a sangre (edge-to-edge) */
+    margin-inline: calc(-1 * var(--container-pad));
+    cursor: grab;
+  }
+
+  .testimonials__marquee:active {
+    cursor: grabbing;
+  }
+
+  .testimonials__track {
+    display: flex;
+    gap: var(--space-md);
+    list-style: none;
+    padding: var(--space-xs) var(--container-pad);
+    width: max-content;
+    will-change: transform;
+  }
+
+  /* ── Card ── */
+  .testimonials__card {
+    flex: 0 0 340px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: var(--space-lg) var(--space-md);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    position: relative;
+  }
+
+  /* Comilla decorativa */
+  .testimonials__card::before {
+    content: '\201C';
+    font-family: var(--font-heading);
+    font-size: 5rem;
+    line-height: 0.8;
+    color: var(--accent);
+    opacity: 0.25;
+    display: block;
+    margin-bottom: calc(-1 * var(--space-sm));
+  }
+
+  /* Quote */
+  .testimonials__quote p {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  /* Attribution */
+  .testimonials__attribution {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    border-top: 1px solid var(--border);
+    padding-top: var(--space-sm);
+  }
+
+  .testimonials__author {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .testimonials__role {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+
+  /* Fallback reduced-motion: scrollable horizontal */
+  @media (prefers-reduced-motion: reduce) {
+    .testimonials__marquee {
+      overflow-x: auto;
+      padding-bottom: var(--space-sm);
+    }
+  }
+</style>

@@ -1,0 +1,62 @@
+{
+  "_comment": "Contrato para páginas de tipo Landing. El agente DEBE completar todos los campos 'required: true'.",
+  "schema_version": "1.0",
+  "page_type": "landing",
+  "fields": {
+    "seo": {
+      "required": true,
+      "fields": {
+        "title":          { "required": true,  "type": "string", "max": 60 },
+        "description":    { "required": true,  "type": "string", "max": 155 },
+        "googleFontsUrl": { "required": false, "type": "string" },
+        "schemaData":     { "required": false, "type": "object" }
+      }
+    },
+    "hero": {
+      "required": true,
+      "fields": {
+        "headline":           { "required": true,  "type": "string", "max": 80 },
+        "subheadline":        { "required": false, "type": "string", "max": 160 },
+        "ctaText":            { "required": true,  "type": "string", "max": 30 },
+        "ctaHref":            { "required": true,  "type": "string" },
+        "ctaSecondaryText":   { "required": false, "type": "string", "max": 30 },
+        "ctaSecondaryHref":   { "required": false, "type": "string" },
+        "backgroundImage":    { "required": false, "type": "string" }
+      }
+    },
+    "sections": {
+      "required": false,
+      "type": "array",
+      "items": {
+        "type":    { "required": true, "enum": ["features", "testimonials", "faq", "cta", "gallery"] },
+        "content": { "required": true, "type": "object" }
+      }
+    },
+    "media": {
+      "required": false,
+      "_comment": "Media generada por Magnific MCP. El agente genera, descarga a /public y rellena 'path'.",
+      "fields": {
+        "images": {
+          "required": false,
+          "type": "array",
+          "items": {
+            "slot":   { "required": true,  "type": "string", "_comment": "ej: hero-bg, og-default" },
+            "prompt": { "required": true,  "type": "string" },
+            "alt":    { "required": true,  "type": "string" },
+            "path":   { "required": false, "type": "string", "_comment": "lo rellena media.js apply: /images/slot.webp" }
+          }
+        },
+        "videos": {
+          "required": false,
+          "type": "array",
+          "items": {
+            "slot":     { "required": true,  "type": "string", "_comment": "ej: hero-video" },
+            "prompt":   { "required": true,  "type": "string" },
+            "duration": { "required": false, "type": "number" },
+            "path":     { "required": false, "type": "string", "_comment": "/videos/slot.mp4" }
+          }
+        }
+      }
+    }
+  }
+}

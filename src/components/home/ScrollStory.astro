@@ -1,0 +1,411 @@
+---
+// src/components/home/ScrollStory.astro
+// Home §4.3 — Galería horizontal pinneada, 9 escenas. Prueba viva del ancla "Ver cómo funciona".
+// Desktop (>=768px, sin reduced-motion): GSAP pin + scrub horizontal.
+// Mobile: carrusel con scroll-snap nativo. prefers-reduced-motion: tarjetas apiladas.
+
+const scenes = [
+  {
+    id: 'apertura',
+    terminal: null,
+    kicker: null,
+    title: 'Tres terminales. Un solo Mobile One.',
+    copy: 'No instalas nada nuevo. Mobile One corre directo en el terminal con el que ya cobras.',
+    variant: 'trio',
+  },
+  {
+    id: 'mp-carrito',
+    terminal: 'Mercado Pago',
+    kicker: 'Escanear producto',
+    title: 'Escanea. Aparece en el carrito.',
+    copy: 'Con stock validado en tiempo real.',
+    variant: 'screen',
+    screen: 'scan',
+  },
+  {
+    id: 'mp-cobro',
+    terminal: 'Mercado Pago',
+    kicker: 'Cobro mixto',
+    title: 'Cobra mezclando medios de pago.',
+    copy: 'El vuelto se calcula solo.',
+    variant: 'screen',
+    screen: 'pay',
+  },
+  {
+    id: 'trans-1',
+    terminal: null,
+    kicker: null,
+    title: 'La misma venta. Otro terminal.',
+    copy: null,
+    variant: 'transition',
+    from: 'Mercado Pago',
+    to: 'Getnet',
+  },
+  {
+    id: 'gn-promo',
+    terminal: 'Getnet',
+    kicker: 'Promociones automáticas',
+    title: 'Las promociones se aplican solas.',
+    copy: 'Nadie calcula nada a mano.',
+    variant: 'screen',
+    screen: 'promo',
+  },
+  {
+    id: 'gn-entrega',
+    terminal: 'Getnet',
+    kicker: 'Venta omnicanal',
+    title: 'Si no hay stock en la tienda, se despacha desde la red.',
+    copy: 'La venta no se pierde.',
+    variant: 'screen',
+    screen: 'delivery',
+  },
+  {
+    id: 'trans-2',
+    terminal: null,
+    kicker: null,
+    title: 'Otra vez la misma venta. Otro terminal más.',
+    copy: null,
+    variant: 'transition',
+    from: 'Getnet',
+    to: 'Transbank',
+  },
+  {
+    id: 'tb-cierre',
+    terminal: 'Transbank',
+    kicker: 'Documento electrónico',
+    title: 'Boleta o factura, al instante.',
+    copy: 'Integrada a tu ERP sin que nadie mueva un dedo.',
+    variant: 'screen',
+    screen: 'done',
+  },
+  {
+    id: 'cierre',
+    terminal: null,
+    kicker: null,
+    title: 'Getnet, Transbank o Mercado Pago. Elige tú.',
+    copy: 'Mobile One ya sabe cómo hablarles.',
+    variant: 'trio-done',
+  },
+];
+---
+
+<section class="scroll-story bg-pattern-m" id="terminal-narrativo" data-gsap-section="scroll-story">
+  <div class="scroll-story__viewport">
+    <div class="scroll-story__track">
+      {scenes.map((scene) => (
+        <article class={`scene scene--${scene.variant}`} data-scene={scene.id}>
+
+          {scene.variant === 'trio' && (
+            <div class="scene__content">
+              <div class="trio">
+                <span class="terminal terminal--mini" data-terminal-mini>Mercado Pago</span>
+                <span class="terminal terminal--mini" data-terminal-mini>Getnet</span>
+                <span class="terminal terminal--mini" data-terminal-mini>Transbank</span>
+              </div>
+              <h2 class="scene__title" data-scene-reveal>{scene.title}</h2>
+              <p class="scene__copy" data-scene-reveal>{scene.copy}</p>
+            </div>
+          )}
+
+          {scene.variant === 'screen' && (
+            <div class="scene__content scene__content--screen">
+              <div class="terminal terminal--lg">
+                <div class="terminal__screen">
+                  {scene.screen === 'scan' && (
+                    <div class="screen-inner" data-scene-reveal>
+                      <div class="scan-line"></div>
+                      <div class="cart-row"><span>Chaqueta Cortavientos</span><span>$19.990</span></div>
+                      <span class="badge badge--ok">✓ Stock disponible en esta tienda</span>
+                    </div>
+                  )}
+                  {scene.screen === 'pay' && (
+                    <div class="screen-inner" data-scene-reveal>
+                      <div class="pay-total">$19.990</div>
+                      <div class="pay-methods"><span class="chip">Tarjeta</span><span class="chip">Efectivo</span></div>
+                      <div class="cart-row"><span>Vuelto</span><span>$10</span></div>
+                      <span class="badge badge--ok">✓ Pago aprobado</span>
+                    </div>
+                  )}
+                  {scene.screen === 'promo' && (
+                    <div class="screen-inner" data-scene-reveal>
+                      <div class="cart-row"><span>Buzo canguro</span><span>$14.990</span></div>
+                      <div class="cart-row"><span>Gorro trucker</span><span class="strike">$8.990</span></div>
+                      <span class="badge badge--promo">-15% aplicado</span>
+                    </div>
+                  )}
+                  {scene.screen === 'delivery' && (
+                    <div class="screen-inner" data-scene-reveal>
+                      <div class="delivery-options">
+                        <span class="chip">Llevar ahora</span>
+                        <span class="chip">Retiro en otra tienda</span>
+                        <span class="chip chip--active">Despacho a domicilio</span>
+                      </div>
+                      <span class="badge badge--ok">Despachado desde la red</span>
+                    </div>
+                  )}
+                  {scene.screen === 'done' && (
+                    <div class="screen-inner" data-scene-reveal>
+                      <div class="doc-icon">🧾</div>
+                      <span class="badge badge--ok">✓ Venta completada</span>
+                    </div>
+                  )}
+                </div>
+                <span class="terminal__label">{scene.terminal}</span>
+              </div>
+
+              <div class="scene__copy-block">
+                <p class="scene__kicker">{scene.kicker}</p>
+                <h2 class="scene__title scene__title--sm" data-scene-reveal>{scene.title}</h2>
+                <p class="scene__copy">{scene.copy}</p>
+              </div>
+            </div>
+          )}
+
+          {scene.variant === 'transition' && (
+            <div class="scene__content scene__content--transition">
+              <span class="terminal terminal--mini terminal--exit" data-terminal-mini>{scene.from}</span>
+              <p class="scene__title scene__title--transition" data-scene-reveal>{scene.title}</p>
+              <span class="terminal terminal--mini terminal--enter" data-terminal-mini>{scene.to}</span>
+            </div>
+          )}
+
+          {scene.variant === 'trio-done' && (
+            <div class="scene__content">
+              <div class="trio">
+                <span class="terminal terminal--mini" data-terminal-mini>Mercado Pago<span class="trio__check">✓</span></span>
+                <span class="terminal terminal--mini" data-terminal-mini>Getnet<span class="trio__check">✓</span></span>
+                <span class="terminal terminal--mini" data-terminal-mini>Transbank<span class="trio__check">✓</span></span>
+              </div>
+              <h2 class="scene__title" data-scene-reveal>{scene.title}</h2>
+              <p class="scene__copy" data-scene-reveal>{scene.copy}</p>
+              <a href="/integraciones" class="scene__link">Ver todas las integraciones →</a>
+            </div>
+          )}
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ ignoreMobileResize: true });
+
+  function initScrollStory() {
+    const section = document.querySelector('[data-gsap-section="scroll-story"]');
+    if (!section) return;
+
+    const viewport = section.querySelector('.scroll-story__viewport');
+    const track = section.querySelector('.scroll-story__track');
+    if (!viewport || !track) return;
+
+    const mm = gsap.matchMedia();
+
+    mm.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => {
+      const horizontalTween = gsap.to(track, {
+        x: () => -(track.scrollWidth - window.innerWidth),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: () => '+=' + (track.scrollWidth - window.innerWidth),
+          scrub: 1,
+          pin: viewport,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      track.querySelectorAll('[data-scene-reveal]').forEach((el) => {
+        gsap.from(el, {
+          opacity: 0,
+          y: 24,
+          duration: 0.6,
+          ease: 'expo.out',
+          scrollTrigger: {
+            trigger: el,
+            containerAnimation: horizontalTween,
+            start: 'left 75%',
+            toggleActions: 'play none none reverse',
+          },
+        });
+      });
+
+      // Teclado: flechas para avanzar/retroceder entre escenas con foco en la sección
+      section.setAttribute('tabindex', '0');
+      const onKey = (e) => {
+        const st = horizontalTween.scrollTrigger;
+        if (!st) return;
+        const sceneCount = track.children.length;
+        const step = (st.end - st.start) / (sceneCount - 1);
+        if (e.key === 'ArrowRight') window.scrollTo({ top: window.scrollY + step });
+        if (e.key === 'ArrowLeft') window.scrollTo({ top: window.scrollY - step });
+      };
+      section.addEventListener('keydown', onKey);
+
+      return () => {
+        section.removeEventListener('keydown', onKey);
+      };
+    });
+  }
+
+  document.addEventListener('astro:page-load', initScrollStory);
+</script>
+
+<style>
+  .scroll-story { color: var(--on-accent); }
+
+  .scroll-story__viewport {
+    height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scroll-story__track {
+    display: flex;
+    width: max-content;
+  }
+
+  .scene {
+    width: 88vw;
+    max-width: 480px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    padding: var(--space-xl) var(--space-lg);
+    display: flex;
+    align-items: center;
+  }
+
+  .scene__content { display: grid; gap: var(--space-md); width: 100%; }
+  .scene__content--screen { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .scene__content--transition { text-align: center; gap: var(--space-lg); justify-items: center; }
+
+  .scene__kicker {
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--on-accent) 70%, transparent);
+  }
+  .scene__title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .scene__title--sm { font-size: clamp(1.3rem, 3vw, 1.9rem); }
+  .scene__title--transition { font-size: var(--text-xl); opacity: 0.9; }
+  .scene__copy { font-size: var(--text-base); color: color-mix(in srgb, var(--on-accent) 85%, transparent); }
+  .scene__copy-block { display: grid; gap: var(--space-xs); }
+  .scene__link {
+    color: var(--on-accent);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--on-accent) 50%, transparent);
+    width: fit-content;
+  }
+
+  /* ── Terminal (device frame estilizado, sin marcas de terceros) ── */
+  .trio { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
+  .terminal--mini {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--text-xs);
+    color: var(--on-accent);
+    background-color: color-mix(in srgb, var(--on-accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--on-accent) 25%, transparent);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+  }
+  .trio__check { color: #6ee7a3; }
+  .terminal--exit { opacity: 0.5; }
+  .terminal--enter { opacity: 1; }
+
+  .terminal--lg {
+    width: 220px;
+    background-color: var(--navy);
+    border-radius: var(--radius-lg);
+    padding: var(--space-sm);
+    box-shadow: var(--shadow-lg);
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .terminal__screen {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    aspect-ratio: 3 / 4;
+    padding: var(--space-sm);
+    display: flex;
+    align-items: center;
+    color: var(--text-primary);
+    position: relative;
+    overflow: hidden;
+  }
+  .terminal__label {
+    text-align: center;
+    font-size: var(--text-xs);
+    color: color-mix(in srgb, var(--on-accent) 80%, transparent);
+  }
+
+  .screen-inner { display: grid; gap: var(--space-xs); width: 100%; }
+  .cart-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-xs);
+    padding-block: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .badge {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: var(--radius-full);
+    width: fit-content;
+  }
+  .badge--ok { color: #0a7a3d; background-color: color-mix(in srgb, #0a7a3d 12%, transparent); }
+  .badge--promo { color: var(--accent-hover); background-color: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .pay-total { font-size: var(--text-xl); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .pay-methods, .delivery-options { display: flex; gap: 4px; flex-wrap: wrap; }
+  .chip {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+  }
+  .chip--active { background-color: var(--accent); color: var(--on-accent); }
+  .strike { text-decoration: line-through; color: var(--text-secondary); }
+  .doc-icon { font-size: 2.5rem; text-align: center; }
+
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 2px;
+    background-color: var(--accent);
+    animation: scan-move 1.8s ease-in-out infinite;
+  }
+  @keyframes scan-move { 0%, 100% { top: 8%; } 50% { top: 88%; } }
+
+  /* ── Desktop: pin + scrub ── */
+  @media (min-width: 768px) {
+    .scroll-story__viewport {
+      height: 100vh;
+      overflow: hidden;
+      scroll-snap-type: none;
+    }
+    .scene { width: 100vw; max-width: none; justify-content: center; }
+  }
+
+  /* ── Reduced motion: tarjetas apiladas, sin pin ni scroll horizontal ── */
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-story__viewport { height: auto !important; overflow: visible !important; }
+    .scroll-story__track { display: block !important; width: 100% !important; }
+    .scene { width: 100% !important; max-width: none; scroll-snap-align: none; }
+    .scan-line { animation: none; }
+  }
+</style>

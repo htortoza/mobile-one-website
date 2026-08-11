@@ -1,0 +1,102 @@
+---
+// src/components/StickyCTA.astro
+// CTA de conversión persistente (Pilar 3). Aparece tras el hero, se oculta cerca del footer.
+// Lee el destino de pedido desde contracts/site.json.
+import site from '../../contracts/site.json';
+const orderUrl = site.orderUrl ?? '#';
+---
+
+<a
+  href={orderUrl}
+  class="sticky-cta"
+  data-sticky-cta
+  aria-label="Agendar demo"
+>
+  <span class="sticky-cta__dot" aria-hidden="true"></span>
+  Agendar demo
+</a>
+
+<script>
+  const cta = document.querySelector('[data-sticky-cta]');
+  if (cta) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const update = () => {
+      const y = window.scrollY;
+      const nearBottom = y + window.innerHeight > document.body.scrollHeight - 240;
+      const pastHero = y > window.innerHeight * 0.8;
+      cta.classList.toggle('is-visible', pastHero && !nearBottom);
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+
+    // Micro-pulso cada 8s para atraer el ojo
+    if (!reduced) {
+      const pulse = () => {
+        if (!cta.classList.contains('is-visible')) return;
+        cta.classList.add('is-pulsing');
+        setTimeout(() => cta.classList.remove('is-pulsing'), 700);
+      };
+      const interval = setInterval(pulse, 8000);
+      document.addEventListener('astro:before-swap', () => clearInterval(interval), { once: true });
+    }
+  }
+</script>
+
+<style>
+  .sticky-cta {
+    position: fixed;
+    right: var(--space-md);
+    bottom: var(--space-md);
+    z-index: var(--z-modal);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--bg-primary);
+    background-color: var(--accent);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transform: translateY(120%);
+    pointer-events: none;
+    transition: opacity var(--transition-smooth), transform var(--transition-smooth), background-color var(--transition-fast);
+  }
+  .sticky-cta.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .sticky-cta:hover { background-color: var(--accent-hover); }
+
+  .sticky-cta__dot {
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-primary);
+  }
+
+  .sticky-cta.is-pulsing { animation: sticky-pulse 0.7s var(--ease-out); }
+  @keyframes sticky-pulse {
+    0%   { box-shadow: var(--shadow-lg), 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent); }
+    100% { box-shadow: var(--shadow-lg), 0 0 0 18px color-mix(in srgb, var(--accent) 0%, transparent); }
+  }
+
+  @media (max-width: 640px) {
+    .sticky-cta {
+      left: var(--space-md);
+      right: var(--space-md);
+      justify-content: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sticky-cta { transition: opacity var(--transition-fast); transform: none; }
+  }
+</style>

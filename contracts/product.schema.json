@@ -1,0 +1,35 @@
+{
+  "_comment": "Schema para páginas de producto. El agente DEBE completar todos los campos 'required: true'.",
+  "schema_version": "1.0",
+  "page_type": "product",
+  "fields": {
+    "seo": {
+      "required": true,
+      "fields": {
+        "title":          { "required": true,  "type": "string", "max": 60 },
+        "description":    { "required": true,  "type": "string", "max": 155 },
+        "googleFontsUrl": { "required": false, "type": "string" },
+        "schemaData":     { "required": false, "type": "object", "_comment": "Si ausente, el validador auto-genera schema.org/Product" }
+      }
+    },
+    "product": {
+      "required": true,
+      "fields": {
+        "name":        { "required": true,  "type": "string" },
+        "description": { "required": true,  "type": "string" },
+        "price":       { "required": true,  "type": "number", "_comment": "Sin símbolo de moneda, solo el número: 12900" },
+        "currency":    { "required": true,  "type": "string", "_comment": "Código ISO 4217: CLP, USD, EUR" },
+        "images":      { "required": false, "type": "array",  "_comment": "Array de strings con paths o URLs de imágenes" },
+        "specs":       {
+          "required": false,
+          "type": "array",
+          "_comment": "Especificaciones técnicas del producto",
+          "items": {
+            "label": { "required": true, "type": "string" },
+            "value": { "required": true, "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

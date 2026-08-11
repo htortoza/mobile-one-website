@@ -1,0 +1,45 @@
+---
+// src/components/BaseHead.astro
+import '../styles/theme.css';
+
+const {
+  title,
+  description,
+  image = '/images/default-og.jpg',
+  canonicalUrl = Astro.url.href,
+  googleFontsUrl = 'https://api.fontshare.com/v2/css?f[]=satoshi@400,500&display=swap',
+} = Astro.props;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#0000ff" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta name="generator" content={Astro.generator} />
+
+<!-- Canonical -->
+<link rel="canonical" href={canonicalUrl} />
+
+<!-- SEO básico -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+
+<!-- Open Graph -->
+<meta property="og:type"        content="website" />
+<meta property="og:url"         content={canonicalUrl} />
+<meta property="og:title"       content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image"       content={new URL(image, Astro.url)} />
+
+<!-- Twitter Cards -->
+<meta property="twitter:card"        content="summary_large_image" />
+<meta property="twitter:url"         content={canonicalUrl} />
+<meta property="twitter:title"       content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image"       content={new URL(image, Astro.url)} />
+
+<!-- Fuente (Fontshare — Satoshi) — URL inyectada via prop googleFontsUrl -->
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+<link href={googleFontsUrl} rel="stylesheet" />

@@ -1,0 +1,162 @@
+---
+// src/components/ShaderField.astro
+// Campo shader iridiscente (OGL) — §17. Fondo premium para hero/cierre.
+// Colores desde variables del tema; fallback CSS estático; respeta reduced-motion;
+// pausa fuera de viewport; se destruye en astro:before-swap.
+interface Props { class?: string }
+const { class: className = '' } = Astro.props;
+---
+
+<div class={`shaderfield ${className}`} data-shaderfield aria-hidden="true">
+  <canvas data-shader-canvas></canvas>
+</div>
+
+<script>
+  import { Renderer, Program, Mesh, Triangle } from 'ogl';
+
+  const FRAG = `
+    precision highp float;
+    uniform float uTime;
+    uniform vec2 uRes;
+    uniform vec3 uAccent;
+    uniform vec3 uBg;
+    uniform vec3 uMid;
+
+    // fbm simplex-ish noise (barato)
+    vec3 hash3(vec2 p){
+      vec3 q = vec3(dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)), dot(p,vec2(419.2,371.9)));
+      return fract(sin(q)*43758.5453);
+    }
+    float noise(vec2 p){
+      vec2 i = floor(p); vec2 f = fract(p);
+      vec2 u = f*f*(3.0-2.0*f);
+      float a = hash3(i).x;
+      float b = hash3(i+vec2(1.0,0.0)).x;
+      float c = hash3(i+vec2(0.0,1.0)).x;
+      float d = hash3(i+vec2(1.0,1.0)).x;
+      return mix(mix(a,b,u.x), mix(c,d,u.x), u.y);
+    }
+    float fbm(vec2 p){
+      float v = 0.0; float a = 0.5;
+      for(int i=0;i<5;i++){ v += a*noise(p); p *= 2.0; a *= 0.5; }
+      return v;
+    }
+
+    void main(){
+      vec2 uv = gl_FragCoord.xy / uRes.xy;
+      vec2 p = uv * 2.6;
+      float t = uTime * 0.05;
+
+      // dominio que fluye
+      vec2 q = vec2(fbm(p + t), fbm(p + vec2(5.2,1.3) - t));
+      float f = fbm(p + 1.8*q + t*0.5);
+
+      // mezcla navy -> mid -> accent
+      vec3 col = mix(uBg, uMid, smoothstep(0.2, 0.7, f));
+      col = mix(col, uAccent, smoothstep(0.62, 0.95, f) * 0.55);
+
+      // sheen iridiscente sutil
+      float irid = sin((f*6.0) + uv.x*3.0 + t*4.0) * 0.5 + 0.5;
+      col += uAccent * irid * 0.05;
+
+      // viñeta para fundir con la sección
+      float vig = smoothstep(1.15, 0.25, length(uv - 0.5));
+      col = mix(uBg, col, vig);
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  const VERT = `
+    attribute vec2 position;
+    void main(){ gl_Position = vec4(position, 0.0, 1.0); }
+  `;
+
+  function hexToRgb(hex) {
+    hex = (hex || '').trim().replace('#','');
+    if (hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+    const n = parseInt(hex || '000000', 16);
+    return [((n>>16)&255)/255, ((n>>8)&255)/255, (n&255)/255];
+  }
+
+  let cleanup = null;
+
+  function initShader() {
+    cleanup && cleanup();
+    const host = document.querySelector('[data-shaderfield]');
+    const canvas = document.querySelector('[data-shader-canvas]');
+    if (!host || !canvas) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; // fallback CSS
+
+    let renderer;
+    try {
+      renderer = new Renderer({ canvas, dpr: Math.min(window.devicePixelRatio, 2), alpha: false, antialias: false });
+    } catch (e) { return; } // sin WebGL → fallback CSS
+    const gl = renderer.gl;
+
+    const css = getComputedStyle(document.documentElement);
+    const program = new Program(gl, {
+      vertex: VERT, fragment: FRAG,
+      uniforms: {
+        uTime:   { value: 0 },
+        uRes:    { value: [1, 1] },
+        uAccent: { value: hexToRgb(css.getPropertyValue('--accent')) },
+        uBg:     { value: hexToRgb(css.getPropertyValue('--bg-primary')) },
+        uMid:    { value: hexToRgb(css.getPropertyValue('--bg-secondary')) },
+      },
+    });
+    const mesh = new Mesh(gl, { geometry: new Triangle(gl), program });
+
+    const resize = () => {
+      const r = host.getBoundingClientRect();
+      renderer.setSize(r.width, r.height);
+      program.uniforms.uRes.value = [gl.canvas.width, gl.canvas.height];
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    let raf = 0, running = false, t0 = performance.now();
+    const loop = (now) => {
+      program.uniforms.uTime.value = (now - t0) / 1000;
+      renderer.render({ scene: mesh });
+      raf = requestAnimationFrame(loop);
+    };
+    const start = () => { if (!running) { running = true; raf = requestAnimationFrame(loop); } };
+    const stop  = () => { running = false; cancelAnimationFrame(raf); };
+
+    // Pausa fuera de viewport
+    const io = new IntersectionObserver(([e]) => e.isIntersecting ? start() : stop(), { threshold: 0.01 });
+    io.observe(host);
+    const onVis = () => document.hidden ? stop() : start();
+    document.addEventListener('visibilitychange', onVis);
+
+    cleanup = () => {
+      stop(); io.disconnect();
+      window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', onVis);
+      const ext = gl.getExtension('WEBGL_lose_context'); ext && ext.loseContext();
+      cleanup = null;
+    };
+  }
+
+  document.addEventListener('astro:page-load', initShader);
+  document.addEventListener('astro:before-swap', () => cleanup && cleanup());
+</script>
+
+<style>
+  .shaderfield {
+    position: absolute; inset: 0; z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    /* Fallback CSS (sin JS / reduced-motion / sin WebGL): gradiente iridiscente estático */
+    background:
+      radial-gradient(60% 80% at 20% 30%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 60%),
+      radial-gradient(50% 70% at 80% 70%, color-mix(in srgb, var(--bg-secondary) 90%, var(--accent)), transparent 65%),
+      var(--bg-primary);
+  }
+  .shaderfield canvas { display: block; width: 100%; height: 100%; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shaderfield canvas { display: none; }
+  }
+</style>

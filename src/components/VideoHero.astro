@@ -1,0 +1,96 @@
+---
+// src/components/VideoHero.astro
+// Hero con video de fondo generado por Magnific.
+// Props desde el contrato: media.videos[slot].path → videoSrc, poster (imagen slot).
+import Button from './Button.astro';
+
+const {
+  headline,
+  subheadline,
+  ctaText,
+  ctaHref,
+  videoSrc,        // /videos/hero.mp4
+  poster,          // /images/hero-poster.webp (obligatorio)
+} = Astro.props;
+
+const words = headline ? headline.split(' ') : [];
+---
+
+<section class="vhero" data-gsap-section="video-hero">
+  {videoSrc && (
+    <video
+      class="vhero__bg"
+      src={videoSrc}
+      poster={poster}
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+    ></video>
+  )}
+  <div class="vhero__overlay"></div>
+
+  <div class="container vhero__inner">
+    <h1 class="vhero__headline" data-gsap-split="words">
+      {words.map((word) => (
+        <span class="vhero__word-outer"><span class="vhero__word">{word}</span></span>
+      ))}
+    </h1>
+    {subheadline && <p class="vhero__sub" data-gsap-animate="fade-up">{subheadline}</p>}
+    {ctaText && (
+      <div class="vhero__cta" data-gsap-animate="fade-up">
+        <Button href={ctaHref}>{ctaText}</Button>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .vhero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: var(--bg-primary);
+  }
+  .vhero__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+  .vhero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--bg-primary), transparent 70%);
+    z-index: 1;
+  }
+  .vhero__inner {
+    position: relative;
+    z-index: 2;
+    padding: var(--space-xl) 0;
+  }
+  .vhero__headline {
+    font-family: var(--font-heading);
+    font-size: var(--text-4xl, clamp(2.5rem, 6vw, 5rem));
+    color: var(--text-primary);
+    line-height: 1.05;
+    margin: 0 0 var(--space-md);
+  }
+  .vhero__word-outer { display: inline-block; overflow: hidden; }
+  .vhero__word { display: inline-block; }
+  .vhero__sub {
+    color: var(--text-secondary);
+    font-size: var(--text-lg);
+    max-width: 52ch;
+    margin: 0 0 var(--space-lg);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vhero__bg { display: none; }
+  }
+</style>

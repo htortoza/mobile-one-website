@@ -1,0 +1,113 @@
+---
+// src/components/CTA.astro
+// AGENTE FRONTEND: pasa headline, ctaText, ctaHref desde el contrato JSON
+// AGENTE MOTION: fade-in scroll-triggered + micro-pulso en botón cada 8s
+
+import Button from './Button.astro';
+
+interface Props {
+  headline: string;
+  subtext?: string;
+  ctaText: string;
+  ctaHref: string;
+}
+
+const { headline, subtext, ctaText, ctaHref } = Astro.props;
+---
+
+<section class="cta" data-gsap-section="cta">
+  <div class="container cta__inner" data-gsap-animate="cta-content">
+    <h2 class="cta__headline">{headline}</h2>
+    {subtext && <p class="cta__subtext">{subtext}</p>}
+    <Button href={ctaHref} variant="primary" size="lg">
+      {ctaText}
+    </Button>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const section = document.querySelector('[data-gsap-section="cta"]');
+  const content = section && section.querySelector('[data-gsap-animate="cta-content"]');
+
+  if (section && content) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Fade-in scroll-triggered
+    if (!reduced) {
+      gsap.from(content, {
+        y: 32,
+        opacity: 0,
+        duration: 1,
+        ease: 'expo.out',
+        scrollTrigger: { trigger: section, start: 'top 80%' },
+      });
+    }
+
+    // Micro-pulso en el botón primario cada 8s
+    const btn = section.querySelector('.btn--primary');
+    if (btn && !reduced) {
+      const pulse = () => {
+        gsap.timeline()
+          .to(btn, { scale: 1.06, duration: 0.18, ease: 'power2.out' })
+          .to(btn, { scale: 1,    duration: 0.55, ease: 'elastic.out(1, 0.3)' });
+      };
+
+      // Primera vez a los 3s, luego cada 8s
+      let pulseTimeout = setTimeout(() => {
+        pulse();
+        const pulseInterval = setInterval(pulse, 8000);
+        document.addEventListener('astro:before-swap', () => {
+          clearInterval(pulseInterval);
+        }, { once: true });
+      }, 3000);
+
+      document.addEventListener('astro:before-swap', () => {
+        clearTimeout(pulseTimeout);
+      }, { once: true });
+    }
+  }
+</script>
+
+<style>
+  .cta {
+    padding-block: var(--space-2xl);
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+  }
+
+  .cta__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-lg);
+  }
+
+  .cta__headline {
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 8vw, 9rem);
+    line-height: 0.95;
+    color: var(--text-primary);
+    letter-spacing: -0.04em;
+    max-width: 14ch;
+  }
+
+  .cta__subtext {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 480px;
+  }
+
+  @media (max-width: 640px) {
+    .cta__inner :global(.btn) {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

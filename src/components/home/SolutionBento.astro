@@ -1,0 +1,137 @@
+---
+// src/components/home/SolutionBento.astro
+// Home §4.5 — La solución. Bento grid con mini-mockup real por celda (mostrar producto).
+const { title, items } = Astro.props;
+const list = items ?? [];
+---
+
+<section class="solution" data-gsap-section="solution">
+  <div class="container solution__inner">
+    <h2 class="solution__title" data-gsap-animate="fade-up">{title}</h2>
+
+    <div class="bento">
+      {list.map((item, i) => (
+        <article class={`bento__cell bento__cell--${i}`} data-bento-cell>
+          <div class="bento__mock" aria-hidden="true">
+            {item.mock === 'sala' && (
+              <div class="mock-mini">
+                <span class="mock-mini__dot"></span>
+                <span class="mock-mini__line mock-mini__line--lg"></span>
+                <span class="mock-mini__line"></span>
+              </div>
+            )}
+            {item.mock === 'red' && (
+              <div class="mock-mini mock-mini--grid">
+                <span class="mock-mini__store">Tienda A · 12</span>
+                <span class="mock-mini__store">Tienda B · 0</span>
+                <span class="mock-mini__store mock-mini__store--cd">CD · 48</span>
+              </div>
+            )}
+            {item.mock === 'promo' && (
+              <div class="mock-mini">
+                <span class="mock-mini__line"></span>
+                <span class="mock-mini__badge">-15% aplicado</span>
+              </div>
+            )}
+            {item.mock === 'backoffice' && (
+              <div class="mock-mini mock-mini--panel">
+                <span class="mock-mini__line mock-mini__line--lg"></span>
+                <span class="mock-mini__line"></span>
+                <span class="mock-mini__line"></span>
+              </div>
+            )}
+          </div>
+          <h3 class="bento__heading">{item.heading}</h3>
+          <p class="bento__text">{item.text}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initSolution() {
+    const section = document.querySelector('[data-gsap-section="solution"]');
+    if (!section || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    gsap.from(section.querySelectorAll('[data-bento-cell]'), {
+      opacity: 0,
+      scale: 0.94,
+      y: 20,
+      duration: 0.7,
+      stagger: 0.1,
+      ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 75%' },
+    });
+  }
+
+  document.addEventListener('astro:page-load', initSolution);
+</script>
+
+<style>
+  .solution { padding-block: var(--space-2xl); background-color: var(--bg-secondary); }
+  .solution__inner { display: grid; gap: var(--space-lg); }
+  .solution__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    max-width: 26ch;
+  }
+
+  .bento {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  .bento__cell {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: var(--space-sm);
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  }
+  .bento__cell:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
+  .bento__heading { font-family: var(--font-heading); font-size: var(--text-lg); color: var(--text-primary); }
+  .bento__text { color: var(--text-secondary); line-height: 1.6; }
+
+  .bento__mock { height: 92px; display: flex; align-items: center; }
+  .mock-mini { width: 100%; display: grid; gap: 6px; }
+  .mock-mini__dot { width: 10px; height: 10px; border-radius: var(--radius-full); background-color: var(--accent); }
+  .mock-mini__line { height: 8px; border-radius: var(--radius-sm); background-color: var(--border); width: 80%; }
+  .mock-mini__line--lg { width: 55%; height: 12px; background-color: var(--navy); opacity: 0.15; }
+  .mock-mini--grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .mock-mini__store {
+    font-size: var(--text-xs);
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+  }
+  .mock-mini__store--cd { background-color: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-hover); grid-column: 1 / -1; }
+  .mock-mini__badge {
+    width: fit-content;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--accent-hover);
+    background-color: color-mix(in srgb, var(--accent) 10%, transparent);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+  }
+  .mock-mini--panel { grid-template-columns: none; }
+
+  @media (min-width: 768px) {
+    .bento { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, auto); }
+    .bento__cell--0 { grid-column: span 2; grid-row: span 2; }
+    .bento__cell--1 { grid-column: span 2; }
+    .bento__cell--2 { grid-column: span 1; }
+    .bento__cell--3 { grid-column: span 1; }
+  }
+</style>

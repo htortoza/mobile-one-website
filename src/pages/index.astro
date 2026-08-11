@@ -1,0 +1,128 @@
+---
+// src/pages/index.astro — Home. Copy fuente: doc maestro "Mobile One 2.0 — Sitio Web de Ventas" §4.
+import Layout from '../layouts/Layout.astro';
+import TrustBar from '../components/home/TrustBar.astro';
+import HeroSplit from '../components/home/HeroSplit.astro';
+import ScrollStory from '../components/home/ScrollStory.astro';
+import ProblemLedger from '../components/home/ProblemLedger.astro';
+import SolutionBento from '../components/home/SolutionBento.astro';
+import HowItWorksFlow from '../components/home/HowItWorksFlow.astro';
+import ArchitectureTeaser from '../components/home/ArchitectureTeaser.astro';
+import SocialProofStat from '../components/home/SocialProofStat.astro';
+import CtaClose from '../components/home/CtaClose.astro';
+
+const schemaData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Mobile One',
+  url: 'https://mobileone.dotsolutions.io',
+};
+---
+
+<Layout
+  title="Mobile One 2.0 — POS móvil para retail con inventario conectado"
+  description="Convierte a tus vendedores en un punto de venta móvil. Vende con el stock de toda tu red, integrado a SAP Business One y a tu hardware de pago actual. Implementación en horas."
+  image="/images/og-default.png"
+  schemaData={schemaData}
+>
+  <HeroSplit
+    eyebrow="Plataforma de venta asistida omnicanal"
+    headline="Cada terminal de cobro, un punto de venta completo. Toda la tienda, sin filas."
+    subheadline="Mobile One 2.0 elimina la caja fija: tus vendedores venden, cobran y facturan desde cualquier lugar de la sala usando el mismo terminal Getnet, Transbank o Mercado Pago que ya tienen, con acceso al stock de toda la red."
+    ctaText="Agendar demo"
+    ctaHref="/contacto"
+    ctaSecondaryText="Ver cómo funciona"
+    ctaSecondaryHref="#terminal-narrativo"
+  />
+
+  <TrustBar
+    items={[
+      'Se integra con SAP Business One',
+      'Getnet · Transbank · Mercado Pago',
+      'Multi-tenant Cloud',
+      'Implementación en horas',
+      'Un solo código base',
+    ]}
+  />
+
+  <ScrollStory />
+
+  <ProblemLedger
+    title="El retail físico sigue perdiendo ventas que el e-commerce ya resolvió hace años"
+    items={[
+      {
+        heading: 'Filas y checkout lento',
+        text: 'Los clientes esperan en horarios peak porque la venta solo puede cerrarse en una caja fija, mientras el vendedor queda atado a un punto y no puede acompañar la decisión de compra.',
+      },
+      {
+        heading: 'Stock que existe pero no se puede vender',
+        text: 'El producto está disponible en otra tienda o en el centro de distribución, pero la tienda física no tiene forma operativa de venderlo. La venta se pierde aunque el inventario existe.',
+      },
+      {
+        heading: 'Vendedores haciendo tareas transaccionales',
+        text: 'Gran parte del tiempo del equipo de ventas se va en procesos de checkout en vez de en atención y cierre de venta.',
+      },
+    ]}
+    closing="Esto no es un problema de personas, es un problema de arquitectura de venta."
+    closingHref="/por-que-mobile-one"
+  />
+
+  <SolutionBento
+    title="Un POS que vive en el mismo terminal con el que ya cobras — no en un dispositivo adicional"
+    items={[
+      {
+        heading: 'Venta desde cualquier punto de la sala',
+        text: 'Escaneo por código de barra o SKU, validación de stock en tiempo real, cobro con pago mixto y emisión de boleta/factura, todo desde el mismo terminal de pago.',
+        mock: 'sala',
+      },
+      {
+        heading: 'Inventario de toda la red, no solo de la tienda',
+        text: 'Venta directa, retiro programado en otra sucursal o despacho a domicilio — incluso con múltiples direcciones en una misma transacción.',
+        mock: 'red',
+      },
+      {
+        heading: 'Promociones aplicadas solas',
+        text: 'Reglas por cliente, categoría, marca o ticket total, con CloudPromo y Prism conectados en tiempo real.',
+        mock: 'promo',
+      },
+      {
+        heading: 'BackOffice sin fricción',
+        text: 'Ventas, tiendas, artículos, clientes y usuarios desde un panel web sincronizado con tu ERP.',
+        mock: 'backoffice',
+      },
+    ]}
+  />
+
+  <HowItWorksFlow
+    title="Cómo funciona, en 4 pasos"
+    steps={[
+      'El vendedor escanea el QR de la tienda y su credencial',
+      'Escanea o busca el producto y ve stock real, local y de red',
+      'Aplica promos automáticas, cobra y elige entrega',
+      'Se emite el documento y la venta se integra a SAP B1',
+    ]}
+  />
+
+  <ArchitectureTeaser
+    title="Se integra con lo que ya tienes, no lo reemplaza"
+    text="Mobile One no duplica reglas de negocio: consulta el stock a tu ERP (SAP Business One o SmartOrder), delega las promociones a tu motor de promociones y opera sobre el hardware de pago que ya certificaste."
+    badges={['SAP Business One (Service Layer)', 'Agnóstico de hardware POS', 'Multi-tenant con feature flags']}
+    nodes={['POS Mobile', 'Mobile One Core', 'SAP / SmartOrder', 'CloudPromo / Prism', 'Facturador']}
+  />
+
+  <SocialProofStat
+    title="Retailers que ya vendieron su primer producto sin usar una caja"
+    statLabel="Implementación típica"
+    statText="Horas, no semanas."
+    note="Casos de clientes reales se publican solo con autorización expresa — mientras tanto, agenda una demo y te mostramos el flujo completo con tu catálogo."
+  />
+
+  <CtaClose
+    title="¿Listo para dejar de perder ventas en la caja?"
+    body="Agenda una demo de 30 minutos y te mostramos Mobile One funcionando con tu catálogo."
+    ctaText="Agendar demo"
+    ctaHref="/contacto"
+    ctaSecondaryText="Hablar con un especialista"
+    ctaSecondaryHref="/contacto"
+  />
+</Layout>

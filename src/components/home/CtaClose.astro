@@ -1,0 +1,99 @@
+---
+// src/components/home/CtaClose.astro
+// Home §4.9 — CTA de cierre. Bookend azul con Hero/4.3 (mismo bg-pattern-m).
+const { title, body, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref } = Astro.props;
+---
+
+<section class="cta-close bg-pattern-m" data-gsap-section="cta-close">
+  <div class="container cta-close__inner" data-gsap-animate="cta-content">
+    <h2 class="cta-close__title">{title}</h2>
+    <p class="cta-close__body">{body}</p>
+    <div class="cta-close__actions">
+      <a href={ctaHref} class="cta-close__btn cta-close__btn--primary">{ctaText}</a>
+      {ctaSecondaryText && <a href={ctaSecondaryHref} class="cta-close__btn cta-close__btn--ghost">{ctaSecondaryText}</a>}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initCtaClose() {
+    const section = document.querySelector('[data-gsap-section="cta-close"]');
+    const content = section && section.querySelector('[data-gsap-animate="cta-content"]');
+    if (!section || !content) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!reduced) {
+      gsap.from(content, {
+        y: 32,
+        opacity: 0,
+        duration: 1,
+        ease: 'expo.out',
+        scrollTrigger: { trigger: section, start: 'top 80%' },
+      });
+
+      const btn = section.querySelector('.cta-close__btn--primary');
+      if (btn) {
+        const pulse = () => {
+          gsap.timeline()
+            .to(btn, { scale: 1.06, duration: 0.18, ease: 'power2.out' })
+            .to(btn, { scale: 1, duration: 0.55, ease: 'elastic.out(1, 0.3)' });
+        };
+        let timeout = setTimeout(() => {
+          pulse();
+          const interval = setInterval(pulse, 8000);
+          document.addEventListener('astro:before-swap', () => clearInterval(interval), { once: true });
+        }, 3000);
+        document.addEventListener('astro:before-swap', () => clearTimeout(timeout), { once: true });
+      }
+    }
+  }
+
+  document.addEventListener('astro:page-load', initCtaClose);
+</script>
+
+<style>
+  .cta-close { padding-block: var(--space-2xl); color: var(--on-accent); }
+  .cta-close__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-lg);
+    max-width: 720px;
+  }
+  .cta-close__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.4rem, 7vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .cta-close__body { font-size: var(--text-lg); color: color-mix(in srgb, var(--on-accent) 88%, transparent); max-width: 50ch; }
+  .cta-close__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+
+  .cta-close__btn {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: var(--text-base);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: transform var(--transition-fast);
+  }
+  .cta-close__btn--primary { background-color: var(--on-accent); color: var(--accent-hover); }
+  .cta-close__btn--primary:hover { transform: translateY(-2px); }
+  .cta-close__btn--ghost {
+    color: var(--on-accent);
+    border: 1px solid color-mix(in srgb, var(--on-accent) 45%, transparent);
+  }
+
+  @media (max-width: 640px) {
+    .cta-close__actions { flex-direction: column; width: 100%; }
+    .cta-close__btn { justify-content: center; }
+  }
+</style>

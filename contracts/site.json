@@ -1,0 +1,28 @@
+{
+  "contract_type": "site",
+  "site": {
+    "domain": "https://mobileone.dotsolutions.io",
+    "siteName": "Mobile One",
+    "language": "es",
+    "defaultOgImage": "/images/og-default.png"
+  },
+  "company": {
+    "legalName": "DOT Solutions",
+    "email": "contacto@dotsolutions.io",
+    "phone": "",
+    "address": "Chile"
+  },
+  "orderUrl": "/contacto",
+  "navigation": [
+    { "label": "Producto",          "href": "/producto" },
+    { "label": "Soluciones",        "href": "/soluciones" },
+    { "label": "Por qué Mobile One", "href": "/por-que-mobile-one" },
+    { "label": "Integraciones",     "href": "/integraciones" },
+    { "label": "Casos de éxito",    "href": "/casos-de-exito" },
+    { "label": "Nosotros",          "href": "/nosotros" }
+  ],
+  "footerLinks": [
+    { "label": "Términos",   "href": "/terminos" },
+    { "label": "Privacidad", "href": "/privacidad" }
+  ]
+}

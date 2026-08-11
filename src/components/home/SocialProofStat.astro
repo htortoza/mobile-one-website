@@ -1,0 +1,95 @@
+---
+// src/components/home/SocialProofStat.astro
+// Home §4.8 — Prueba social honesta. Sin testimonios/cifras inventadas (doc §9 / §12.4):
+// el único dato real disponible hoy es cualitativo ("horas, no semanas"), no una cifra —
+// se muestra tipográficamente grande en vez de forzar un count-up de un número inventado.
+const { title, statLabel, statText, note } = Astro.props;
+const words = statText ? statText.split(' ') : [];
+---
+
+<section class="proof" data-gsap-section="proof">
+  <div class="container proof__inner">
+    <h2 class="proof__title" data-gsap-animate="fade-up">{title}</h2>
+
+    <p class="proof__label">{statLabel}</p>
+    <p class="proof__stat" data-gsap-split="words">
+      {words.map((word) => (
+        <span class="proof__word-outer"><span class="proof__word">{word}</span></span>
+      ))}
+    </p>
+
+    <div class="proof__placeholders">
+      <span class="proof__placeholder">Próximamente: casos de moda y calzado</span>
+      <span class="proof__placeholder">Próximamente: casos de retail multitienda</span>
+    </div>
+
+    <p class="proof__note">{note}</p>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+
+  function initProof() {
+    const section = document.querySelector('[data-gsap-section="proof"]');
+    if (!section || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    gsap.from(section.querySelectorAll('.proof__word'), {
+      opacity: 0,
+      y: 30,
+      duration: 0.8,
+      stagger: 0.06,
+      ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 78%' },
+    });
+  }
+
+  document.addEventListener('astro:page-load', initProof);
+</script>
+
+<style>
+  .proof { padding-block: var(--space-2xl); background-color: var(--bg-primary); text-align: center; }
+  .proof__inner { display: grid; gap: var(--space-sm); justify-items: center; }
+  .proof__title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    letter-spacing: -0.02em;
+  }
+  .proof__label {
+    font-size: var(--text-sm);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-top: var(--space-md);
+  }
+  .proof__stat {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 0.25em;
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 9vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+  }
+  .proof__word-outer { overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+  .proof__word { display: block; }
+
+  .proof__placeholders {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+  }
+  .proof__placeholder {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    border: 1px dashed var(--border);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+  }
+
+  .proof__note { font-size: var(--text-sm); color: var(--text-secondary); max-width: 46ch; margin-top: var(--space-md); }
+</style>

@@ -1,0 +1,54 @@
+---
+// src/components/home/TrustBar.astro
+// Home §4.2 — Marquee de confianza. Sin logos de terceros (nota legal del doc original).
+const { items } = Astro.props;
+const list = items ?? [];
+---
+
+<div class="trust-bar" data-gsap-section="trust-bar">
+  <div class="trust-bar__track" aria-hidden="true">
+    {[...list, ...list].map((item) => (
+      <span class="trust-bar__item">{item}</span>
+    ))}
+  </div>
+  <p class="sr-only">{list.join(' · ')}</p>
+</div>
+
+<style>
+  .trust-bar {
+    background-color: var(--bg-secondary);
+    border-block: 1px solid var(--border);
+    overflow: hidden;
+    padding-block: var(--space-sm);
+  }
+  .trust-bar__track {
+    display: flex;
+    gap: var(--space-xl);
+    width: max-content;
+    animation: trust-marquee 32s linear infinite;
+  }
+  .trust-bar:hover .trust-bar__track { animation-play-state: paused; }
+  .trust-bar__item {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: var(--navy);
+    white-space: nowrap;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  @keyframes trust-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .trust-bar__track { animation: none; flex-wrap: wrap; }
+  }
+</style>

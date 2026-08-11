@@ -1,0 +1,55 @@
+{
+  "_comment": "Schema del contrato GLOBAL de sitio. Se valida UNA VEZ por proyecto, no por página. El agente detecta este tipo por la presencia de 'contract_type: site'.",
+  "schema_version": "1.0",
+  "contract_type": "site",
+  "fields": {
+    "site": {
+      "required": true,
+      "_comment": "Datos técnicos del dominio",
+      "fields": {
+        "domain":         { "required": true,  "type": "string", "_comment": "URL completa con protocolo: https://cliente.com" },
+        "siteName":       { "required": true,  "type": "string", "_comment": "Nombre visible del sitio, usado en <title> y JSON-LD" },
+        "language":       { "required": false, "type": "string", "default": "es", "_comment": "Código ISO 639-1" },
+        "defaultOgImage": { "required": false, "type": "string", "_comment": "Path relativo a /public: /images/og-default.jpg" }
+      }
+    },
+    "company": {
+      "required": true,
+      "_comment": "Datos legales y de contacto para JSON-LD Organization y footer",
+      "fields": {
+        "legalName": { "required": true,  "type": "string" },
+        "email":     { "required": true,  "type": "string" },
+        "phone":     { "required": false, "type": "string" },
+        "address":   { "required": false, "type": "string" }
+      }
+    },
+    "navigation": {
+      "required": true,
+      "type": "array",
+      "_comment": "Items del Header. Al menos uno requerido.",
+      "items": {
+        "label": { "required": true, "type": "string", "max": 30 },
+        "href":  { "required": true, "type": "string" }
+      }
+    },
+    "footerLinks": {
+      "required": true,
+      "type": "array",
+      "_comment": "Links del Footer (privacidad, términos, etc). Al menos uno requerido.",
+      "items": {
+        "label": { "required": true, "type": "string", "max": 30 },
+        "href":  { "required": true, "type": "string" }
+      }
+    },
+    "theme": {
+      "required": false,
+      "type": "object",
+      "_comment": "Variables CSS que el Agente UI sobrescribe en theme.css. Las keys son exactamente los nombres de las variables CSS (con --)."
+    },
+    "organizationSchema": {
+      "required": false,
+      "type": "object",
+      "_comment": "JSON-LD schema.org/Organization. Si está ausente, el validador lo auto-genera desde company + site y lo muestra para que lo copies."
+    }
+  }
+}
