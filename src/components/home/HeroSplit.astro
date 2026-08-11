@@ -52,34 +52,12 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
   </div>
 
   <div class="hero-split__light">
-    <div class="hero-split__mockups" data-gsap-animate="mockup">
-      <img
-        src="/images/pos-terminal.png"
-        alt=""
-        aria-hidden="true"
-        class="mock-terminal-bg"
-      />
-
-      <div class="mock-cart" aria-hidden="true">
-        <div class="mock-cart__header">
-          <span class="mock-cart__folio">186 · Boleta</span>
-          <span class="mock-cart__badge">● en línea</span>
-        </div>
-        <div class="mock-cart__item">
-          <span class="mock-cart__item-name">Chaqueta Cortavientos</span>
-          <span class="mock-cart__item-price">$19.990</span>
-        </div>
-        <div class="mock-cart__item">
-          <span class="mock-cart__item-name">Gorro trucker</span>
-          <span class="mock-cart__item-price">$8.990</span>
-        </div>
-        <div class="mock-cart__total">
-          <span>Total</span>
-          <span>$28.980</span>
-        </div>
-        <div class="mock-cart__pay">Confirmar cobro</div>
-      </div>
-    </div>
+    <img
+      src="/images/hero-mobile-pos-v2-final.png"
+      alt="Terminal Mobile One mostrando un carrito de venta con productos, descuento aplicado y botón de cobro"
+      class="hero-pos-image"
+      data-gsap-animate="mockup"
+    />
   </div>
 </section>
 
@@ -217,7 +195,6 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
   .hero-split__light {
     position: relative;
     min-width: 0;
-    overflow: hidden;
     background-color: var(--bg-secondary);
     display: flex;
     align-items: center;
@@ -238,73 +215,29 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     -webkit-mask-image: radial-gradient(circle at 60% 50%, black 0%, black 30%, transparent 72%);
     mask-image: radial-gradient(circle at 60% 50%, black 0%, black 30%, transparent 72%);
   }
-  .hero-split__mockups {
+  /* Imagen real del producto (hero-mobile-pos-v2-final). Mobile: contenida en su
+     propio flujo. Desktop: se agranda y sube/cruza hacia el panel azul (bleed). */
+  .hero-pos-image {
     position: relative;
-    width: 100%;
-    max-width: 380px;
-  }
-
-  .mock-terminal-bg {
-    position: absolute;
-    top: -18%;
-    right: -12%;
-    width: 62%;
-    filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.18));
-  }
-
-  .mock-cart {
-    position: relative;
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    padding: var(--space-md);
-    display: grid;
-    gap: var(--space-sm);
-    margin-top: 22%;
-  }
-  .mock-cart__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: var(--text-xs);
-    color: var(--text-secondary);
-  }
-  .mock-cart__badge { color: var(--accent-hover); font-weight: 500; }
-  .mock-cart__item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: var(--text-sm);
-    padding-block: var(--space-xs);
-    border-bottom: 1px solid var(--border);
-  }
-  .mock-cart__item-price { font-variant-numeric: tabular-nums; color: var(--text-secondary); }
-  .mock-cart__total {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-weight: 500;
-    font-size: var(--text-lg);
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-  }
-  .mock-cart__pay {
-    text-align: center;
-    font-weight: 600;
-    font-size: var(--text-sm);
-    color: var(--on-accent);
-    background: var(--accent-gradient);
-    padding: var(--space-sm);
-    border-radius: var(--radius-md);
+    display: block;
+    width: 85%;
+    max-width: 420px;
+    margin-inline: auto;
+    filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.2));
   }
 
   @media (min-width: 1024px) {
     .hero-split { grid-template-columns: 60% 40%; }
-  }
 
-  @media (max-width: 640px) {
-    .mock-terminal-bg { width: 50%; top: -10%; right: -6%; }
-    .mock-cart { margin-top: 12%; }
+    .hero-pos-image {
+      position: absolute;
+      z-index: 1;
+      top: -8%;
+      left: -22%;
+      width: 80%;
+      max-width: 640px;
+      margin: 0;
+    }
   }
 
 </style>
