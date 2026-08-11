@@ -195,6 +195,7 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
   .hero-split__light {
     position: relative;
     min-width: 0;
+    order: -1;
     background-color: var(--bg-secondary);
     display: flex;
     align-items: center;
@@ -228,15 +229,16 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
 
   @media (min-width: 1024px) {
     .hero-split { grid-template-columns: 60% 40%; }
+    .hero-split__light { order: 0; }
 
     .hero-pos-image {
-      position: absolute;
+      /* Sigue en flujo normal — el flex del panel (align-items:center) lo centra
+         verticalmente solo, sin pelear con el transform que usa GSAP para animarlo. */
       z-index: 1;
-      top: -8%;
-      left: -22%;
       width: 80%;
       max-width: 640px;
-      margin: 0;
+      margin-left: -34%;
+      margin-right: 0;
     }
   }
 
