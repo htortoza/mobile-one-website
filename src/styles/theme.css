@@ -23,6 +23,8 @@ html {
 }
 
 h1, h2, h3, h4, h5, h6 {
+  /* La hoja de estilos del navegador pone bold (700) por defecto — tope de peso es 600 (§15.3) */
+  font-weight: 400;
   text-wrap: balance;
 }
 
@@ -112,6 +114,15 @@ h1, h2, h3, h4, h5, h6 {
     repeating-linear-gradient(-60deg, color-mix(in srgb, var(--on-accent) 7%, transparent) 0 2px, transparent 2px 46px),
     repeating-linear-gradient(60deg, color-mix(in srgb, var(--on-accent) 7%, transparent) 0 2px, transparent 2px 46px),
     var(--accent-gradient);
+}
+
+/* Grid cuadriculado sutil sobre fondo claro (referencia: app real, mobile-one-dev.dotsolutions.io/login) */
+.bg-pattern-grid {
+  background-color: var(--bg-secondary);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--navy) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--navy) 7%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
 @media (prefers-reduced-motion: reduce) {
