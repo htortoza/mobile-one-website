@@ -29,6 +29,9 @@ const words = statText ? statText.split(' ') : [];
 
 <script>
   import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
 
   function initProof() {
     const section = document.querySelector('[data-gsap-section="proof"]');
@@ -52,7 +55,7 @@ const words = statText ? statText.split(' ') : [];
   .proof__inner { display: grid; gap: var(--space-sm); justify-items: center; }
   .proof__title {
     font-family: var(--font-heading);
-    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-size: clamp(1.9rem, 4.6vw, 2.8rem);
     letter-spacing: -0.02em;
   }
   .proof__label {

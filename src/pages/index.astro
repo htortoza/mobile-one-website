@@ -6,8 +6,7 @@ import ProblemHook from '../components/home/ProblemHook.astro';
 import SolutionSlide from '../components/home/SolutionSlide.astro';
 import HeroSplit from '../components/home/HeroSplit.astro';
 import BrandCompat from '../components/home/BrandCompat.astro';
-import ProblemLedger from '../components/home/ProblemLedger.astro';
-import SolutionBento from '../components/home/SolutionBento.astro';
+import SolutionPair from '../components/home/SolutionPair.astro';
 import HowItWorksFlow from '../components/home/HowItWorksFlow.astro';
 import ArchitectureTeaser from '../components/home/ArchitectureTeaser.astro';
 import SocialProofStat from '../components/home/SocialProofStat.astro';
@@ -92,48 +91,21 @@ const schemaData = {
     title="El mismo terminal que ya usas para cobrar"
   />
 
-  <ProblemLedger
-    title="El retail físico sigue perdiendo ventas que el e-commerce ya resolvió hace años"
+  <SolutionPair
+    eyebrow="Más allá de la caja"
+    title="El resto de la venta también corre en el mismo terminal"
     items={[
       {
-        heading: 'Filas y checkout lento',
-        text: 'Los clientes esperan en horarios peak porque la venta solo puede cerrarse en una caja fija, mientras el vendedor queda atado a un punto y no puede acompañar la decisión de compra.',
+        image: '/images/solucion-promo.webp',
+        alt: 'Vendedora cobrando con terminal Mobile One con un descuento aplicado automáticamente',
+        heading: 'Las promociones se aplican solas',
+        text: 'Reglas por cliente, categoría, marca o ticket total, con CloudPromo y Prism conectados en tiempo real. El vendedor no calcula nada a mano.',
       },
       {
-        heading: 'Stock que existe pero no se puede vender',
-        text: 'El producto está disponible en otra tienda o en el centro de distribución, pero la tienda física no tiene forma operativa de venderlo. La venta se pierde aunque el inventario existe.',
-      },
-      {
-        heading: 'Vendedores haciendo tareas transaccionales',
-        text: 'Gran parte del tiempo del equipo de ventas se va en procesos de checkout en vez de en atención y cierre de venta.',
-      },
-    ]}
-    closing="Esto no es un problema de personas, es un problema de arquitectura de venta."
-    closingHref="/por-que-mobile-one"
-  />
-
-  <SolutionBento
-    title="Un POS que vive en el mismo terminal con el que ya cobras, no en un dispositivo adicional"
-    items={[
-      {
-        heading: 'Venta desde cualquier punto de la sala',
-        text: 'Escaneo por código de barra o SKU, validación de stock en tiempo real, cobro con pago mixto y emisión de boleta/factura, todo desde el mismo terminal de pago.',
-        mock: 'sala',
-      },
-      {
-        heading: 'Inventario de toda la red, no solo de la tienda',
-        text: 'Venta directa, retiro programado en otra sucursal o despacho a domicilio, incluso con múltiples direcciones en una misma transacción.',
-        mock: 'red',
-      },
-      {
-        heading: 'Promociones aplicadas solas',
-        text: 'Reglas por cliente, categoría, marca o ticket total, con CloudPromo y Prism conectados en tiempo real.',
-        mock: 'promo',
-      },
-      {
-        heading: 'BackOffice sin fricción',
-        text: 'Ventas, tiendas, artículos, clientes y usuarios desde un panel web sincronizado con tu ERP.',
-        mock: 'backoffice',
+        image: '/images/solucion-backoffice.webp',
+        alt: 'Encargada de tienda revisando ventas y stock en un panel web desde laptop y tablet',
+        heading: 'El BackOffice ya no es otro sistema',
+        text: 'Ventas, tiendas, artículos, clientes y usuarios desde un panel web sincronizado con tu ERP, sin digitar la misma información dos veces.',
       },
     ]}
   />

@@ -65,21 +65,21 @@ const nodeList = nodes ?? [];
   .arch__inner { display: grid; gap: var(--space-lg); }
   .arch__title {
     font-family: var(--font-heading);
-    font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+    font-size: clamp(2rem, 5vw, 3.2rem);
     line-height: 1.1;
     letter-spacing: -0.02em;
   }
-  .arch__text { color: var(--text-secondary); max-width: 60ch; line-height: 1.6; margin-block: var(--space-sm); }
+  .arch__text { font-size: var(--text-lg); color: var(--text-secondary); max-width: 60ch; line-height: 1.6; margin-block: var(--space-sm); }
   .arch__link { color: var(--accent); font-weight: 600; text-decoration: none; }
 
   .arch__badges { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-md); }
   .arch__badge {
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--navy);
     background-color: var(--bg-primary);
     border: 1px solid var(--border);
-    padding: var(--space-xs) var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     border-radius: var(--radius-full);
   }
 
@@ -94,7 +94,7 @@ const nodeList = nodes ?? [];
     border-radius: var(--radius-lg);
   }
   .arch__node {
-    font-size: var(--text-xs);
+    font-size: var(--text-sm);
     color: var(--accent-hover);
     background-color: color-mix(in srgb, var(--accent) 10%, transparent);
     padding: var(--space-sm) var(--space-md);

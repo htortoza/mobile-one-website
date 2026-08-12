@@ -90,7 +90,7 @@ const list = steps ?? [];
   .flow__inner { display: grid; gap: var(--space-xl); }
   .flow__title {
     font-family: var(--font-heading);
-    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-size: clamp(2.2rem, 5.4vw, 3.6rem);
     line-height: 1.1;
     letter-spacing: -0.02em;
     max-width: 22ch;
@@ -129,8 +129,8 @@ const list = steps ?? [];
     text-align: center;
   }
   .flow__node-dot {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: var(--radius-full);
     background: var(--accent-gradient);
     color: var(--on-accent);
@@ -138,9 +138,9 @@ const list = steps ?? [];
     align-items: center;
     justify-content: center;
     font-family: var(--font-heading);
-    font-size: var(--text-lg);
+    font-size: var(--text-xl);
   }
-  .flow__node-text { color: var(--text-secondary); max-width: 20ch; }
+  .flow__node-text { font-size: var(--text-lg); color: var(--text-secondary); max-width: 20ch; }
 
   .flow__packet {
     position: absolute;
