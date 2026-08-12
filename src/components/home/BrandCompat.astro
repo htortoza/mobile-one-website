@@ -33,9 +33,10 @@ const chapters = [
     brand: 'Mercado Pago',
     kicker: 'Compatibilidad con',
     logo: '/images/logo-mercadopago-color.svg',
-    logoHeight: '58px',
+    logoHeight: '84px',
+    noShadow: true,
     claim: 'En tu terminal Mercado Pago, Mobile One cobra y emite el documento tributario al instante.',
-    detail: 'El stock se sincroniza con tu ERP igual que en el resto de tus tiendas — un solo sistema para toda la red.',
+    detail: 'El stock se sincroniza con tu ERP igual que en el resto de tus tiendas: un solo sistema para toda la red.',
     image: '/images/retail-payment-scene-mercadopago.webp',
     alt: 'Vendedora de retail cobrando a un cliente en una tienda de ropa',
     tone: 'var(--tone-mercadopago)',
@@ -67,7 +68,7 @@ const chapters = [
               style={i > 0 ? 'opacity:0' : ''}
             >
               <p class="compat__kicker">{ch.kicker}</p>
-              <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} style={ch.logoHeight ? `height:${ch.logoHeight}` : ''} />
+              <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} style={`${ch.logoHeight ? `height:${ch.logoHeight};` : ''}${ch.noShadow ? 'filter:none;' : ''}`} />
               <p class="compat__claim">{ch.claim}</p>
               <p class="compat__detail">{ch.detail}</p>
             </div>
@@ -83,7 +84,7 @@ const chapters = [
         <img class="compat__card-image" src={ch.image} alt={ch.alt} />
         <div class={`compat__text ${ch.onDark ? 'compat__text--on-dark' : ''}`} style={`background-color:${ch.tone}`}>
           <p class="compat__kicker">{ch.kicker}</p>
-          <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} style={ch.logoHeight ? `height:${ch.logoHeight}` : ''} />
+          <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} style={`${ch.logoHeight ? `height:${ch.logoHeight};` : ''}${ch.noShadow ? 'filter:none;' : ''}`} />
           <p class="compat__claim">{ch.claim}</p>
           <p class="compat__detail">{ch.detail}</p>
         </div>
