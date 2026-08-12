@@ -50,7 +50,7 @@ h1, h2, h3, h4, h5, h6 {
      hex exacto de marca de terceros, solo un acento de color para diferenciar
      cada capítulo. Transbank reusa el azul propio de Mobile One. */
   --tone-transbank:   var(--accent-grad-start);
-  --tone-getnet:      #e8531f;
+  --tone-getnet:      #e2231a;
   --tone-mercadopago: #ffcc00;
 
   /* Tipografías — Satoshi (Fontshare), tope de peso 600 — la URL se pasa via BaseHead */
