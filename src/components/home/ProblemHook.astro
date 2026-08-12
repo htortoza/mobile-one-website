@@ -1,9 +1,9 @@
 ---
 // src/components/home/ProblemHook.astro
-// Hook de retención tras el logo strip: NO es full-bleed. Card cuadrada chica
-// a la izquierda (foto real, una por línea) que gira/se mueve y cambia de
-// foto en cada transición; el texto grande le pasa por encima al desplazarse
-// hacia la derecha. Formato distinto a BrandCompat/SolutionBento/ProblemLedger.
+// Hook de retención tras el logo strip: NO es full-bleed. Card cuadrada grande
+// a la derecha (foto real, una por línea) que gira y cambia de foto en cada
+// transición; el texto grande le pasa por encima. Sin flotación continua.
+// Formato distinto a BrandCompat/SolutionBento/ProblemLedger.
 const { lines, images } = Astro.props;
 const list = lines ?? [];
 const imgs = images ?? [];
@@ -12,15 +12,15 @@ const imgs = images ?? [];
 <section class="hook" data-gsap-section="hook">
   <div class="hook__pin" data-hook-pin>
     <div class="container hook__stage">
-      <div class="hook__card" data-hook-card>
-        {imgs.map((src, i) => (
-          <img class="hook__cardimg" src={src} alt="" style={i > 0 ? 'opacity:0' : ''} data-hook-cardimg={i} />
-        ))}
-      </div>
-
       <div class="hook__text">
         {list.map((line, i) => (
           <p class={`hook__line ${i === 0 ? 'is-first' : ''}`} data-hook-line={i}>{line}</p>
+        ))}
+      </div>
+
+      <div class="hook__card" data-hook-card>
+        {imgs.map((src, i) => (
+          <img class="hook__cardimg" src={src} alt="" style={i > 0 ? 'opacity:0' : ''} data-hook-cardimg={i} />
         ))}
       </div>
     </div>
@@ -82,11 +82,6 @@ const imgs = images ?? [];
       tl.to({}, { duration: 0.6 }); // hold la última línea
     });
 
-    mm.add('(min-width: 768px)', () => {
-      if (!card) return;
-      gsap.to(card, { y: -14, duration: 3.2, ease: 'sine.inOut', repeat: -1, yoyo: true });
-    });
-
     mm.add('(max-width: 767px), (prefers-reduced-motion: reduce)', () => {
       gsap.utils.toArray(lines).forEach((line) => {
         gsap.from(line, {
@@ -121,8 +116,9 @@ const imgs = images ?? [];
   .hook__card {
     position: relative;
     flex-shrink: 0;
-    width: clamp(140px, 22vw, 260px);
+    width: clamp(260px, 38vw, 520px);
     aspect-ratio: 1;
+    margin-left: clamp(-110px, -10vw, -60px);
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
@@ -139,9 +135,9 @@ const imgs = images ?? [];
 
   .hook__text {
     position: relative;
+    flex: 1;
     display: grid;
-    margin-left: clamp(-70px, -8vw, -30px);
-    padding-left: var(--space-lg);
+    padding-right: var(--space-lg);
     z-index: 1;
     min-height: 12rem;
   }
@@ -160,10 +156,10 @@ const imgs = images ?? [];
   @media (max-width: 767px) {
     .hook__pin { min-height: auto; padding-block: var(--space-2xl); }
     .hook__stage { flex-direction: column; align-items: flex-start; gap: var(--space-lg); }
-    .hook__card { width: 120px; }
+    .hook__card { order: -1; width: 200px; margin-left: 0; }
     .hook__text {
-      margin-left: 0;
-      padding-left: 0;
+      flex: none;
+      padding-right: 0;
       display: grid;
       gap: var(--space-lg);
       min-height: 0;
