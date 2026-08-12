@@ -1,8 +1,9 @@
 ---
 // src/components/home/BrandCompat.astro
 // Home §4.3 (rediseñado) — Compatibilidad de hardware. Reemplaza el scroll-horizontal de 9 escenas.
-// Stage inset (no full-bleed): 1 foto real + bloque de color que invierten de lado y
-// mutan de tono entre 3 capítulos (Transbank → Getnet → Mercado Pago), pin+scrub corto.
+// Entrada: la stage "cae" y se centra al entrar en viewport (marca la división con la sección anterior).
+// Luego, pin+scrub corto: 3 fotos DISTINTAS (no la misma con filtro) + bloque de color que
+// invierten de lado y cambian de tono — Transbank (azul) → Getnet (rojo) → Mercado Pago (amarillo).
 const { title, eyebrow } = Astro.props;
 
 const chapters = [
@@ -10,6 +11,8 @@ const chapters = [
     brand: 'Transbank',
     kicker: 'Disponible en',
     claim: 'El terminal que ya tienes, listo para vender más.',
+    image: '/images/retail-payment-scene-transbank.webp',
+    alt: 'Vendedora de retail con polera azul cobrando a una clienta con el terminal Mobile One',
     tone: 'var(--tone-transbank)',
     onDark: true,
   },
@@ -17,6 +20,8 @@ const chapters = [
     brand: 'Getnet',
     kicker: 'También en',
     claim: 'Sin cambiar de hardware, sin curva de aprendizaje.',
+    image: '/images/retail-payment-scene-getnet.webp',
+    alt: 'Vendedora de retail con polera roja cobrando a una clienta con el terminal Mobile One',
     tone: 'var(--tone-getnet)',
     onDark: false,
   },
@@ -24,6 +29,8 @@ const chapters = [
     brand: 'Mercado Pago',
     kicker: 'Y en',
     claim: 'Un solo Mobile One que habla el idioma de cada terminal.',
+    image: '/images/retail-payment-scene-mercadopago.webp',
+    alt: 'Vendedora de retail con polera amarilla cobrando a un cliente con el terminal Mobile One',
     tone: 'var(--tone-mercadopago)',
     onDark: false,
   },
@@ -36,30 +43,56 @@ const chapters = [
     <h2 class="compat__title" data-gsap-animate="fade-up">{title}</h2>
   </div>
 
-  <div class="container compat__stage-wrap">
-    <div class="compat__stage" data-compat-stage>
-      <div class="compat__slot compat__slot--image" data-slot-image>
-        <img
-          src="/images/retail-payment-scene.webp"
-          alt="Vendedora de retail cobrando a una clienta con el terminal de pago, usando Mobile One"
-          data-compat-image
-        />
-      </div>
+  <div class="compat__pin compat__desktop-only" data-compat-pin>
+    <div class="container compat__stage-wrap">
+      <img
+        src="/images/hero-mobile-pos-v2-final.webp"
+        alt=""
+        aria-hidden="true"
+        class="compat__handoff"
+        data-compat-handoff
+      />
+      <div class="compat__stage" data-compat-stage>
+        <div class="compat__slot compat__slot--image" data-slot-image>
+          {chapters.map((ch, i) => (
+            <img
+              class="compat__image"
+              data-compat-image={i}
+              style={i > 0 ? 'opacity:0' : ''}
+              src={ch.image}
+              alt={ch.alt}
+            />
+          ))}
+        </div>
 
-      <div class="compat__slot compat__slot--color" data-slot-color>
-        {chapters.map((ch, i) => (
-          <div
-            class={`compat__text ${ch.onDark ? 'compat__text--on-dark' : ''}`}
-            data-compat-text={i}
-            style={i > 0 ? 'opacity:0' : ''}
-          >
-            <p class="compat__kicker">{ch.kicker}</p>
-            <h3 class="compat__brand">{ch.brand}</h3>
-            <p class="compat__claim">{ch.claim}</p>
-          </div>
-        ))}
+        <div class="compat__slot compat__slot--color" data-slot-color>
+          {chapters.map((ch, i) => (
+            <div
+              class={`compat__text ${ch.onDark ? 'compat__text--on-dark' : ''}`}
+              data-compat-text={i}
+              style={i > 0 ? 'opacity:0' : ''}
+            >
+              <p class="compat__kicker">{ch.kicker}</p>
+              <h3 class="compat__brand">{ch.brand}</h3>
+              <p class="compat__claim">{ch.claim}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
+  </div>
+
+  <div class="container compat__mobile-only">
+    {chapters.map((ch) => (
+      <div class="compat__card">
+        <img class="compat__card-image" src={ch.image} alt={ch.alt} />
+        <div class={`compat__text ${ch.onDark ? 'compat__text--on-dark' : ''}`} style={`background-color:${ch.tone}`}>
+          <p class="compat__kicker">{ch.kicker}</p>
+          <h3 class="compat__brand">{ch.brand}</h3>
+          <p class="compat__claim">{ch.claim}</p>
+        </div>
+      </div>
+    ))}
   </div>
 
   <div class="container compat__foot">
@@ -76,37 +109,50 @@ const chapters = [
 
   // Deben coincidir con --tone-* en theme.css (GSAP necesita un valor concreto para interpolar color)
   const TONES = ['#0022aa', '#e8531f', '#ffcc00'];
-  // Misma estructura de funciones en los 3 — así GSAP puede tweenear el filter suavemente
-  const GRADES = [
-    'saturate(1.05) sepia(0) hue-rotate(0deg) brightness(1)',
-    'saturate(1.3) sepia(0.4) hue-rotate(300deg) brightness(1.05)',
-    'saturate(1.3) sepia(0.4) hue-rotate(28deg) brightness(1.08)',
-  ];
 
   function initCompat() {
     const section = document.querySelector('[data-gsap-section="compat"]');
     if (!section) return;
 
-    const stageWrap = section.querySelector('.compat__stage-wrap');
-    const image = section.querySelector('[data-compat-image]');
+    const pinEl = section.querySelector('[data-compat-pin]');
+    const stage = section.querySelector('[data-compat-stage]');
+    const handoff = section.querySelector('[data-compat-handoff]');
     const colorSlot = section.querySelector('[data-slot-color]');
     const imageSlot = section.querySelector('[data-slot-image]');
+    const images = section.querySelectorAll('[data-compat-image]');
     const texts = section.querySelectorAll('[data-compat-text]');
-    if (!stageWrap || !image || !colorSlot || !imageSlot) return;
+    if (!pinEl || !stage || !handoff || !colorSlot || !imageSlot) return;
 
-    gsap.set(image, { filter: GRADES[0] });
     gsap.set(colorSlot, { backgroundColor: TONES[0] });
 
     const mm = gsap.matchMedia();
 
     mm.add('(min-width: 900px) and (prefers-reduced-motion: no-preference)', () => {
+      // Handoff: el mismo POS del Hero cae y se posa al centro, marcando la división
+      // con la sección anterior. Al asentarse, se disuelve y la stage (capítulo 1) toma su lugar.
+      gsap.set(handoff, { y: -160, opacity: 0, scale: 0.82, rotate: -6 });
+      gsap.set(stage, { opacity: 0, y: 28, scale: 0.96 });
+
+      const handoffTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: pinEl,
+          start: 'top 85%',
+          end: 'top 25%',
+          scrub: true,
+        },
+      });
+      handoffTl
+        .to(handoff, { y: 0, opacity: 1, scale: 1, rotate: 0, duration: 0.5, ease: 'power2.out' }, 0)
+        .to(handoff, { opacity: 0, scale: 1.06, y: -16, duration: 0.25, ease: 'power1.in' }, 0.62)
+        .to(stage, { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'power2.out' }, 0.66);
+
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: section,
+          trigger: pinEl,
           start: 'top top',
           end: '+=220%',
           scrub: 1,
-          pin: stageWrap,
+          pin: pinEl,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
@@ -115,10 +161,11 @@ const chapters = [
       function transition(toIndex, swap) {
         const seg = gsap.timeline();
         seg.to(texts[toIndex - 1], { opacity: 0, y: -10, duration: 0.18, ease: 'power1.in' }, 0);
+        seg.to(images[toIndex - 1], { opacity: 0, duration: 0.3, ease: 'power1.inOut' }, 0.06);
         seg.to(imageSlot, { xPercent: swap ? 100 : 0, duration: 0.4, ease: 'power2.inOut' }, 0.05);
         seg.to(colorSlot, { xPercent: swap ? -100 : 0, duration: 0.4, ease: 'power2.inOut' }, 0.05);
         seg.to(colorSlot, { backgroundColor: TONES[toIndex], duration: 0.4, ease: 'power1.inOut' }, 0.08);
-        seg.to(image, { filter: GRADES[toIndex], duration: 0.4, ease: 'power1.inOut' }, 0.08);
+        seg.to(images[toIndex], { opacity: 1, duration: 0.32, ease: 'power1.inOut' }, 0.28);
         seg.to(texts[toIndex], { opacity: 1, y: 0, duration: 0.22, ease: 'power2.out' }, 0.32);
         return seg;
       }
@@ -128,6 +175,10 @@ const chapters = [
       tl.to({}, { duration: 0.6 }); // hold capítulo 2
       tl.add(transition(2, false), '+=0');
       tl.to({}, { duration: 0.6 }); // hold capítulo 3
+
+      return () => {
+        gsap.set([imageSlot, colorSlot], { xPercent: 0, clearProps: 'transform' });
+      };
     });
   }
 
@@ -154,7 +205,24 @@ const chapters = [
     max-width: 30ch;
   }
 
-  .compat__stage-wrap { display: flex; justify-content: center; }
+  /* Contenedor pinneado: siempre 100vh y centra la stage sin importar cuánto mida el head de arriba */
+  .compat__pin {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+  .compat__stage-wrap { position: relative; width: 100%; display: flex; justify-content: center; }
+
+  .compat__handoff {
+    position: absolute;
+    z-index: 2;
+    top: 6%;
+    left: 50%;
+    width: 260px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.22));
+  }
   .compat__stage {
     position: relative;
     width: 100%;
@@ -173,7 +241,9 @@ const chapters = [
     height: 100%;
   }
   .compat__slot--image { left: 0; overflow: hidden; }
-  .compat__slot--image img {
+  .compat__image {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -196,7 +266,6 @@ const chapters = [
   }
   .compat__claim { color: color-mix(in srgb, var(--navy) 75%, transparent); max-width: 26ch; line-height: 1.5; }
 
-  /* Capítulo con fondo oscuro (Transbank) — invierte a texto claro para contraste */
   .compat__text--on-dark .compat__kicker { color: color-mix(in srgb, var(--on-accent) 75%, transparent); }
   .compat__text--on-dark .compat__brand { color: var(--on-accent); }
   .compat__text--on-dark .compat__claim { color: color-mix(in srgb, var(--on-accent) 88%, transparent); }
@@ -204,51 +273,26 @@ const chapters = [
   .compat__foot { margin-top: var(--space-md); text-align: center; }
   .compat__link { color: var(--accent); font-weight: 600; text-decoration: none; }
 
-  /* ── Mobile / reduced-motion: 3 tarjetas apiladas, sin pin ni wipe ── */
+  /* ── Mobile / reduced-motion: bloque independiente, 3 tarjetas imagen+color apiladas ── */
+  .compat__mobile-only { display: none; }
+
   @media (max-width: 899px), (prefers-reduced-motion: reduce) {
-    .compat__stage-wrap { display: block; }
-    .compat__stage {
-      display: grid;
-      gap: var(--space-md);
-      aspect-ratio: auto;
-      height: auto;
-      border-radius: 0;
-      overflow: visible;
-      box-shadow: none;
-      background: none;
-    }
-    .compat__slot {
-      position: relative;
+    .compat__desktop-only { display: none; }
+    .compat__mobile-only { display: grid; gap: var(--space-lg); }
+
+    .compat__card { display: grid; gap: var(--space-md); }
+    .compat__card-image {
       width: 100%;
-      height: auto;
-      left: auto !important;
-      transform: none !important;
-    }
-    .compat__slot--image {
-      border-radius: var(--radius-lg);
-      overflow: hidden;
       aspect-ratio: 4 / 3;
-    }
-    .compat__slot--color {
+      object-fit: cover;
       border-radius: var(--radius-lg);
-      padding: var(--space-lg);
-      display: grid;
-      gap: var(--space-md);
-      background-color: transparent !important;
+      display: block;
     }
-    .compat__text {
+    .compat__card .compat__text {
       position: relative;
       inset: auto;
-      opacity: 1 !important;
       padding: var(--space-lg);
       border-radius: var(--radius-lg);
     }
-    .compat__text[data-compat-text='0'] { background-color: var(--tone-transbank); }
-    .compat__text[data-compat-text='1'] { background-color: var(--tone-getnet); }
-    .compat__text[data-compat-text='2'] { background-color: var(--tone-mercadopago); }
-    .compat__kicker, .compat__brand, .compat__claim { color: var(--navy); }
-    .compat__text--on-dark .compat__kicker,
-    .compat__text--on-dark .compat__brand,
-    .compat__text--on-dark .compat__claim { color: var(--on-accent); }
   }
 </style>
