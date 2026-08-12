@@ -30,19 +30,23 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
 
   <div class="container arch__diagram" data-arch-diagram>
     <svg class="arch__cables" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      {inputList.map((_, i) => {
-        const y = ((i + 0.5) / inputList.length) * 100;
-        return <path d={`M 26 ${y} C 38 ${y}, 40 50, 50 50`} class="arch__cable" data-arch-cable vector-effect="non-scaling-stroke" />;
-      })}
-      {outputList.map((_, i) => {
-        const y = ((i + 0.5) / outputList.length) * 100;
-        return <path d={`M 50 50 C 60 50, 62 ${y}, 74 ${y}`} class="arch__cable" data-arch-cable vector-effect="non-scaling-stroke" />;
-      })}
+      {inputList.map((_, i) => (
+        <>
+          <path class="arch__cable" data-arch-cable data-side="in" data-index={i} />
+          <path class="arch__beam" data-arch-beam data-side="in" data-index={i} pathLength="100" />
+        </>
+      ))}
+      {outputList.map((_, i) => (
+        <>
+          <path class="arch__cable" data-arch-cable data-side="out" data-index={i} />
+          <path class="arch__beam" data-arch-beam data-side="out" data-index={i} pathLength="100" />
+        </>
+      ))}
     </svg>
 
     <div class="arch__col arch__col--in">
-      {inputList.map((node) => (
-        <div class="arch__card" data-arch-card>
+      {inputList.map((node, i) => (
+        <div class="arch__card" data-arch-card="in" data-arch-index={i}>
           {node.logos && (
             <div class="arch__logos">
               {node.logos.map((logo) => (
@@ -65,8 +69,8 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
     </div>
 
     <div class="arch__col arch__col--out">
-      {outputList.map((node) => (
-        <div class="arch__card" data-arch-card>
+      {outputList.map((node, i) => (
+        <div class="arch__card" data-arch-card="out" data-arch-index={i}>
           <p class="arch__card-label">{node.label}</p>
           {node.sub && <p class="arch__card-sub">{node.sub}</p>}
         </div>
@@ -81,6 +85,41 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
 
   gsap.registerPlugin(ScrollTrigger);
 
+  // Calcula el trazo real de cada cable a partir de la posición en pantalla
+  // de cada card y del hub (no coordenadas % adivinadas): así el cable
+  // siempre nace y termina exactamente en el borde de la card/hub, sin
+  // importar cuánto midan las columnas del grid en cada viewport.
+  function layoutCables(diagram) {
+    const svg = diagram.querySelector('.arch__cables');
+    const hub = diagram.querySelector('[data-arch-hub]');
+    if (!svg || !hub || window.innerWidth < 1024) return;
+
+    const box = diagram.getBoundingClientRect();
+    const toPct = (x, y) => ({ x: ((x - box.left) / box.width) * 100, y: ((y - box.top) / box.height) * 100 });
+
+    const hubBox = hub.getBoundingClientRect();
+    const hubLeft = toPct(hubBox.left, hubBox.top + hubBox.height / 2);
+    const hubRight = toPct(hubBox.right, hubBox.top + hubBox.height / 2);
+
+    diagram.querySelectorAll('[data-arch-card="in"]').forEach((card) => {
+      const i = card.dataset.archIndex;
+      const cardBox = card.getBoundingClientRect();
+      const start = toPct(cardBox.right, cardBox.top + cardBox.height / 2);
+      const midX = (start.x + hubLeft.x) / 2;
+      const d = `M ${start.x} ${start.y} C ${midX} ${start.y}, ${midX} ${hubLeft.y}, ${hubLeft.x} ${hubLeft.y}`;
+      svg.querySelectorAll(`[data-side="in"][data-index="${i}"]`).forEach((p) => p.setAttribute('d', d));
+    });
+
+    diagram.querySelectorAll('[data-arch-card="out"]').forEach((card) => {
+      const i = card.dataset.archIndex;
+      const cardBox = card.getBoundingClientRect();
+      const end = toPct(cardBox.left, cardBox.top + cardBox.height / 2);
+      const midX = (hubRight.x + end.x) / 2;
+      const d = `M ${hubRight.x} ${hubRight.y} C ${midX} ${hubRight.y}, ${midX} ${end.y}, ${end.x} ${end.y}`;
+      svg.querySelectorAll(`[data-side="out"][data-index="${i}"]`).forEach((p) => p.setAttribute('d', d));
+    });
+  }
+
   function initArch() {
     const section = document.querySelector('[data-gsap-section="arch"]');
     if (!section) return;
@@ -94,6 +133,14 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
     const diagram = section.querySelector('[data-arch-diagram]');
     if (!diagram) return;
 
+    layoutCables(diagram);
+    const onResize = () => layoutCables(diagram);
+    window.addEventListener('resize', onResize);
+    // Los logos pueden terminar de cargar después del layout inicial y
+    // cambiar la altura de las cards — se recalcula una vez más al asentarse.
+    window.addEventListener('load', onResize, { once: true });
+    document.addEventListener('astro:before-swap', () => window.removeEventListener('resize', onResize), { once: true });
+
     if (reduced) return;
 
     gsap.from(section.querySelectorAll('[data-arch-card]'), {
@@ -105,33 +152,26 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
       scrollTrigger: { trigger: diagram, start: 'top 72%' },
     });
 
-    const cables = section.querySelectorAll('[data-arch-cable]');
-    cables.forEach((cable) => {
+    ScrollTrigger.addEventListener('refresh', () => layoutCables(diagram));
+
+    section.querySelectorAll('[data-arch-cable]').forEach((cable) => {
       gsap.fromTo(cable, { opacity: 0 }, {
         opacity: 1, duration: 0.6,
         scrollTrigger: { trigger: diagram, start: 'top 70%' },
       });
+    });
 
-      const length = cable.getTotalLength();
-      const packet = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      packet.setAttribute('r', '1.4');
-      packet.setAttribute('fill', 'var(--accent)');
-      packet.style.filter = 'drop-shadow(0 0 3px color-mix(in srgb, var(--accent) 70%, transparent))';
-      cable.parentNode.appendChild(packet);
-
-      const obj = { d: 0 };
-      gsap.to(obj, {
-        d: length,
-        duration: 1.8,
+    // Rayo de luz: un segmento corto y brillante que recorre el cable en loop,
+    // usando pathLength=100 para que el dasharray sea en % sin medir el path.
+    section.querySelectorAll('[data-arch-beam]').forEach((beam) => {
+      gsap.set(beam, { attr: { 'stroke-dasharray': '16 100', 'stroke-dashoffset': 0 } });
+      gsap.to(beam, {
+        attr: { 'stroke-dashoffset': -116 },
+        duration: 1.6,
         repeat: -1,
-        delay: gsap.utils.random(0, 1),
+        delay: gsap.utils.random(0, 1.2),
         ease: 'power1.inOut',
         scrollTrigger: { trigger: diagram, start: 'top 85%', end: 'bottom top' },
-        onUpdate: () => {
-          const p = cable.getPointAtLength(obj.d);
-          packet.setAttribute('cx', String(p.x));
-          packet.setAttribute('cy', String(p.y));
-        },
       });
     });
   }
@@ -169,8 +209,16 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
     gap: var(--space-xl);
     padding-block: var(--space-lg);
   }
-  .arch__cables { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; display: none; }
-  .arch__cable { stroke: var(--border); stroke-width: 1.4; fill: none; opacity: 0; }
+  .arch__cables { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; display: none; overflow: visible; }
+  .arch__cable { stroke: var(--border); stroke-width: 1.4; fill: none; opacity: 0; vector-effect: non-scaling-stroke; }
+  .arch__beam {
+    stroke: var(--accent-hover);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    fill: none;
+    vector-effect: non-scaling-stroke;
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 75%, transparent));
+  }
 
   .arch__col { position: relative; z-index: 1; display: grid; gap: var(--space-md); }
 
