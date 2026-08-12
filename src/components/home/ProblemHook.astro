@@ -1,9 +1,9 @@
 ---
 // src/components/home/ProblemHook.astro
 // Hook de retención tras el logo strip: NO es full-bleed. Card cuadrada grande
-// a la derecha (foto real, una por línea) que gira y cambia de foto en cada
-// transición; el texto grande le pasa por encima. Sin flotación continua.
-// Formato distinto a BrandCompat/SolutionBento/ProblemLedger.
+// a la derecha (foto real, mismo estilo cálido/luz natural que BrandCompat)
+// que cambia de foto en cada transición, sin girar ni flotar; el texto
+// grande le pasa por encima. Formato distinto a BrandCompat/SolutionBento/ProblemLedger.
 const { lines, images } = Astro.props;
 const list = lines ?? [];
 const imgs = images ?? [];
@@ -34,19 +34,14 @@ const imgs = images ?? [];
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.config({ ignoreMobileResize: true });
 
-  const ROTATIONS = [-4, 3, -3, 5, -2];
-
   function initHook() {
     const section = document.querySelector('[data-gsap-section="hook"]');
     if (!section) return;
 
     const pinEl = section.querySelector('[data-hook-pin]');
     const lines = section.querySelectorAll('[data-hook-line]');
-    const card = section.querySelector('[data-hook-card]');
     const cardImgs = section.querySelectorAll('[data-hook-cardimg]');
     if (!pinEl || !lines.length) return;
-
-    if (card) gsap.set(card, { rotate: ROTATIONS[0] });
 
     const mm = gsap.matchMedia();
 
@@ -70,14 +65,6 @@ const imgs = images ?? [];
         tl.to(line, { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' }, '<');
         if (cardImgs[i - 1]) tl.to(cardImgs[i - 1], { opacity: 0, duration: 0.35 }, '<');
         if (cardImgs[i]) tl.to(cardImgs[i], { opacity: 1, duration: 0.35 }, '<');
-        if (card) {
-          tl.to(card, {
-            rotate: ROTATIONS[i % ROTATIONS.length],
-            x: (i % 2 === 0) ? 10 : -10,
-            duration: 0.6,
-            ease: 'power2.inOut',
-          }, '<');
-        }
       });
       tl.to({}, { duration: 0.6 }); // hold la última línea
     });
