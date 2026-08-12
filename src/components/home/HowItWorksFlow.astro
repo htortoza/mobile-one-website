@@ -9,8 +9,9 @@
 // de producto → promoción aplicada → boleta emitida. Rail lateral (número +
 // texto) + dots + barra de progreso, mismo mecanismo que BrandCompat/
 // ProductoGallery.
-const { title, steps } = Astro.props;
+const { title, steps, headings } = Astro.props;
 const list = steps ?? [];
+const headingList = headings ?? [];
 ---
 
 <section class="flow" data-gsap-section="flow">
@@ -29,7 +30,8 @@ const list = steps ?? [];
 
         {list.map((step, i) => (
           <div class="flow__rail-text" data-rail-text={i} style={i > 0 ? 'opacity:0' : ''}>
-            <span class="flow__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <span class="flow__num"><span class="flow__num-fig" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><span class="flow__num-bar" aria-hidden="true"></span></span>
+            {headingList[i] && <h3 class="flow__heading">{headingList[i]}</h3>}
             <p class="flow__step-text">{step}</p>
           </div>
         ))}
@@ -123,7 +125,8 @@ const list = steps ?? [];
           </div>
         </div>
         <div class="flow__rail-text">
-          <span class="flow__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <span class="flow__num"><span class="flow__num-fig" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><span class="flow__num-bar" aria-hidden="true"></span></span>
+          {headingList[i] && <h3 class="flow__heading">{headingList[i]}</h3>}
           <p class="flow__step-text">{step}</p>
         </div>
       </div>
@@ -222,14 +225,28 @@ const list = steps ?? [];
   .flow__dot.is-active { background-color: var(--accent); transform: scale(1.3); }
 
   .flow__rail-text { position: relative; display: grid; gap: var(--space-sm); grid-row: 2; grid-column: 1; }
-  .flow__num {
+  .flow__num { display: inline-flex; align-items: baseline; gap: var(--space-sm); }
+  .flow__num-fig {
     font-family: var(--font-heading);
-    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-size: clamp(3.6rem, 8vw, 6.2rem);
     font-weight: 500;
-    color: color-mix(in srgb, var(--accent) 20%, transparent);
-    line-height: 1;
+    letter-spacing: -0.03em;
+    line-height: 0.9;
+    color: transparent;
+    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--accent) 45%, transparent);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%);
+    background-clip: text;
+    -webkit-background-clip: text;
   }
-  .flow__step-text { font-size: var(--text-xl); color: var(--text-primary); line-height: 1.4; max-width: 24ch; }
+  .flow__num-bar { display: block; width: 40px; height: 3px; border-radius: var(--radius-full); background-color: var(--accent); transform: translateY(-0.3em); }
+  .flow__heading {
+    font-family: var(--font-heading);
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+  .flow__step-text { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.5; max-width: 26ch; }
 
   .flow__progress { height: 3px; background-color: var(--border); border-radius: var(--radius-full); overflow: hidden; }
   .flow__progress-fill { display: block; height: 100%; width: 100%; background-color: var(--accent); transform: scaleX(0); transform-origin: left; }
@@ -287,6 +304,7 @@ const list = steps ?? [];
     .flow__mobile-only { display: grid; gap: var(--space-2xl); }
     .flow__mcard { display: grid; gap: var(--space-lg); justify-items: center; text-align: center; }
     .flow__mcard .flow__rail-text { justify-items: center; }
+    .flow__mcard .flow__num { justify-content: center; }
     .flow__mcard .flow__step-text { max-width: 30ch; }
     .flow__device-wrap--sm .flow__device { aspect-ratio: 3 / 4; }
   }
