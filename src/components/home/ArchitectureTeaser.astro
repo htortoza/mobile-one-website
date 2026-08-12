@@ -71,6 +71,15 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
     <div class="arch__col arch__col--out">
       {outputList.map((node, i) => (
         <div class="arch__card" data-arch-card="out" data-arch-index={i}>
+          {node.logos && (
+            <div class="arch__logos">
+              {node.logos.map((logo) => (
+                <span class={`arch__logo-chip ${logo.tone ? `arch__logo-chip--${logo.tone}` : ''}`}>
+                  <img src={logo.src} alt="" />
+                </span>
+              ))}
+            </div>
+          )}
           <p class="arch__card-label">{node.label}</p>
           {node.sub && <p class="arch__card-sub">{node.sub}</p>}
         </div>
@@ -254,25 +263,25 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
     z-index: 1;
     justify-self: center;
     align-self: center;
-    width: 168px;
-    aspect-ratio: 1;
-    border-radius: 32px;
+    width: 260px;
+    min-height: 208px;
+    border-radius: 36px;
     background: var(--accent-gradient);
     color: var(--on-accent);
     display: grid;
     align-content: center;
     justify-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-md);
+    gap: var(--space-sm);
+    padding: var(--space-lg) var(--space-md);
     text-align: center;
     box-shadow: var(--shadow-lg);
   }
-  .arch__hub-logo { height: 22px; width: auto; filter: brightness(0) invert(1); margin-bottom: var(--space-xs); }
-  .arch__hub-label { font-family: var(--font-heading); font-size: var(--text-base); line-height: 1.2; }
-  .arch__hub-sub { font-size: var(--text-xs); color: color-mix(in srgb, var(--on-accent) 80%, transparent); }
+  .arch__hub-logo { height: 24px; width: auto; filter: brightness(0) invert(1); margin-bottom: var(--space-xs); }
+  .arch__hub-label { font-family: var(--font-heading); font-size: var(--text-lg); line-height: 1.3; max-width: 18ch; white-space: nowrap; }
+  .arch__hub-sub { font-size: var(--text-sm); color: color-mix(in srgb, var(--on-accent) 82%, transparent); }
 
   @media (min-width: 1024px) {
-    .arch__diagram { grid-template-columns: 1fr 168px 1fr; align-items: center; gap: var(--space-2xl); }
+    .arch__diagram { grid-template-columns: 1fr 260px 1fr; align-items: center; gap: var(--space-2xl); }
     .arch__cables { display: block; }
     .arch__col--out { justify-items: end; }
     .arch__col--out .arch__card { text-align: right; justify-items: end; }
