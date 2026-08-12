@@ -9,8 +9,10 @@ const { title, eyebrow } = Astro.props;
 const chapters = [
   {
     brand: 'Transbank',
-    kicker: 'Disponible en',
-    claim: 'El terminal que ya tienes, listo para vender más.',
+    kicker: 'Compatibilidad con',
+    logo: '/images/logo-transbank-white.png',
+    claim: 'Mobile One corre directo en tu terminal Transbank — el mismo con el que ya cobras.',
+    detail: 'Catálogo, cobro con pago mixto y boleta o factura electrónica, todo en un solo dispositivo, sin hardware adicional.',
     image: '/images/retail-payment-scene-transbank.webp',
     alt: 'Vendedora de retail cobrando a una clienta en un local de ropa',
     tone: 'var(--tone-transbank)',
@@ -18,8 +20,10 @@ const chapters = [
   },
   {
     brand: 'Getnet',
-    kicker: 'También en',
-    claim: 'Sin cambiar de hardware, sin curva de aprendizaje.',
+    kicker: 'Compatibilidad con',
+    logo: '/images/logo-getnet-white.png',
+    claim: 'Activa Mobile One sobre tu terminal Getnet sin cambiar de hardware.',
+    detail: 'Mismo flujo de venta, mismo dispositivo, sin curva de aprendizaje para tu equipo y con el stock de toda la red disponible al instante.',
     image: '/images/retail-payment-scene-getnet.webp',
     alt: 'Vendedora de retail cobrando a una clienta en una tienda de barrio',
     tone: 'var(--tone-getnet)',
@@ -27,8 +31,10 @@ const chapters = [
   },
   {
     brand: 'Mercado Pago',
-    kicker: 'Y en',
-    claim: 'Un solo Mobile One que habla el idioma de cada terminal.',
+    kicker: 'Compatibilidad con',
+    logo: '/images/logo-mercadopago-white.svg',
+    claim: 'En tu terminal Mercado Pago, Mobile One cobra y emite el documento tributario al instante.',
+    detail: 'El stock se sincroniza con tu ERP igual que en el resto de tus tiendas — un solo sistema para toda la red.',
     image: '/images/retail-payment-scene-mercadopago.webp',
     alt: 'Vendedora de retail cobrando a un cliente en una tienda de ropa',
     tone: 'var(--tone-mercadopago)',
@@ -60,8 +66,9 @@ const chapters = [
               style={i > 0 ? 'opacity:0' : ''}
             >
               <p class="compat__kicker">{ch.kicker}</p>
-              <h3 class="compat__brand">{ch.brand}</h3>
+              <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} />
               <p class="compat__claim">{ch.claim}</p>
+              <p class="compat__detail">{ch.detail}</p>
             </div>
           ))}
         </div>
@@ -75,8 +82,9 @@ const chapters = [
         <img class="compat__card-image" src={ch.image} alt={ch.alt} />
         <div class={`compat__text ${ch.onDark ? 'compat__text--on-dark' : ''}`} style={`background-color:${ch.tone}`}>
           <p class="compat__kicker">{ch.kicker}</p>
-          <h3 class="compat__brand">{ch.brand}</h3>
+          <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} />
           <p class="compat__claim">{ch.claim}</p>
+          <p class="compat__detail">{ch.detail}</p>
         </div>
       </div>
     ))}
@@ -215,19 +223,28 @@ const chapters = [
     padding: var(--space-lg);
   }
 
-  .compat__text { position: absolute; inset: var(--space-lg); display: grid; align-content: center; gap: var(--space-xs); }
+  .compat__text { position: absolute; inset: var(--space-lg); display: grid; align-content: center; gap: var(--space-sm); }
   .compat__kicker { font-size: var(--text-sm); color: color-mix(in srgb, var(--navy) 70%, transparent); }
-  .compat__brand {
+  .compat__brand-logo {
+    height: 34px;
+    width: auto;
+    margin-block: 2px 4px;
+    /* Logos siempre en blanco (pedido de marca) — drop-shadow para que no se pierdan sobre el amarillo */
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+  }
+  .compat__claim {
     font-family: var(--font-heading);
-    font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
     color: var(--navy);
     letter-spacing: -0.01em;
+    line-height: 1.3;
+    max-width: 30ch;
   }
-  .compat__claim { color: color-mix(in srgb, var(--navy) 75%, transparent); max-width: 26ch; line-height: 1.5; }
+  .compat__detail { color: color-mix(in srgb, var(--navy) 72%, transparent); max-width: 32ch; line-height: 1.55; }
 
   .compat__text--on-dark .compat__kicker { color: color-mix(in srgb, var(--on-accent) 75%, transparent); }
-  .compat__text--on-dark .compat__brand { color: var(--on-accent); }
-  .compat__text--on-dark .compat__claim { color: color-mix(in srgb, var(--on-accent) 88%, transparent); }
+  .compat__text--on-dark .compat__claim { color: var(--on-accent); }
+  .compat__text--on-dark .compat__detail { color: color-mix(in srgb, var(--on-accent) 82%, transparent); }
 
   .compat__foot { margin-top: var(--space-md); text-align: center; }
   .compat__link { color: var(--accent); font-weight: 600; text-decoration: none; }
