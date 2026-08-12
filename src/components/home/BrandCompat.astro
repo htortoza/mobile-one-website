@@ -27,12 +27,13 @@ const chapters = [
     image: '/images/retail-payment-scene-getnet.webp',
     alt: 'Vendedora de retail cobrando a una clienta en una tienda de barrio',
     tone: 'var(--tone-getnet)',
-    onDark: false,
+    onDark: true,
   },
   {
     brand: 'Mercado Pago',
     kicker: 'Compatibilidad con',
-    logo: '/images/logo-mercadopago-white.svg',
+    logo: '/images/logo-mercadopago-color.svg',
+    logoHeight: '58px',
     claim: 'En tu terminal Mercado Pago, Mobile One cobra y emite el documento tributario al instante.',
     detail: 'El stock se sincroniza con tu ERP igual que en el resto de tus tiendas — un solo sistema para toda la red.',
     image: '/images/retail-payment-scene-mercadopago.webp',
@@ -66,7 +67,7 @@ const chapters = [
               style={i > 0 ? 'opacity:0' : ''}
             >
               <p class="compat__kicker">{ch.kicker}</p>
-              <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} />
+              <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} style={ch.logoHeight ? `height:${ch.logoHeight}` : ''} />
               <p class="compat__claim">{ch.claim}</p>
               <p class="compat__detail">{ch.detail}</p>
             </div>
@@ -82,7 +83,7 @@ const chapters = [
         <img class="compat__card-image" src={ch.image} alt={ch.alt} />
         <div class={`compat__text ${ch.onDark ? 'compat__text--on-dark' : ''}`} style={`background-color:${ch.tone}`}>
           <p class="compat__kicker">{ch.kicker}</p>
-          <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} />
+          <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} style={ch.logoHeight ? `height:${ch.logoHeight}` : ''} />
           <p class="compat__claim">{ch.claim}</p>
           <p class="compat__detail">{ch.detail}</p>
         </div>
@@ -234,13 +235,18 @@ const chapters = [
   }
   .compat__claim {
     font-family: var(--font-heading);
-    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
     color: var(--navy);
     letter-spacing: -0.01em;
-    line-height: 1.3;
+    line-height: 1.28;
     max-width: 30ch;
   }
-  .compat__detail { color: color-mix(in srgb, var(--navy) 72%, transparent); max-width: 32ch; line-height: 1.55; }
+  .compat__detail {
+    font-size: var(--text-lg);
+    color: color-mix(in srgb, var(--navy) 72%, transparent);
+    max-width: 32ch;
+    line-height: 1.55;
+  }
 
   .compat__text--on-dark .compat__kicker { color: color-mix(in srgb, var(--on-accent) 75%, transparent); }
   .compat__text--on-dark .compat__claim { color: var(--on-accent); }
