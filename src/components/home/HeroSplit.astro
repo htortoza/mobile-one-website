@@ -5,6 +5,7 @@ const {
   eyebrow,
   headline,
   accentPhrase,
+  breakAfterAccent = false,
   subheadline,
   ctaText,
   ctaHref,
@@ -36,9 +37,14 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
 
       <h1 class="hero-split__headline" data-gsap-split="words">
         {words.map((word, i) => (
-          <span class="hero-split__word-outer">
-            <span class={`hero-split__word ${isAccent(i) ? 'hero-split__word--accent' : ''}`}>{word}</span>
-          </span>
+          <>
+            <span class="hero-split__word-outer">
+              <span class={`hero-split__word ${isAccent(i) ? 'hero-split__word--accent' : ''}`}>{word}</span>
+            </span>
+            {breakAfterAccent && accentStart >= 0 && i === accentStart + phraseWords.length - 1 && (
+              <span class="hero-split__break" aria-hidden="true"></span>
+            )}
+          </>
         ))}
       </h1>
 
@@ -114,7 +120,7 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     color: var(--on-accent);
     display: flex;
     align-items: center;
-    padding-block: var(--space-xl) var(--space-lg);
+    padding-block: var(--space-xl);
     padding-inline-start: max(var(--container-pad), calc((100vw - var(--content-max-xl)) / 2));
     padding-inline-end: var(--space-lg);
   }
@@ -144,6 +150,7 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     letter-spacing: -0.02em;
   }
   .hero-split__word-outer { overflow: hidden; padding-bottom: 0.06em; margin-bottom: -0.06em; }
+  .hero-split__break { flex-basis: 100%; height: 0; }
   .hero-split__word { display: block; }
   .hero-split__word--accent {
     font-weight: 500;
