@@ -3,7 +3,7 @@
 import Layout from '../layouts/Layout.astro';
 import ClientLogos from '../components/home/ClientLogos.astro';
 import ProblemHook from '../components/home/ProblemHook.astro';
-import FeatureTour from '../components/home/FeatureTour.astro';
+import SolutionSlide from '../components/home/SolutionSlide.astro';
 import HeroSplit from '../components/home/HeroSplit.astro';
 import BrandCompat from '../components/home/BrandCompat.astro';
 import ProblemLedger from '../components/home/ProblemLedger.astro';
@@ -59,27 +59,30 @@ const schemaData = {
     ]}
   />
 
-  <FeatureTour
-    eyebrow="Producto"
-    title="Tres fricciones que ya no tiene tu venta"
-    features={[
+  <SolutionSlide
+    eyebrow="Así lo resuelve"
+    title="La misma pregunta, respondida tres veces"
+    panels={[
       {
         num: '01',
-        kind: 'queue',
-        heading: 'Corta las filas',
-        text: 'El POS va donde está el cliente: tus vendedores cobran desde cualquier punto de la sala con el mismo terminal de pago, sin una sola caja que decida cuánto vendes.',
+        image: '/images/hook-resuelto.webp',
+        alt: 'Vendedora cobrando rápido con terminal Mobile One, sin fila detrás',
+        heading: 'La fila desaparece',
+        text: 'El vendedor cobra donde está el cliente, con el mismo terminal de pago. Ninguna caja fija decide cuánto vendes.',
       },
       {
         num: '02',
-        kind: 'stock',
-        heading: 'Vende lo que no está en la vitrina',
-        text: 'El sistema consulta el stock de toda la red en tiempo real. Un mueble vacío en tienda ya no significa una venta perdida: se reserva y se despacha desde donde sí hay stock.',
+        image: '/images/solucion-stock.webp',
+        alt: 'Vendedora mostrando en el terminal la confirmación de una reserva de stock en otra tienda',
+        heading: 'El stock deja de estar escondido',
+        text: 'El terminal consulta el inventario de toda la red en tiempo real y reserva el despacho ahí mismo, frente al cliente.',
       },
       {
         num: '03',
-        kind: 'bulk',
-        heading: 'Recibe por bultos, no producto por producto',
-        text: 'Escanea el bulto una vez y el sistema reconcilia todo su contenido contra la orden de compra, sin destapar ni contar artículo por artículo.',
+        image: '/images/solucion-bulto.webp',
+        alt: 'Trabajador escaneando un bulto sellado con el terminal, sin abrirlo',
+        heading: 'Contar a mano ya no es el trabajo',
+        text: 'Se escanea el bulto una vez y el sistema reconcilia todo su contenido contra la orden de compra.',
       },
     ]}
   />

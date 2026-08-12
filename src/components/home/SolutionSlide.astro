@@ -1,0 +1,168 @@
+---
+// src/components/home/SolutionSlide.astro
+// Home — Responde a las 3 preguntas de ProblemHook. Slide horizontal
+// pinneado, limpio y ordenado: logo de marca en el header, foto real grande
+// por panel (mismo estilo cálido que BrandCompat/ProblemHook), sin mockups
+// abstractos. Mecánica de galería horizontal (§16.3), distinta al
+// rail+device que ya no usamos.
+const { eyebrow, title, panels } = Astro.props;
+const list = panels ?? [];
+---
+
+<section class="sslide" data-gsap-section="sslide">
+  <div class="container sslide__head">
+    <img class="sslide__logo" src="/brand/Imagotipo-logo.svg" alt="Mobile One" data-gsap-animate="fade-up" />
+    {eyebrow && <p class="sslide__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
+    <h2 class="sslide__title" data-gsap-animate="fade-up">{title}</h2>
+  </div>
+
+  <div class="sslide__pin sslide__desktop-only" data-sslide-pin>
+    <div class="sslide__track" data-sslide-track>
+      {list.map((p) => (
+        <article class="sslide__panel">
+          <div class="sslide__frame">
+            <img class="sslide__img" src={p.image} alt={p.alt} />
+          </div>
+          <div class="sslide__copy">
+            <span class="sslide__num">{p.num}</span>
+            <h3 class="sslide__heading">{p.heading}</h3>
+            <p class="sslide__text">{p.text}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+
+  <div class="container sslide__mobile-only">
+    {list.map((p) => (
+      <article class="sslide__mcard" data-sslide-mcard>
+        <div class="sslide__frame">
+          <img class="sslide__img" src={p.image} alt={p.alt} />
+        </div>
+        <div class="sslide__copy">
+          <span class="sslide__num">{p.num}</span>
+          <h3 class="sslide__heading">{p.heading}</h3>
+          <p class="sslide__text">{p.text}</p>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ ignoreMobileResize: true });
+
+  function initSlide() {
+    const section = document.querySelector('[data-gsap-section="sslide"]');
+    if (!section) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!reduced) {
+      gsap.from(section.querySelectorAll('[data-gsap-animate="fade-up"]'), {
+        opacity: 0,
+        y: 16,
+        duration: 0.6,
+        stagger: 0.08,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: section, start: 'top 82%' },
+      });
+    }
+
+    const pinEl = section.querySelector('[data-sslide-pin]');
+    const track = section.querySelector('[data-sslide-track]');
+    if (!pinEl || !track) return;
+
+    const mm = gsap.matchMedia();
+
+    mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
+      const getDistance = () => track.scrollWidth - window.innerWidth;
+
+      gsap.to(track, {
+        x: () => -getDistance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: pinEl,
+          start: 'top top',
+          end: () => '+=' + getDistance(),
+          scrub: 1,
+          pin: pinEl,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      gsap.from(track.querySelectorAll('.sslide__panel'), {
+        opacity: 0,
+        y: 20,
+        duration: 0.6,
+        stagger: 0.08,
+        scrollTrigger: { trigger: pinEl, start: 'top 90%' },
+      });
+    });
+
+    mm.add('(max-width: 1023px), (prefers-reduced-motion: reduce)', () => {
+      section.querySelectorAll('[data-sslide-mcard]').forEach((card) => {
+        gsap.from(card, {
+          opacity: 0, y: 24, duration: 0.7, ease: 'power2.out',
+          scrollTrigger: { trigger: card, start: 'top 82%' },
+        });
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initSlide);
+</script>
+
+<style>
+  .sslide { padding-block: var(--space-2xl); background-color: var(--bg-primary); overflow: hidden; }
+
+  .sslide__head { display: grid; gap: var(--space-sm); margin-bottom: var(--space-lg); }
+  .sslide__logo { height: 28px; width: auto; margin-bottom: var(--space-xs); }
+  .sslide__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+  .sslide__title { font-family: var(--font-heading); font-size: clamp(1.9rem, 4.6vw, 3rem); letter-spacing: -0.02em; max-width: 34ch; }
+
+  .sslide__pin { height: 100vh; display: flex; align-items: center; }
+  .sslide__track { display: flex; will-change: transform; }
+
+  .sslide__panel {
+    flex: 0 0 auto;
+    width: min(56vw, 620px);
+    margin-right: var(--space-xl);
+    display: grid;
+    gap: var(--space-md);
+  }
+  .sslide__frame {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+  .sslide__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .sslide__copy { display: grid; gap: var(--space-xs); }
+  .sslide__num {
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    color: var(--accent);
+  }
+  .sslide__heading {
+    font-family: var(--font-heading);
+    font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+  .sslide__text { color: var(--text-secondary); line-height: 1.6; max-width: 40ch; }
+
+  .sslide__mobile-only { display: none; }
+  @media (max-width: 1023px), (prefers-reduced-motion: reduce) {
+    .sslide__desktop-only { display: none; }
+    .sslide__mobile-only { display: grid; gap: var(--space-xl); }
+    .sslide__mcard { display: grid; gap: var(--space-md); }
+    .sslide__mcard .sslide__frame { aspect-ratio: 4 / 3; }
+  }
+</style>
