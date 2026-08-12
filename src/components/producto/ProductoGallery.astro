@@ -1,0 +1,145 @@
+---
+// src/components/producto/ProductoGallery.astro
+// /producto — Galería horizontal pinneada (§16.3 "galería horizontal pinneada
+// que avanza con el scroll" — mecánica distinta al rail+device ya usado en
+// Home/FeatureTour). Cada panel: foto real a sangre + número fantasma gigante.
+const { eyebrow, title, panels } = Astro.props;
+const list = panels ?? [];
+---
+
+<section class="pgal" data-gsap-section="pgal">
+  <div class="container pgal__head">
+    {eyebrow && <p class="pgal__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
+    <h2 class="pgal__title" data-gsap-animate="fade-up">{title}</h2>
+  </div>
+
+  <div class="pgal__pin pgal__desktop-only" data-pgal-pin>
+    <div class="pgal__track" data-pgal-track>
+      {list.map((p) => (
+        <article class="pgal__panel">
+          <img class="pgal__img" src={p.image} alt={p.alt} />
+          <div class="pgal__scrim" aria-hidden="true"></div>
+          <span class="pgal__num" aria-hidden="true">{p.num}</span>
+          <div class="pgal__copy">
+            <h3 class="pgal__heading">{p.heading}</h3>
+            <p class="pgal__text">{p.text}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+
+  <div class="container pgal__mobile-only">
+    {list.map((p) => (
+      <article class="pgal__mcard" data-pgal-mcard>
+        <img class="pgal__mimg" src={p.image} alt={p.alt} />
+        <div class="pgal__scrim" aria-hidden="true"></div>
+        <span class="pgal__num" aria-hidden="true">{p.num}</span>
+        <div class="pgal__copy">
+          <h3 class="pgal__heading">{p.heading}</h3>
+          <p class="pgal__text">{p.text}</p>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ ignoreMobileResize: true });
+
+  function initGallery() {
+    const section = document.querySelector('[data-gsap-section="pgal"]');
+    if (!section) return;
+
+    const pinEl = section.querySelector('[data-pgal-pin]');
+    const track = section.querySelector('[data-pgal-track]');
+    if (!pinEl || !track) return;
+
+    const mm = gsap.matchMedia();
+
+    mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
+      const getDistance = () => track.scrollWidth - window.innerWidth;
+
+      gsap.to(track, {
+        x: () => -getDistance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: pinEl,
+          start: 'top top',
+          end: () => '+=' + getDistance(),
+          scrub: 1,
+          pin: pinEl,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      gsap.from(track.querySelectorAll('.pgal__panel'), {
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.08,
+        scrollTrigger: { trigger: pinEl, start: 'top 90%' },
+      });
+    });
+
+    mm.add('(max-width: 1023px), (prefers-reduced-motion: reduce)', () => {
+      section.querySelectorAll('[data-pgal-mcard]').forEach((card) => {
+        gsap.from(card, {
+          opacity: 0, y: 24, duration: 0.7, ease: 'power2.out',
+          scrollTrigger: { trigger: card, start: 'top 82%' },
+        });
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initGallery);
+</script>
+
+<style>
+  .pgal { padding-block: var(--space-2xl); background-color: var(--bg-primary); color: var(--text-primary); overflow: hidden; }
+  .pgal__head { display: grid; gap: var(--space-sm); margin-bottom: var(--space-lg); }
+  .pgal__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+  .pgal__title { font-family: var(--font-heading); font-weight: 500; font-size: clamp(1.9rem, 4.6vw, 3rem); letter-spacing: -0.02em; max-width: 30ch; }
+
+  .pgal__pin { height: 100vh; display: flex; align-items: center; }
+  .pgal__track { display: flex; height: 78vh; will-change: transform; }
+
+  .pgal__panel {
+    position: relative;
+    flex: 0 0 auto;
+    width: min(72vw, 900px);
+    height: 100%;
+    margin-right: var(--space-lg);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .pgal__img, .pgal__mimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pgal__scrim {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, color-mix(in srgb, var(--bg-primary) 88%, transparent) 0%, transparent 55%);
+  }
+  .pgal__num {
+    position: absolute;
+    top: var(--space-md);
+    left: var(--space-md);
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: clamp(2.6rem, 5vw, 4rem);
+    color: color-mix(in srgb, var(--text-primary) 55%, transparent);
+    text-shadow: 0 2px 12px color-mix(in srgb, var(--bg-primary) 60%, transparent);
+  }
+  .pgal__copy { position: absolute; inset-inline: var(--space-md); bottom: var(--space-md); display: grid; gap: var(--space-xs); }
+  .pgal__heading { font-family: var(--font-heading); font-weight: 500; font-size: clamp(1.3rem, 2.2vw, 1.8rem); letter-spacing: -0.01em; }
+  .pgal__text { color: color-mix(in srgb, var(--text-primary) 85%, transparent); max-width: 34ch; line-height: 1.55; }
+
+  .pgal__mobile-only { display: none; }
+  @media (max-width: 1023px), (prefers-reduced-motion: reduce) {
+    .pgal__desktop-only { display: none; }
+    .pgal__mobile-only { display: grid; gap: var(--space-lg); }
+    .pgal__mcard { position: relative; aspect-ratio: 4 / 5; border-radius: 20px; overflow: hidden; }
+  }
+</style>

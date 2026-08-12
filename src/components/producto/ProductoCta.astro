@@ -1,12 +1,14 @@
 ---
 // src/components/producto/ProductoCta.astro
-// /producto — Cierre oscuro con glow CSS (no shader: el momento WebGL ya se usó
-// en el Hero, §17.1 "un momento por página").
+// /producto — Cierre: el único momento WebGL de la página (§17.1) se reubica
+// aquí (el Hero ya usa foto real). Tipografía gigante, no un CTA chico centrado.
+import ShaderField from '../ShaderField.astro';
+
 const { title, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref } = Astro.props;
 ---
 
 <section class="pcta" data-gsap-section="pcta">
-  <div class="pcta__glow" aria-hidden="true"></div>
+  <ShaderField class="pcta__shader" />
   <div class="container pcta__inner" data-gsap-animate="pcta-content">
     <h2 class="pcta__title">{title}</h2>
     <div class="pcta__cta">
@@ -40,28 +42,23 @@ const { title, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref } = Astro.pr
 <style>
   .pcta {
     position: relative;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
     padding-block: var(--space-2xl);
     background-color: var(--bg-primary);
     color: var(--text-primary);
     overflow: hidden;
     text-align: center;
   }
-  .pcta__glow {
-    position: absolute;
-    inset: -10% 10% auto 10%;
-    height: 60%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 35%, transparent), transparent 70%);
-    filter: blur(50px);
-    z-index: 0;
-  }
-  .pcta__inner { position: relative; z-index: 1; display: grid; gap: var(--space-lg); justify-items: center; }
+  .pcta__inner { position: relative; z-index: 1; display: grid; gap: var(--space-lg); justify-items: center; margin-inline: auto; }
   .pcta__title {
     font-family: var(--font-heading);
     font-weight: 500;
-    font-size: clamp(2rem, 5.5vw, 3.6rem);
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-    max-width: 22ch;
+    font-size: clamp(2.6rem, 8vw, 6rem);
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+    max-width: 20ch;
   }
   .pcta__cta { display: flex; flex-wrap: wrap; gap: var(--space-sm); justify-content: center; }
   .pcta__btn {

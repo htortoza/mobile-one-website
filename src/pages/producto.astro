@@ -1,12 +1,12 @@
 ---
 // src/pages/producto.astro
-// Deep-dive de producto. Dirección de arte "sala de control" (§20.1) escopeada
-// vía .producto-theme: redefine variables del tema SOLO para esta página (Header/
-// Footer quedan con el tema global de Home, sin tocar nada existente).
+// Deep-dive de producto. Dirección de arte oscura escopeada vía .producto-theme
+// (Header/Footer siguen con el tema global de Home, sin tocar nada existente).
 import Layout from '../layouts/Layout.astro';
 import ProductoHero from '../components/producto/ProductoHero.astro';
+import ProductoMarquee from '../components/producto/ProductoMarquee.astro';
 import ProductoMetrics from '../components/producto/ProductoMetrics.astro';
-import ProductoTour from '../components/producto/ProductoTour.astro';
+import ProductoGallery from '../components/producto/ProductoGallery.astro';
 import ProductoCta from '../components/producto/ProductoCta.astro';
 
 const schemaData = {
@@ -22,7 +22,7 @@ const CLASH_SATOSHI_FONTS = 'https://api.fontshare.com/v2/css?f[]=satoshi@400,50
 <Layout
   title="Producto: Mobile One por dentro"
   description="Un recorrido por Mobile One: venta asistida, stock de toda la red, recepción por bultos, promociones automáticas y sincronización con tu ERP, todo desde el mismo terminal de pago."
-  image="/images/og-default.png"
+  image="/images/producto/hero-venta.webp"
   googleFontsUrl={CLASH_SATOSHI_FONTS}
   schemaData={schemaData}
 >
@@ -33,49 +33,57 @@ const CLASH_SATOSHI_FONTS = 'https://api.fontshare.com/v2/css?f[]=satoshi@400,50
       subheadline="No es una demo de laboratorio: es el mismo flujo que corre en el terminal de pago de tu vendedor, con stock de toda la red y promociones aplicándose solas."
       ctaText="Agendar demo"
       ctaHref="/contacto"
-      ctaSecondaryText="Ver compatibilidad"
-      ctaSecondaryHref="/#compatibilidad"
+      keywords={['Sin filas', 'Stock en red', 'Mismo terminal', 'SAP Business One', 'Promociones automáticas']}
+    />
+
+    <ProductoMarquee
+      words={['Venta asistida', 'Stock en red', 'Recepción por bultos', 'CloudPromo', 'SAP Business One', 'Un solo terminal']}
     />
 
     <ProductoMetrics
-      stats={[
-        { value: 3, label: 'Pasarelas de pago certificadas' },
+      big={{ value: 3, label: 'Pasarelas de pago certificadas: Transbank, Getnet y Mercado Pago' }}
+      small={[
         { value: 1, label: 'Código base para toda la red' },
         { text: 'Horas', label: 'Implementación típica, no semanas' },
       ]}
     />
 
-    <ProductoTour
+    <ProductoGallery
       eyebrow="Sala de control"
       title="Un mismo dispositivo, cinco problemas resueltos"
-      modules={[
+      panels={[
         {
           num: '01',
-          kind: 'queue',
+          image: '/images/producto/hero-venta.webp',
+          alt: 'Vendedor cobrando con terminal Mobile One en una tienda de ropa',
           heading: 'Venta asistida en la sala',
           text: 'El vendedor cierra la venta donde está el cliente, con el mismo terminal de pago. Sin caja fija que decida cuánto vendes.',
         },
         {
           num: '02',
-          kind: 'stock',
+          image: '/images/producto/red.webp',
+          alt: 'Red de datos abstracta representando el stock conectado de toda la cadena',
           heading: 'Stock de toda la red',
           text: 'Consulta en tiempo real el inventario de todas las tiendas y el centro de distribución, no solo el de la sala donde está parado.',
         },
         {
           num: '03',
-          kind: 'bulk',
+          image: '/images/producto/bultos.webp',
+          alt: 'Trabajador escaneando un bulto en una bodega',
           heading: 'Recepción por bultos',
           text: 'Escanea el bulto una vez y reconcilia todo su contenido contra la orden de compra, sin destapar artículo por artículo.',
         },
         {
           num: '04',
-          kind: 'promo',
+          image: '/images/producto/promo.webp',
+          alt: 'Etiqueta de descuento en un perchero de ropa',
           heading: 'Promociones automáticas',
           text: 'Reglas por cliente, categoría o ticket total aplicadas por CloudPromo y Prism al momento de cobrar, sin que el vendedor las calcule a mano.',
         },
         {
           num: '05',
-          kind: 'erp',
+          image: '/images/producto/erp.webp',
+          alt: 'Laptop mostrando un dashboard de datos sincronizados',
           heading: 'Tu ERP siempre al día',
           text: 'Ventas, stock y documentos tributarios sincronizados con SAP Business One, sin digitación doble ni cierres manuales.',
         },
