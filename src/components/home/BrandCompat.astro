@@ -46,7 +46,7 @@ const chapters = [
   <div class="compat__pin compat__desktop-only" data-compat-pin>
     <div class="container compat__stage-wrap">
       <div class="compat__stage" data-compat-stage>
-        <div class="compat__half compat__half--image">
+        <div class="compat__half compat__half--image" data-image-half>
           {chapters.map((ch, i) => (
             <img class="compat__bg" data-compat-image={i} style={i > 0 ? 'opacity:0' : ''} src={ch.image} alt={ch.alt} />
           ))}
@@ -104,9 +104,10 @@ const chapters = [
     const pinEl = section.querySelector('[data-compat-pin]');
     const stage = section.querySelector('[data-compat-stage]');
     const colorHalf = section.querySelector('[data-color-half]');
+    const imageHalf = section.querySelector('[data-image-half]');
     const bgImages = section.querySelectorAll('[data-compat-image]');
     const texts = section.querySelectorAll('[data-compat-text]');
-    if (!pinEl || !stage || !colorHalf) return;
+    if (!pinEl || !stage || !colorHalf || !imageHalf) return;
 
     gsap.set(colorHalf, { backgroundColor: TONES[0] });
 
@@ -135,10 +136,12 @@ const chapters = [
         },
       });
 
-      function transition(toIndex) {
+      function transition(toIndex, swap) {
         const seg = gsap.timeline();
         seg.to(texts[toIndex - 1], { opacity: 0, y: -10, duration: 0.18, ease: 'power1.in' }, 0);
         seg.to(bgImages[toIndex - 1], { opacity: 0, duration: 0.3, ease: 'power1.inOut' }, 0.05);
+        seg.to(imageHalf, { xPercent: swap ? 100 : 0, duration: 0.45, ease: 'power2.inOut' }, 0.05);
+        seg.to(colorHalf, { xPercent: swap ? -100 : 0, duration: 0.45, ease: 'power2.inOut' }, 0.05);
         seg.to(colorHalf, { backgroundColor: TONES[toIndex], duration: 0.4, ease: 'power1.inOut' }, 0.1);
         seg.to(bgImages[toIndex], { opacity: 1, duration: 0.32, ease: 'power1.inOut' }, 0.24);
         seg.to(texts[toIndex], { opacity: 1, y: 0, duration: 0.22, ease: 'power2.out' }, 0.36);
@@ -146,9 +149,9 @@ const chapters = [
       }
 
       tl.to({}, { duration: 0.55 }); // hold capítulo 1
-      tl.add(transition(1), '+=0');
+      tl.add(transition(1, true), '+=0'); // imagen -> derecha, color -> izquierda
       tl.to({}, { duration: 0.55 }); // hold capítulo 2
-      tl.add(transition(2), '+=0');
+      tl.add(transition(2, false), '+=0'); // vuelve: imagen -> izquierda, color -> derecha
       tl.to({}, { duration: 0.55 }); // hold capítulo 3
     });
   }
