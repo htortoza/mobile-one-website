@@ -1,20 +1,28 @@
 ---
 // src/components/home/ProblemHook.astro
-// Hook de retención tras el logo strip: full-bleed azul de marca (bg-pattern-m),
-// texto grande centrado que cambia con el scroll (pin + crossfade). Última línea
-// es el gancho hacia la sección de producto (FeatureTour). Formato distinto a
-// BrandCompat/SolutionBento/ProblemLedger: sin imagen, sin grid, un solo mensaje
-// que se transforma.
-const { lines } = Astro.props;
+// Hook de retención tras el logo strip: NO es full-bleed. Card cuadrada chica
+// a la izquierda (foto real, una por línea) que gira/se mueve y cambia de
+// foto en cada transición; el texto grande le pasa por encima al desplazarse
+// hacia la derecha. Formato distinto a BrandCompat/SolutionBento/ProblemLedger.
+const { lines, images } = Astro.props;
 const list = lines ?? [];
+const imgs = images ?? [];
 ---
 
-<section class="hook bg-pattern-m" data-gsap-section="hook">
+<section class="hook" data-gsap-section="hook">
   <div class="hook__pin" data-hook-pin>
     <div class="container hook__stage">
-      {list.map((line, i) => (
-        <p class={`hook__line ${i === 0 ? 'is-first' : ''}`} data-hook-line={i}>{line}</p>
-      ))}
+      <div class="hook__card" data-hook-card>
+        {imgs.map((src, i) => (
+          <img class="hook__cardimg" src={src} alt="" style={i > 0 ? 'opacity:0' : ''} data-hook-cardimg={i} />
+        ))}
+      </div>
+
+      <div class="hook__text">
+        {list.map((line, i) => (
+          <p class={`hook__line ${i === 0 ? 'is-first' : ''}`} data-hook-line={i}>{line}</p>
+        ))}
+      </div>
     </div>
   </div>
 </section>
@@ -26,13 +34,19 @@ const list = lines ?? [];
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.config({ ignoreMobileResize: true });
 
+  const ROTATIONS = [-4, 3, -3, 5, -2];
+
   function initHook() {
     const section = document.querySelector('[data-gsap-section="hook"]');
     if (!section) return;
 
     const pinEl = section.querySelector('[data-hook-pin]');
     const lines = section.querySelectorAll('[data-hook-line]');
+    const card = section.querySelector('[data-hook-card]');
+    const cardImgs = section.querySelectorAll('[data-hook-cardimg]');
     if (!pinEl || !lines.length) return;
+
+    if (card) gsap.set(card, { rotate: ROTATIONS[0] });
 
     const mm = gsap.matchMedia();
 
@@ -54,8 +68,23 @@ const list = lines ?? [];
         tl.to({}, { duration: 0.5 }); // hold la línea anterior
         tl.to(lines[i - 1], { opacity: 0, y: -16, duration: 0.35, ease: 'power1.in' });
         tl.to(line, { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' }, '<');
+        if (cardImgs[i - 1]) tl.to(cardImgs[i - 1], { opacity: 0, duration: 0.35 }, '<');
+        if (cardImgs[i]) tl.to(cardImgs[i], { opacity: 1, duration: 0.35 }, '<');
+        if (card) {
+          tl.to(card, {
+            rotate: ROTATIONS[i % ROTATIONS.length],
+            x: (i % 2 === 0) ? 10 : -10,
+            duration: 0.6,
+            ease: 'power2.inOut',
+          }, '<');
+        }
       });
       tl.to({}, { duration: 0.6 }); // hold la última línea
+    });
+
+    mm.add('(min-width: 768px)', () => {
+      if (!card) return;
+      gsap.to(card, { y: -14, duration: 3.2, ease: 'sine.inOut', repeat: -1, yoyo: true });
     });
 
     mm.add('(max-width: 767px), (prefers-reduced-motion: reduce)', () => {
@@ -75,7 +104,7 @@ const list = lines ?? [];
 </script>
 
 <style>
-  .hook { color: var(--on-accent); }
+  .hook { background-color: var(--bg-secondary); }
 
   .hook__pin {
     min-height: 100vh;
@@ -85,32 +114,61 @@ const list = lines ?? [];
   }
   .hook__stage {
     position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .hook__card {
+    position: relative;
+    flex-shrink: 0;
+    width: clamp(140px, 22vw, 260px);
+    aspect-ratio: 1;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    background-color: var(--bg-primary);
+  }
+  .hook__cardimg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s;
+  }
+
+  .hook__text {
+    position: relative;
     display: grid;
-    place-items: center;
-    min-height: 40vh;
+    margin-left: clamp(-70px, -8vw, -30px);
+    padding-left: var(--space-lg);
+    z-index: 1;
+    min-height: 12rem;
   }
   .hook__line {
     grid-area: 1 / 1;
-    text-align: center;
-    max-width: 22ch;
-    margin-inline: auto;
+    max-width: 20ch;
     font-family: var(--font-heading);
-    font-size: clamp(1.9rem, 5vw, 3.4rem);
-    line-height: 1.18;
+    font-size: clamp(2.2rem, 6vw, 4.2rem);
+    line-height: 1.14;
     letter-spacing: -0.02em;
+    color: var(--text-primary);
     opacity: 0;
   }
   .hook__line.is-first { opacity: 1; }
 
   @media (max-width: 767px) {
     .hook__pin { min-height: auto; padding-block: var(--space-2xl); }
-    .hook__stage {
+    .hook__stage { flex-direction: column; align-items: flex-start; gap: var(--space-lg); }
+    .hook__card { width: 120px; }
+    .hook__text {
+      margin-left: 0;
+      padding-left: 0;
       display: grid;
-      grid-template-columns: 1fr;
       gap: var(--space-lg);
       min-height: 0;
     }
-    .hook__line { grid-area: auto; opacity: 1; }
+    .hook__line { grid-area: auto; opacity: 1; max-width: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
