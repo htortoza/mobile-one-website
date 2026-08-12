@@ -2,6 +2,8 @@
 // src/pages/index.astro — Home. Copy fuente: doc maestro "Mobile One 2.0 — Sitio Web de Ventas" §4.
 import Layout from '../layouts/Layout.astro';
 import ClientLogos from '../components/home/ClientLogos.astro';
+import ProblemHook from '../components/home/ProblemHook.astro';
+import FeatureTour from '../components/home/FeatureTour.astro';
 import HeroSplit from '../components/home/HeroSplit.astro';
 import BrandCompat from '../components/home/BrandCompat.astro';
 import ProblemLedger from '../components/home/ProblemLedger.astro';
@@ -42,6 +44,39 @@ const schemaData = {
     logos={['Nordén', 'Cassia', 'Verax Retail', 'Lumen', 'Ostra', 'Platto Group']}
   />
 
+  <ProblemHook
+    lines={[
+      'Cada cliente en la fila es una venta que se enfría.',
+      'Cada producto que no ves en pantalla es una venta que se pierde.',
+      'Cada bulto sin escanear es tiempo que no vuelve.',
+      'Mobile One elimina las tres.',
+    ]}
+  />
+
+  <FeatureTour
+    eyebrow="Producto"
+    title="Tres fricciones que ya no tiene tu venta"
+    features={[
+      {
+        num: '01',
+        kind: 'queue',
+        heading: 'Corta las filas',
+        text: 'El POS va donde está el cliente: tus vendedores cobran desde cualquier punto de la sala con el mismo terminal de pago, sin una sola caja que decida cuánto vendes.',
+      },
+      {
+        num: '02',
+        kind: 'stock',
+        heading: 'Vende lo que no está en la vitrina',
+        text: 'El sistema consulta el stock de toda la red en tiempo real. Un mueble vacío en tienda ya no significa una venta perdida: se reserva y se despacha desde donde sí hay stock.',
+      },
+      {
+        num: '03',
+        kind: 'bulk',
+        heading: 'Recibe por bultos, no producto por producto',
+        text: 'Escanea el bulto una vez y el sistema reconcilia todo su contenido contra la orden de compra, sin destapar ni contar artículo por artículo.',
+      },
+    ]}
+  />
 
   <BrandCompat
     eyebrow="Compatibilidad total"

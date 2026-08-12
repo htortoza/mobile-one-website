@@ -1,0 +1,119 @@
+---
+// src/components/home/ProblemHook.astro
+// Hook de retención tras el logo strip: full-bleed azul de marca (bg-pattern-m),
+// texto grande centrado que cambia con el scroll (pin + crossfade). Última línea
+// es el gancho hacia la sección de producto (FeatureTour). Formato distinto a
+// BrandCompat/SolutionBento/ProblemLedger: sin imagen, sin grid, un solo mensaje
+// que se transforma.
+const { lines } = Astro.props;
+const list = lines ?? [];
+---
+
+<section class="hook bg-pattern-m" data-gsap-section="hook">
+  <div class="hook__pin" data-hook-pin>
+    <div class="container hook__stage">
+      {list.map((line, i) => (
+        <p class={`hook__line ${i === 0 ? 'is-first' : ''}`} data-hook-line={i}>{line}</p>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ ignoreMobileResize: true });
+
+  function initHook() {
+    const section = document.querySelector('[data-gsap-section="hook"]');
+    if (!section) return;
+
+    const pinEl = section.querySelector('[data-hook-pin]');
+    const lines = section.querySelectorAll('[data-hook-line]');
+    if (!pinEl || !lines.length) return;
+
+    const mm = gsap.matchMedia();
+
+    mm.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: pinEl,
+          start: 'top top',
+          end: '+=' + (lines.length * 90) + '%',
+          scrub: 1,
+          pin: pinEl,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      lines.forEach((line, i) => {
+        if (i === 0) return;
+        tl.to({}, { duration: 0.5 }); // hold la línea anterior
+        tl.to(lines[i - 1], { opacity: 0, y: -16, duration: 0.35, ease: 'power1.in' });
+        tl.to(line, { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' }, '<');
+      });
+      tl.to({}, { duration: 0.6 }); // hold la última línea
+    });
+
+    mm.add('(max-width: 767px), (prefers-reduced-motion: reduce)', () => {
+      gsap.utils.toArray(lines).forEach((line) => {
+        gsap.from(line, {
+          opacity: 0,
+          y: 16,
+          duration: 0.6,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: line, start: 'top 85%' },
+        });
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initHook);
+</script>
+
+<style>
+  .hook { color: var(--on-accent); }
+
+  .hook__pin {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hook__stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 40vh;
+  }
+  .hook__line {
+    grid-area: 1 / 1;
+    text-align: center;
+    max-width: 22ch;
+    margin-inline: auto;
+    font-family: var(--font-heading);
+    font-size: clamp(1.9rem, 5vw, 3.4rem);
+    line-height: 1.18;
+    letter-spacing: -0.02em;
+    opacity: 0;
+  }
+  .hook__line.is-first { opacity: 1; }
+
+  @media (max-width: 767px) {
+    .hook__pin { min-height: auto; padding-block: var(--space-2xl); }
+    .hook__stage {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+      min-height: 0;
+    }
+    .hook__line { grid-area: auto; opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hook__line { opacity: 1; }
+  }
+</style>
