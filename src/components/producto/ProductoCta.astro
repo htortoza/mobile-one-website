@@ -1,0 +1,79 @@
+---
+// src/components/producto/ProductoCta.astro
+// /producto — Cierre oscuro con glow CSS (no shader: el momento WebGL ya se usó
+// en el Hero, §17.1 "un momento por página").
+const { title, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref } = Astro.props;
+---
+
+<section class="pcta" data-gsap-section="pcta">
+  <div class="pcta__glow" aria-hidden="true"></div>
+  <div class="container pcta__inner" data-gsap-animate="pcta-content">
+    <h2 class="pcta__title">{title}</h2>
+    <div class="pcta__cta">
+      <a href={ctaHref} class="pcta__btn pcta__btn--primary">{ctaText}</a>
+      <a href={ctaSecondaryHref} class="pcta__btn pcta__btn--ghost">{ctaSecondaryText}</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initCta() {
+    const section = document.querySelector('[data-gsap-section="pcta"]');
+    const content = section && section.querySelector('[data-gsap-animate="pcta-content"]');
+    if (!section || !content) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    gsap.from(content, {
+      y: 24, opacity: 0, duration: 0.9, ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 80%' },
+    });
+  }
+
+  document.addEventListener('astro:page-load', initCta);
+</script>
+
+<style>
+  .pcta {
+    position: relative;
+    padding-block: var(--space-2xl);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+    text-align: center;
+  }
+  .pcta__glow {
+    position: absolute;
+    inset: -10% 10% auto 10%;
+    height: 60%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 35%, transparent), transparent 70%);
+    filter: blur(50px);
+    z-index: 0;
+  }
+  .pcta__inner { position: relative; z-index: 1; display: grid; gap: var(--space-lg); justify-items: center; }
+  .pcta__title {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: clamp(2rem, 5.5vw, 3.6rem);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    max-width: 22ch;
+  }
+  .pcta__cta { display: flex; flex-wrap: wrap; gap: var(--space-sm); justify-content: center; }
+  .pcta__btn {
+    display: inline-flex; align-items: center;
+    font-family: var(--font-body); font-weight: 500; font-size: var(--text-base);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: transform var(--transition-fast), background-color var(--transition-fast);
+  }
+  .pcta__btn--primary { background-color: var(--accent); color: var(--on-accent); }
+  .pcta__btn--primary:hover { transform: translateY(-2px); background-color: var(--accent-hover); }
+  .pcta__btn--ghost { color: var(--text-primary); border: 1px solid color-mix(in srgb, var(--text-primary) 25%, transparent); }
+  .pcta__btn--ghost:hover { background-color: color-mix(in srgb, var(--text-primary) 8%, transparent); }
+</style>

@@ -1,0 +1,221 @@
+---
+// src/components/producto/ProductoHero.astro
+// /producto — Hero "sala de control": ShaderField (OGL, §17) + device grande con
+// glow. Dirección de arte oscura, escopeada vía .producto-theme (ver producto.astro).
+// Un (1) momento WebGL fuerte de la página, per §17.1.
+import ShaderField from '../ShaderField.astro';
+
+const { eyebrow, headline, subheadline, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref } = Astro.props;
+---
+
+<section class="phero" data-gsap-section="phero">
+  <ShaderField class="phero__shader" />
+
+  <div class="container phero__inner">
+    <div class="phero__copy">
+      {eyebrow && (
+        <p class="phero__eyebrow" data-gsap-animate="fade-up">
+          <span class="phero__dot" aria-hidden="true"></span>{eyebrow}
+        </p>
+      )}
+      <h1 class="phero__headline" data-gsap-animate="fade-up">{headline}</h1>
+      <p class="phero__sub" data-gsap-animate="fade-up">{subheadline}</p>
+      <div class="phero__cta" data-gsap-animate="fade-up">
+        <a href={ctaHref} class="phero__btn phero__btn--primary">{ctaText}</a>
+        <a href={ctaSecondaryHref} class="phero__btn phero__btn--ghost">{ctaSecondaryText}</a>
+      </div>
+    </div>
+
+    <div class="phero__device" data-phero-device>
+      <div class="pdevice">
+        <div class="pdevice__notch"></div>
+        <div class="pdevice__screen">
+          <div class="pdevice__row pdevice__row--head">
+            <span class="pdevice__live"><span class="pdevice__live-dot"></span>En vivo</span>
+            <span class="pdevice__id">Terminal 04</span>
+          </div>
+          <div class="pdevice__row">
+            <span>Zapatilla Urbana 42</span><strong>$42.990</strong>
+          </div>
+          <div class="pdevice__row">
+            <span>Descuento CloudPromo</span><strong class="pdevice__ok">-15%</strong>
+          </div>
+          <div class="pdevice__row">
+            <span>Stock en red</span><strong class="pdevice__ok">Bodega Norte · 14</strong>
+          </div>
+          <div class="pdevice__total">
+            <span>Total</span><strong>$36.541</strong>
+          </div>
+          <span class="pdevice__badge">Cobrando con Transbank</span>
+        </div>
+      </div>
+      <div class="phero__glow" aria-hidden="true"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initHero() {
+    const section = document.querySelector('[data-gsap-section="phero"]');
+    if (!section) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const items = section.querySelectorAll('[data-gsap-animate="fade-up"]');
+    const device = section.querySelector('[data-phero-device]');
+
+    if (!reduced) {
+      const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+      tl.from(items, { y: 22, opacity: 0, stagger: 0.08, duration: 0.8 });
+      if (device) tl.from(device, { opacity: 0, scale: 0.94, y: 30, duration: 1 }, '-=0.5');
+
+      const mm = gsap.matchMedia();
+      mm.add('(min-width: 900px)', () => {
+        if (device) {
+          gsap.to(device, {
+            y: -40,
+            ease: 'none',
+            scrollTrigger: { trigger: section, start: 'top top', end: 'bottom top', scrub: true },
+          });
+        }
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', initHero);
+</script>
+
+<style>
+  .phero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding-block: var(--space-xl);
+    color: var(--text-primary);
+  }
+  .phero :global(.phero__shader) { z-index: 0; }
+
+  .phero__inner {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: var(--space-xl);
+    align-items: center;
+  }
+
+  .phero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--text-sm);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .phero__dot {
+    width: 7px; height: 7px;
+    border-radius: var(--radius-full);
+    background-color: var(--accent-hover);
+    box-shadow: 0 0 10px 2px color-mix(in srgb, var(--accent-hover) 70%, transparent);
+    animation: phero-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes phero-pulse { 50% { opacity: 0.35; } }
+
+  .phero__headline {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: clamp(2.4rem, 6.4vw, 4.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 16ch;
+    margin-block: var(--space-sm);
+  }
+  .phero__sub {
+    font-size: var(--text-lg);
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 46ch;
+  }
+  .phero__cta { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-block-start: var(--space-lg); }
+
+  .phero__btn {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--text-base);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: transform var(--transition-fast), background-color var(--transition-fast);
+  }
+  .phero__btn--primary { background-color: var(--accent); color: var(--on-accent); }
+  .phero__btn--primary:hover { transform: translateY(-2px); background-color: var(--accent-hover); }
+  .phero__btn--ghost { color: var(--text-primary); border: 1px solid color-mix(in srgb, var(--text-primary) 25%, transparent); }
+  .phero__btn--ghost:hover { background-color: color-mix(in srgb, var(--text-primary) 8%, transparent); }
+
+  .phero__device { position: relative; justify-self: center; }
+  .phero__glow {
+    position: absolute;
+    inset: -20%;
+    z-index: -1;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 45%, transparent), transparent 70%);
+    filter: blur(30px);
+  }
+
+  .pdevice {
+    position: relative;
+    width: min(360px, 82vw);
+    aspect-ratio: 3 / 4;
+    background-color: color-mix(in srgb, var(--bg-secondary) 92%, black 8%);
+    border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+    border-radius: 28px;
+    padding: 14px;
+    box-shadow: var(--shadow-lg);
+  }
+  .pdevice__notch { width: 60px; height: 6px; border-radius: var(--radius-full); background-color: color-mix(in srgb, var(--text-primary) 20%, transparent); margin-inline: auto; margin-block-end: 10px; }
+  .pdevice__screen {
+    height: calc(100% - 20px);
+    background-color: var(--bg-primary);
+    border-radius: 20px;
+    padding: var(--space-md);
+    display: grid;
+    align-content: start;
+    gap: var(--space-xs);
+  }
+  .pdevice__row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    padding-block: 6px;
+    border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  }
+  .pdevice__row--head { border-bottom: none; align-items: center; }
+  .pdevice__live { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-xs); color: var(--accent-hover); text-transform: uppercase; letter-spacing: 0.06em; }
+  .pdevice__live-dot { width: 6px; height: 6px; border-radius: var(--radius-full); background-color: var(--accent-hover); }
+  .pdevice__id { font-size: var(--text-xs); color: var(--text-secondary); }
+  .pdevice__ok { color: var(--accent-hover); font-weight: 500; }
+  .pdevice__total { display: flex; justify-content: space-between; margin-block-start: var(--space-sm); font-family: var(--font-heading); font-size: var(--text-xl); color: var(--text-primary); }
+  .pdevice__badge {
+    justify-self: start;
+    margin-block-start: var(--space-sm);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--accent-hover);
+    background-color: color-mix(in srgb, var(--accent) 16%, transparent);
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+  }
+
+  @media (min-width: 900px) {
+    .phero__inner { grid-template-columns: 1.1fr 0.9fr; }
+  }
+</style>

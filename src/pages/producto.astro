@@ -1,0 +1,111 @@
+---
+// src/pages/producto.astro
+// Deep-dive de producto. Dirección de arte "sala de control" (§20.1) escopeada
+// vía .producto-theme: redefine variables del tema SOLO para esta página (Header/
+// Footer quedan con el tema global de Home, sin tocar nada existente).
+import Layout from '../layouts/Layout.astro';
+import ProductoHero from '../components/producto/ProductoHero.astro';
+import ProductoMetrics from '../components/producto/ProductoMetrics.astro';
+import ProductoTour from '../components/producto/ProductoTour.astro';
+import ProductoCta from '../components/producto/ProductoCta.astro';
+
+const schemaData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Mobile One — Producto',
+  url: 'https://mobileone.dotsolutions.io/producto',
+};
+
+const CLASH_SATOSHI_FONTS = 'https://api.fontshare.com/v2/css?f[]=satoshi@400,500&f[]=clash-display@500,600&display=swap';
+---
+
+<Layout
+  title="Producto: Mobile One por dentro"
+  description="Un recorrido por Mobile One: venta asistida, stock de toda la red, recepción por bultos, promociones automáticas y sincronización con tu ERP, todo desde el mismo terminal de pago."
+  image="/images/og-default.png"
+  googleFontsUrl={CLASH_SATOSHI_FONTS}
+  schemaData={schemaData}
+>
+  <div class="producto-theme">
+    <ProductoHero
+      eyebrow="Producto"
+      headline="Así se ve Mobile One cobrando de verdad"
+      subheadline="No es una demo de laboratorio: es el mismo flujo que corre en el terminal de pago de tu vendedor, con stock de toda la red y promociones aplicándose solas."
+      ctaText="Agendar demo"
+      ctaHref="/contacto"
+      ctaSecondaryText="Ver compatibilidad"
+      ctaSecondaryHref="/#compatibilidad"
+    />
+
+    <ProductoMetrics
+      stats={[
+        { value: 3, label: 'Pasarelas de pago certificadas' },
+        { value: 1, label: 'Código base para toda la red' },
+        { text: 'Horas', label: 'Implementación típica, no semanas' },
+      ]}
+    />
+
+    <ProductoTour
+      eyebrow="Sala de control"
+      title="Un mismo dispositivo, cinco problemas resueltos"
+      modules={[
+        {
+          num: '01',
+          kind: 'queue',
+          heading: 'Venta asistida en la sala',
+          text: 'El vendedor cierra la venta donde está el cliente, con el mismo terminal de pago. Sin caja fija que decida cuánto vendes.',
+        },
+        {
+          num: '02',
+          kind: 'stock',
+          heading: 'Stock de toda la red',
+          text: 'Consulta en tiempo real el inventario de todas las tiendas y el centro de distribución, no solo el de la sala donde está parado.',
+        },
+        {
+          num: '03',
+          kind: 'bulk',
+          heading: 'Recepción por bultos',
+          text: 'Escanea el bulto una vez y reconcilia todo su contenido contra la orden de compra, sin destapar artículo por artículo.',
+        },
+        {
+          num: '04',
+          kind: 'promo',
+          heading: 'Promociones automáticas',
+          text: 'Reglas por cliente, categoría o ticket total aplicadas por CloudPromo y Prism al momento de cobrar, sin que el vendedor las calcule a mano.',
+        },
+        {
+          num: '05',
+          kind: 'erp',
+          heading: 'Tu ERP siempre al día',
+          text: 'Ventas, stock y documentos tributarios sincronizados con SAP Business One, sin digitación doble ni cierres manuales.',
+        },
+      ]}
+    />
+
+    <ProductoCta
+      title="¿Vemos cómo se ve esto con tu catálogo?"
+      ctaText="Agendar demo"
+      ctaHref="/contacto"
+      ctaSecondaryText="Volver al inicio"
+      ctaSecondaryHref="/"
+    />
+  </div>
+</Layout>
+
+<style>
+  /* Tema oscuro "sala de control" — escopeado, no toca src/styles/theme.css.
+     Header/Footer viven fuera de este wrapper y siguen con el tema claro global. */
+  .producto-theme {
+    --bg-primary: #05070d;
+    --bg-secondary: #0d1424;
+    --text-primary: #eef1ff;
+    --text-secondary: #8b93b0;
+    --accent: #2f5bff;
+    --accent-hover: #6f8fff;
+    --border: #1c2438;
+    --on-accent: #ffffff;
+    --font-heading: 'Clash Display', var(--font-body);
+
+    background-color: var(--bg-primary);
+  }
+</style>

@@ -94,7 +94,7 @@ const { class: className = '' } = Astro.props;
     } catch (e) { return; } // sin WebGL → fallback CSS
     const gl = renderer.gl;
 
-    const css = getComputedStyle(document.documentElement);
+    const css = getComputedStyle(host);
     const program = new Program(gl, {
       vertex: VERT, fragment: FRAG,
       uniforms: {

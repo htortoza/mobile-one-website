@@ -1,0 +1,93 @@
+---
+// src/components/producto/ProductoMetrics.astro
+// /producto — Franja de cifras protagonistas (reales, ya validadas en el resto
+// del sitio: sin datos inventados). Count-up al entrar en viewport.
+const { stats } = Astro.props;
+const list = stats ?? [];
+---
+
+<section class="pmetrics" data-gsap-section="pmetrics">
+  <div class="container pmetrics__row">
+    {list.map((s) => (
+      <div class="pmetrics__item">
+        {typeof s.value === 'number' ? (
+          <p class="pmetrics__num" data-pmetric-num data-target={s.value}>{s.prefix ?? ''}0{s.suffix ?? ''}</p>
+        ) : (
+          <p class="pmetrics__num">{s.text}</p>
+        )}
+        <p class="pmetrics__label">{s.label}</p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initMetrics() {
+    const section = document.querySelector('[data-gsap-section="pmetrics"]');
+    if (!section) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    section.querySelectorAll('[data-pmetric-num]').forEach((el) => {
+      const target = Number(el.dataset.target);
+      const prefix = el.textContent.match(/^\D*/)?.[0] ?? '';
+      const suffix = el.textContent.match(/\D*$/)?.[0] ?? '';
+      if (!Number.isFinite(target) || reduced) {
+        el.textContent = `${prefix}${target}${suffix}`;
+        return;
+      }
+      const obj = { v: 0 };
+      gsap.to(obj, {
+        v: target,
+        duration: 1.4,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+        onUpdate: () => { el.textContent = `${prefix}${Math.round(obj.v)}${suffix}`; },
+      });
+    });
+
+    if (!reduced) {
+      gsap.from(section.querySelectorAll('.pmetrics__item'), {
+        opacity: 0,
+        y: 16,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: section, start: 'top 85%' },
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', initMetrics);
+</script>
+
+<style>
+  .pmetrics {
+    padding-block: var(--space-xl);
+    background-color: var(--bg-secondary);
+    border-block: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+    color: var(--text-primary);
+  }
+  .pmetrics__row {
+    display: grid;
+    gap: var(--space-lg);
+    text-align: center;
+  }
+  .pmetrics__num {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: clamp(2.6rem, 7vw, 4.5rem);
+    color: var(--accent-hover);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .pmetrics__label { color: var(--text-secondary); margin-block-start: var(--space-xs); }
+
+  @media (min-width: 768px) {
+    .pmetrics__row { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
