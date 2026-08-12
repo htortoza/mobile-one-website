@@ -2,6 +2,7 @@
 // src/pages/index.astro — Home. Copy fuente: doc maestro "Mobile One 2.0 — Sitio Web de Ventas" §4.
 import Layout from '../layouts/Layout.astro';
 import TrustBar from '../components/home/TrustBar.astro';
+import ClientLogos from '../components/home/ClientLogos.astro';
 import HeroSplit from '../components/home/HeroSplit.astro';
 import BrandCompat from '../components/home/BrandCompat.astro';
 import ProblemLedger from '../components/home/ProblemLedger.astro';
@@ -35,6 +36,11 @@ const schemaData = {
     ctaHref="/contacto"
     ctaSecondaryText="Ver cómo funciona"
     ctaSecondaryHref="#compatibilidad"
+  />
+
+  <ClientLogos
+    claim="Compatible con el stack de pago y ERP que ya usan las cadenas retail más exigentes."
+    logos={['Nordén', 'Cassia', 'Verax Retail', 'Lumen', 'Ostra', 'Platto Group']}
   />
 
   <TrustBar

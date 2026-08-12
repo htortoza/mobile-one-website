@@ -1,0 +1,94 @@
+---
+// src/components/home/ClientLogos.astro
+// Fila de logos + claim de capacidad (no de adopción). PLACEHOLDER: logos ficticios
+// (wordmarks genéricos, no marcas reales) — reemplazar por logos reales de clientes
+// con autorización antes de publicar. No usar para prometer clientes que no existen.
+const { claim, logos } = Astro.props;
+const list = logos ?? [];
+---
+
+<section class="client-logos" data-gsap-section="client-logos">
+  <div class="container client-logos__inner">
+    <p class="client-logos__claim" data-gsap-animate="fade-up">{claim}</p>
+
+    <div class="client-logos__row" data-gsap-animate="fade-up-delay">
+      {list.map((name) => (
+        <span class="client-logos__logo">{name}</span>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initClientLogos() {
+    const section = document.querySelector('[data-gsap-section="client-logos"]');
+    if (!section) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const claim = section.querySelector('[data-gsap-animate="fade-up"]');
+    const row = section.querySelector('[data-gsap-animate="fade-up-delay"]');
+
+    gsap.from([claim, row], {
+      opacity: 0,
+      y: 16,
+      duration: 0.7,
+      stagger: 0.1,
+      ease: 'power2.out',
+      scrollTrigger: { trigger: section, start: 'top 85%' },
+    });
+  }
+
+  document.addEventListener('astro:page-load', initClientLogos);
+</script>
+
+<style>
+  .client-logos {
+    padding-block: var(--space-lg);
+    background-color: var(--bg-primary);
+  }
+  .client-logos__inner {
+    display: grid;
+    gap: var(--space-md);
+    justify-items: center;
+    text-align: center;
+  }
+  .client-logos__claim {
+    font-size: var(--text-sm);
+    letter-spacing: 0.03em;
+    color: var(--text-secondary);
+    max-width: 46ch;
+  }
+  .client-logos__row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+  .client-logos__logo {
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--text-secondary);
+    opacity: 0.55;
+    filter: grayscale(1);
+    transition: opacity var(--transition-fast), filter var(--transition-fast);
+    white-space: nowrap;
+  }
+  .client-logos__logo:hover {
+    opacity: 1;
+    filter: grayscale(0);
+    color: var(--accent);
+  }
+
+  @media (max-width: 599px) {
+    .client-logos__row { gap: var(--space-md); }
+    .client-logos__logo { font-size: var(--text-base); }
+  }
+</style>
