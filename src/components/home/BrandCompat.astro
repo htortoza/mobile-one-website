@@ -1,9 +1,9 @@
 ---
 // src/components/home/BrandCompat.astro
 // Home §4.3 (rediseñado) — Compatibilidad de hardware. Reemplaza el scroll-horizontal de 9 escenas.
-// Entrada: la stage "cae" y se centra al entrar en viewport (marca la división con la sección anterior).
-// Luego, pin+scrub corto: 3 fotos DISTINTAS (no la misma con filtro) + bloque de color que
-// invierten de lado y cambian de tono — Transbank (azul) → Getnet (rojo) → Mercado Pago (amarillo).
+// Layout fijo: foto a la izquierda, bloque de color+texto a la derecha (no invierten de lado).
+// El POS aislado (grande, sin manos/tarjetas/decoración) vive SIEMPRE centrado en la costura —
+// es lo único que se desliza y cambia: cae desde el Hero al entrar, y su color muta por capítulo.
 const { title, eyebrow } = Astro.props;
 
 const chapters = [
@@ -12,7 +12,8 @@ const chapters = [
     kicker: 'Disponible en',
     claim: 'El terminal que ya tienes, listo para vender más.',
     image: '/images/retail-payment-scene-transbank.webp',
-    alt: 'Vendedora de retail con polera azul cobrando a una clienta con el terminal Mobile One',
+    alt: 'Vendedora de retail cobrando a una clienta en un local de ropa',
+    device: '/images/device-transbank.webp',
     tone: 'var(--tone-transbank)',
     onDark: true,
   },
@@ -21,7 +22,8 @@ const chapters = [
     kicker: 'También en',
     claim: 'Sin cambiar de hardware, sin curva de aprendizaje.',
     image: '/images/retail-payment-scene-getnet.webp',
-    alt: 'Vendedora de retail con polera roja cobrando a una clienta con el terminal Mobile One',
+    alt: 'Vendedora de retail cobrando a una clienta en una tienda de barrio',
+    device: '/images/device-getnet.webp',
     tone: 'var(--tone-getnet)',
     onDark: false,
   },
@@ -30,7 +32,8 @@ const chapters = [
     kicker: 'Y en',
     claim: 'Un solo Mobile One que habla el idioma de cada terminal.',
     image: '/images/retail-payment-scene-mercadopago.webp',
-    alt: 'Vendedora de retail con polera amarilla cobrando a un cliente con el terminal Mobile One',
+    alt: 'Vendedora de retail cobrando a un cliente en una tienda de ropa',
+    device: '/images/device-mercadopago.webp',
     tone: 'var(--tone-mercadopago)',
     onDark: false,
   },
@@ -45,27 +48,14 @@ const chapters = [
 
   <div class="compat__pin compat__desktop-only" data-compat-pin>
     <div class="container compat__stage-wrap">
-      <img
-        src="/images/hero-mobile-pos-v2-final.webp"
-        alt=""
-        aria-hidden="true"
-        class="compat__handoff"
-        data-compat-handoff
-      />
       <div class="compat__stage" data-compat-stage>
-        <div class="compat__slot compat__slot--image" data-slot-image>
+        <div class="compat__half compat__half--image">
           {chapters.map((ch, i) => (
-            <img
-              class="compat__image"
-              data-compat-image={i}
-              style={i > 0 ? 'opacity:0' : ''}
-              src={ch.image}
-              alt={ch.alt}
-            />
+            <img class="compat__bg" data-compat-image={i} style={i > 0 ? 'opacity:0' : ''} src={ch.image} alt={ch.alt} />
           ))}
         </div>
 
-        <div class="compat__slot compat__slot--color" data-slot-color>
+        <div class="compat__half compat__half--color" data-color-half>
           {chapters.map((ch, i) => (
             <div
               class={`compat__text ${ch.onDark ? 'compat__text--on-dark' : ''}`}
@@ -79,13 +69,22 @@ const chapters = [
           ))}
         </div>
       </div>
+
+      <div class="compat__device" data-compat-device>
+        {chapters.map((ch, i) => (
+          <img class="compat__device-img" data-compat-device-img={i} style={i > 0 ? 'opacity:0' : ''} src={ch.device} alt="" aria-hidden="true" />
+        ))}
+      </div>
     </div>
   </div>
 
   <div class="container compat__mobile-only">
     {chapters.map((ch) => (
       <div class="compat__card">
-        <img class="compat__card-image" src={ch.image} alt={ch.alt} />
+        <div class="compat__card-visual">
+          <img class="compat__card-image" src={ch.image} alt={ch.alt} />
+          <img class="compat__card-device" src={ch.device} alt="" aria-hidden="true" />
+        </div>
         <div class={`compat__text ${ch.onDark ? 'compat__text--on-dark' : ''}`} style={`background-color:${ch.tone}`}>
           <p class="compat__kicker">{ch.kicker}</p>
           <h3 class="compat__brand">{ch.brand}</h3>
@@ -116,41 +115,43 @@ const chapters = [
 
     const pinEl = section.querySelector('[data-compat-pin]');
     const stage = section.querySelector('[data-compat-stage]');
-    const handoff = section.querySelector('[data-compat-handoff]');
-    const colorSlot = section.querySelector('[data-slot-color]');
-    const imageSlot = section.querySelector('[data-slot-image]');
-    const images = section.querySelectorAll('[data-compat-image]');
+    const device = section.querySelector('[data-compat-device]');
+    const colorHalf = section.querySelector('[data-color-half]');
+    const bgImages = section.querySelectorAll('[data-compat-image]');
+    const deviceImages = section.querySelectorAll('[data-compat-device-img]');
     const texts = section.querySelectorAll('[data-compat-text]');
-    if (!pinEl || !stage || !handoff || !colorSlot || !imageSlot) return;
+    if (!pinEl || !stage || !device || !colorHalf) return;
 
-    gsap.set(colorSlot, { backgroundColor: TONES[0] });
+    gsap.set(colorHalf, { backgroundColor: TONES[0] });
 
     const mm = gsap.matchMedia();
 
     mm.add('(min-width: 900px) and (prefers-reduced-motion: no-preference)', () => {
-      // Handoff: el mismo POS del Hero cae y se posa al centro, marcando la división
-      // con la sección anterior. Al asentarse, se disuelve y la stage (capítulo 1) toma su lugar.
-      gsap.set(handoff, { y: -160, opacity: 0, scale: 0.82, rotate: -6 });
-      gsap.set(stage, { opacity: 0, y: 28, scale: 0.96 });
+      // Handoff: SOLO el POS (sin tarjeta/scan/check del Hero) cae y se desliza
+      // fluido hasta quedar centrado en la costura — ahí se queda, para siempre,
+      // como el elemento fijo de la stage. La imagen y el color de fondo aparecen detrás.
+      gsap.set(stage, { opacity: 0 });
+      // xPercent:-50 centra el device sobre su ancla `left:42%` (CSS) — se mantiene fijo;
+      // solo y/scale/opacity se animan, así nunca compite con el transform de centrado.
+      gsap.set(device, { xPercent: -50, y: -280, opacity: 0, scale: 0.9 });
 
       const handoffTl = gsap.timeline({
         scrollTrigger: {
           trigger: pinEl,
           start: 'top 85%',
-          end: 'top 25%',
+          end: 'top 30%',
           scrub: true,
         },
       });
       handoffTl
-        .to(handoff, { y: 0, opacity: 1, scale: 1, rotate: 0, duration: 0.5, ease: 'power2.out' }, 0)
-        .to(handoff, { opacity: 0, scale: 1.06, y: -16, duration: 0.25, ease: 'power1.in' }, 0.62)
-        .to(stage, { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'power2.out' }, 0.66);
+        .to(stage, { opacity: 1, duration: 0.01 }, 0)
+        .to(device, { y: 0, opacity: 1, scale: 1, duration: 1, ease: 'power2.out' }, 0);
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: pinEl,
           start: 'top top',
-          end: '+=220%',
+          end: '+=200%',
           scrub: 1,
           pin: pinEl,
           anticipatePin: 1,
@@ -158,27 +159,25 @@ const chapters = [
         },
       });
 
-      function transition(toIndex, swap) {
+      function transition(toIndex) {
         const seg = gsap.timeline();
         seg.to(texts[toIndex - 1], { opacity: 0, y: -10, duration: 0.18, ease: 'power1.in' }, 0);
-        seg.to(images[toIndex - 1], { opacity: 0, duration: 0.3, ease: 'power1.inOut' }, 0.06);
-        seg.to(imageSlot, { xPercent: swap ? 100 : 0, duration: 0.4, ease: 'power2.inOut' }, 0.05);
-        seg.to(colorSlot, { xPercent: swap ? -100 : 0, duration: 0.4, ease: 'power2.inOut' }, 0.05);
-        seg.to(colorSlot, { backgroundColor: TONES[toIndex], duration: 0.4, ease: 'power1.inOut' }, 0.08);
-        seg.to(images[toIndex], { opacity: 1, duration: 0.32, ease: 'power1.inOut' }, 0.28);
-        seg.to(texts[toIndex], { opacity: 1, y: 0, duration: 0.22, ease: 'power2.out' }, 0.32);
+        seg.to(bgImages[toIndex - 1], { opacity: 0, duration: 0.3, ease: 'power1.inOut' }, 0.05);
+        seg.to(device, { scale: 0.88, duration: 0.2, ease: 'power1.in' }, 0);
+        seg.to(deviceImages[toIndex - 1], { opacity: 0, duration: 0.18, ease: 'power1.in' }, 0.16);
+        seg.to(colorHalf, { backgroundColor: TONES[toIndex], duration: 0.4, ease: 'power1.inOut' }, 0.1);
+        seg.to(bgImages[toIndex], { opacity: 1, duration: 0.32, ease: 'power1.inOut' }, 0.24);
+        seg.to(deviceImages[toIndex], { opacity: 1, duration: 0.2, ease: 'power1.out' }, 0.3);
+        seg.to(device, { scale: 1, duration: 0.25, ease: 'back.out(1.6)' }, 0.32);
+        seg.to(texts[toIndex], { opacity: 1, y: 0, duration: 0.22, ease: 'power2.out' }, 0.36);
         return seg;
       }
 
-      tl.to({}, { duration: 0.6 }); // hold capítulo 1
-      tl.add(transition(1, true), '+=0');
-      tl.to({}, { duration: 0.6 }); // hold capítulo 2
-      tl.add(transition(2, false), '+=0');
-      tl.to({}, { duration: 0.6 }); // hold capítulo 3
-
-      return () => {
-        gsap.set([imageSlot, colorSlot], { xPercent: 0, clearProps: 'transform' });
-      };
+      tl.to({}, { duration: 0.55 }); // hold capítulo 1
+      tl.add(transition(1), '+=0');
+      tl.to({}, { duration: 0.55 }); // hold capítulo 2
+      tl.add(transition(2), '+=0');
+      tl.to({}, { duration: 0.55 }); // hold capítulo 3
     });
   }
 
@@ -213,16 +212,6 @@ const chapters = [
   }
   .compat__stage-wrap { position: relative; width: 100%; display: flex; justify-content: center; }
 
-  .compat__handoff {
-    position: absolute;
-    z-index: 2;
-    top: 6%;
-    left: 50%;
-    width: 260px;
-    transform: translateX(-50%);
-    pointer-events: none;
-    filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.22));
-  }
   .compat__stage {
     position: relative;
     width: 100%;
@@ -234,14 +223,9 @@ const chapters = [
     background-color: var(--bg-secondary);
   }
 
-  .compat__slot {
-    position: absolute;
-    top: 0;
-    width: 50%;
-    height: 100%;
-  }
-  .compat__slot--image { left: 0; overflow: hidden; }
-  .compat__image {
+  .compat__half { position: absolute; top: 0; width: 50%; height: 100%; }
+  .compat__half--image { left: 0; overflow: hidden; }
+  .compat__bg {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -249,7 +233,7 @@ const chapters = [
     object-fit: cover;
     display: block;
   }
-  .compat__slot--color {
+  .compat__half--color {
     left: 50%;
     display: flex;
     align-items: center;
@@ -270,6 +254,29 @@ const chapters = [
   .compat__text--on-dark .compat__brand { color: var(--on-accent); }
   .compat__text--on-dark .compat__claim { color: color-mix(in srgb, var(--on-accent) 88%, transparent); }
 
+  /* El POS: SIEMPRE centrado en la costura, por encima de ambas mitades — es lo único que "vive".
+     Centrado vía inset+margin:auto (no transform) para no chocar con el transform que anima GSAP. */
+  .compat__device {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    bottom: 0;
+    left: 37%;
+    margin-block: auto;
+    height: 64%;
+    width: fit-content;
+    filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.28));
+    pointer-events: none;
+  }
+  .compat__device-img {
+    position: absolute;
+    inset: 0;
+    margin-inline: auto;
+    height: 100%;
+    width: auto;
+    display: block;
+  }
+
   .compat__foot { margin-top: var(--space-md); text-align: center; }
   .compat__link { color: var(--accent); font-weight: 600; text-decoration: none; }
 
@@ -281,12 +288,15 @@ const chapters = [
     .compat__mobile-only { display: grid; gap: var(--space-lg); }
 
     .compat__card { display: grid; gap: var(--space-md); }
-    .compat__card-image {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      object-fit: cover;
-      border-radius: var(--radius-lg);
-      display: block;
+    .compat__card-visual { position: relative; border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4 / 3; }
+    .compat__card-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .compat__card-device {
+      position: absolute;
+      bottom: -6%;
+      right: 6%;
+      height: 62%;
+      width: auto;
+      filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.3));
     }
     .compat__card .compat__text {
       position: relative;
