@@ -1,9 +1,11 @@
 ---
 // src/components/home/ProblemHook.astro
 // Hook de retención tras el logo strip: NO es full-bleed. Card cuadrada grande
-// a la derecha (foto real, mismo estilo cálido/luz natural que BrandCompat)
-// que cambia de foto en cada transición, sin girar ni flotar; el texto
-// grande le pasa por encima. Formato distinto a BrandCompat/SolutionBento/ProblemLedger.
+// (foto real, mismo estilo cálido/luz natural que BrandCompat) que alterna de
+// lado por línea (izq/der/izq/der) y cambia de foto en cada transición, sin
+// girar ni flotar. El texto se revela letra por letra y lleva un chip de fondo
+// para mantener contraste al pasar sobre la imagen. Formato distinto a
+// BrandCompat/SolutionBento/ProblemLedger.
 const { lines, images } = Astro.props;
 const list = lines ?? [];
 const imgs = images ?? [];
@@ -11,11 +13,23 @@ const imgs = images ?? [];
 
 <section class="hook" data-gsap-section="hook">
   <div class="hook__pin" data-hook-pin>
-    <div class="container hook__stage">
+    <div class="container hook__stage" data-hook-stage data-side="left">
       <div class="hook__text">
-        {list.map((line, i) => (
-          <p class={`hook__line ${i === 0 ? 'is-first' : ''}`} data-hook-line={i}>{line}</p>
-        ))}
+        {list.map((line, i) => {
+          const words = line.split(' ');
+          return (
+            <p class={`hook__line ${i === 0 ? 'is-first' : ''}`} data-hook-line={i}>
+              {words.map((word, wi) => (
+                <>
+                  <span class="hook__word">
+                    {word.split('').map((ch) => <span class="hook__letter">{ch}</span>)}
+                  </span>
+                  {wi < words.length - 1 && ' '}
+                </>
+              ))}
+            </p>
+          );
+        })}
       </div>
 
       <div class="hook__card" data-hook-card>
@@ -39,6 +53,7 @@ const imgs = images ?? [];
     if (!section) return;
 
     const pinEl = section.querySelector('[data-hook-pin]');
+    const stage = section.querySelector('[data-hook-stage]');
     const lines = section.querySelectorAll('[data-hook-line]');
     const cardImgs = section.querySelectorAll('[data-hook-cardimg]');
     if (!pinEl || !lines.length) return;
@@ -46,11 +61,20 @@ const imgs = images ?? [];
     const mm = gsap.matchMedia();
 
     mm.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => {
+      gsap.from(lines[0].querySelectorAll('.hook__letter'), {
+        opacity: 0,
+        y: 14,
+        duration: 0.6,
+        stagger: 0.02,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: pinEl, start: 'top 80%' },
+      });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: pinEl,
           start: 'top top',
-          end: '+=' + (lines.length * 90) + '%',
+          end: '+=' + (lines.length * 110) + '%',
           scrub: 1,
           pin: pinEl,
           anticipatePin: 1,
@@ -62,7 +86,14 @@ const imgs = images ?? [];
         if (i === 0) return;
         tl.to({}, { duration: 0.5 }); // hold la línea anterior
         tl.to(lines[i - 1], { opacity: 0, y: -16, duration: 0.35, ease: 'power1.in' });
-        tl.to(line, { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' }, '<');
+        tl.set(line, { opacity: 1 }, '<');
+        tl.set(stage, { attr: { 'data-side': i % 2 === 0 ? 'left' : 'right' } }, '<');
+        tl.fromTo(
+          line.querySelectorAll('.hook__letter'),
+          { opacity: 0, y: 14 },
+          { opacity: 1, y: 0, duration: 0.5, stagger: 0.018, ease: 'power2.out' },
+          '<'
+        );
         if (cardImgs[i - 1]) tl.to(cardImgs[i - 1], { opacity: 0, duration: 0.35 }, '<');
         if (cardImgs[i]) tl.to(cardImgs[i], { opacity: 1, duration: 0.35 }, '<');
       });
@@ -105,7 +136,6 @@ const imgs = images ?? [];
     flex-shrink: 0;
     width: clamp(260px, 38vw, 520px);
     aspect-ratio: 1;
-    margin-left: clamp(-110px, -10vw, -60px);
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
@@ -124,12 +154,14 @@ const imgs = images ?? [];
     position: relative;
     flex: 1;
     display: grid;
-    padding-right: var(--space-lg);
     z-index: 1;
     min-height: 12rem;
   }
   .hook__line {
     grid-area: 1 / 1;
+    display: inline-block;
+    justify-self: start;
+    align-self: start;
     max-width: 20ch;
     font-family: var(--font-heading);
     font-size: clamp(2.2rem, 6vw, 4.2rem);
@@ -137,16 +169,32 @@ const imgs = images ?? [];
     letter-spacing: -0.02em;
     color: var(--text-primary);
     opacity: 0;
+    background-color: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
+    backdrop-filter: blur(6px);
+    padding: 0.05em 0.3em;
+    border-radius: var(--radius-sm);
   }
   .hook__line.is-first { opacity: 1; }
+  .hook__word { display: inline-block; }
+  .hook__letter { display: inline-block; }
+
+  /* Alternancia de lado por línea: por defecto (data-side="right") la card
+     queda después del texto (derecha); "left" invierte el orden visual. */
+  @media (min-width: 768px) {
+    .hook__stage[data-side="right"] .hook__card { order: 2; margin-left: clamp(-110px, -10vw, -60px); }
+    .hook__stage[data-side="right"] .hook__text { order: 1; padding-right: var(--space-lg); }
+
+    .hook__stage[data-side="left"] .hook__card { order: 1; margin-right: clamp(-110px, -10vw, -60px); }
+    .hook__stage[data-side="left"] .hook__text { order: 2; padding-left: var(--space-lg); }
+  }
 
   @media (max-width: 767px) {
     .hook__pin { min-height: auto; padding-block: var(--space-2xl); }
     .hook__stage { flex-direction: column; align-items: flex-start; gap: var(--space-lg); }
-    .hook__card { order: -1; width: 200px; margin-left: 0; }
+    .hook__card { order: -1; width: 200px; }
     .hook__text {
       flex: none;
-      padding-right: 0;
+      padding: 0;
       display: grid;
       gap: var(--space-lg);
       min-height: 0;
@@ -156,5 +204,6 @@ const imgs = images ?? [];
 
   @media (prefers-reduced-motion: reduce) {
     .hook__line { opacity: 1; }
+    .hook__letter { opacity: 1; }
   }
 </style>
