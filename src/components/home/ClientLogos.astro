@@ -8,15 +8,21 @@ const list = logos ?? [];
 ---
 
 <section class="client-logos" data-gsap-section="client-logos">
-  <div class="container client-logos__inner">
+  <div class="container">
     <p class="client-logos__claim" data-gsap-animate="fade-up">{claim}</p>
+  </div>
 
-    <div class="client-logos__row" data-gsap-animate="fade-up-delay">
+  <div class="client-logos__marquee" data-gsap-animate="fade-up-delay" aria-hidden="true">
+    <div class="client-logos__track">
       {list.map((name) => (
         <span class="client-logos__logo">{name}</span>
       ))}
+      {list.map((name) => (
+        <span class="client-logos__logo" data-logo-dupe>{name}</span>
+      ))}
     </div>
   </div>
+  <p class="sr-only">{list.join(' · ')}</p>
 </section>
 
 <script>
@@ -48,47 +54,64 @@ const list = logos ?? [];
 
 <style>
   .client-logos {
-    padding-block: var(--space-lg);
-    background-color: var(--bg-primary);
-  }
-  .client-logos__inner {
+    padding-block: var(--space-2xl);
+    background-color: var(--bg-secondary);
+    border-block: 1px solid var(--border);
     display: grid;
-    gap: var(--space-md);
-    justify-items: center;
-    text-align: center;
+    gap: var(--space-lg);
   }
   .client-logos__claim {
     font-size: var(--text-sm);
     letter-spacing: 0.03em;
     color: var(--text-secondary);
     max-width: 46ch;
+    margin-inline: auto;
+    text-align: center;
   }
-  .client-logos__row {
+
+  .client-logos__marquee {
+    overflow: hidden;
+  }
+  .client-logos__marquee:hover .client-logos__track { animation-play-state: paused; }
+  .client-logos__track {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
     align-items: center;
-    gap: var(--space-lg);
+    gap: var(--space-xl);
+    width: max-content;
+    animation: client-logos-marquee 28s linear infinite;
   }
   .client-logos__logo {
     font-family: var(--font-heading);
-    font-size: var(--text-lg);
+    font-size: var(--text-xl);
     font-weight: 500;
     letter-spacing: -0.01em;
     color: var(--text-secondary);
-    opacity: 0.55;
+    opacity: 0.5;
     filter: grayscale(1);
     transition: opacity var(--transition-fast), filter var(--transition-fast);
     white-space: nowrap;
   }
-  .client-logos__logo:hover {
-    opacity: 1;
-    filter: grayscale(0);
-    color: var(--accent);
+  .client-logos__marquee:hover .client-logos__logo { opacity: 1; filter: grayscale(0); color: var(--accent); }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  @keyframes client-logos-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
   }
 
   @media (max-width: 599px) {
-    .client-logos__row { gap: var(--space-md); }
-    .client-logos__logo { font-size: var(--text-base); }
+    .client-logos__track { gap: var(--space-lg); }
+    .client-logos__logo { font-size: var(--text-lg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .client-logos__track { animation: none; flex-wrap: wrap; width: 100%; justify-content: center; }
+    .client-logos__logo[data-logo-dupe] { display: none; }
   }
 </style>
