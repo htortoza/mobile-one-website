@@ -1,28 +1,75 @@
 ---
 // src/components/home/ArchitectureTeaser.astro
-// Home §4.7 — Arquitectura (teaser). Badges grandes + mini-diagrama hacia /integraciones.
-const { title, text, badges, nodes } = Astro.props;
+// Home §4.7 — Arquitectura (teaser). Esquema real de integración: entradas
+// (lo que el cliente ya tiene) a la izquierda, Mobile One Core como hub al
+// centro, salidas a la derecha — conectados con cables SVG + paquetes que
+// viajan (§16.3/§21.3). Logos reales donde existen (Transbank/Getnet/
+// Mercado Pago, ya usados en BrandCompat); el resto son wordmarks de texto,
+// no logos fabricados.
+const { title, text, badges, inputs, hub, outputs } = Astro.props;
 const badgeList = badges ?? [];
-const nodeList = nodes ?? [];
+const inputList = inputs ?? [];
+const outputList = outputs ?? [];
+const hubNode = hub ?? { label: 'Mobile One Core' };
 ---
 
 <section class="arch" data-gsap-section="arch">
-  <div class="container arch__inner">
-    <div class="arch__copy">
-      <h2 class="arch__title" data-gsap-animate="fade-up">{title}</h2>
-      <p class="arch__text">{text}</p>
-      <a href="/integraciones" class="arch__link">Ver arquitectura completa →</a>
+  <div class="container arch__head">
+    <h2 class="arch__title" data-gsap-animate="fade-up">{title}</h2>
+    <p class="arch__text">{text}</p>
+    <a href="/integraciones" class="arch__link">Ver arquitectura completa →</a>
 
+    {badgeList.length > 0 && (
       <div class="arch__badges">
         {badgeList.map((b) => (
           <span class="arch__badge" data-count-badge>{b}</span>
         ))}
       </div>
+    )}
+  </div>
+
+  <div class="container arch__diagram" data-arch-diagram>
+    <svg class="arch__cables" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      {inputList.map((_, i) => {
+        const y = ((i + 0.5) / inputList.length) * 100;
+        return <path d={`M 26 ${y} C 38 ${y}, 40 50, 50 50`} class="arch__cable" data-arch-cable vector-effect="non-scaling-stroke" />;
+      })}
+      {outputList.map((_, i) => {
+        const y = ((i + 0.5) / outputList.length) * 100;
+        return <path d={`M 50 50 C 60 50, 62 ${y}, 74 ${y}`} class="arch__cable" data-arch-cable vector-effect="non-scaling-stroke" />;
+      })}
+    </svg>
+
+    <div class="arch__col arch__col--in">
+      {inputList.map((node) => (
+        <div class="arch__card" data-arch-card>
+          {node.logos && (
+            <div class="arch__logos">
+              {node.logos.map((logo) => (
+                <span class={`arch__logo-chip ${logo.tone ? `arch__logo-chip--${logo.tone}` : ''}`}>
+                  <img src={logo.src} alt="" />
+                </span>
+              ))}
+            </div>
+          )}
+          <p class="arch__card-label">{node.label}</p>
+          {node.sub && <p class="arch__card-sub">{node.sub}</p>}
+        </div>
+      ))}
     </div>
 
-    <div class="arch__mini" aria-hidden="true">
-      {nodeList.map((n, i) => (
-        <span class="arch__node" data-arch-node style={`--i:${i}`}>{n}</span>
+    <div class="arch__hub" data-arch-hub>
+      <img class="arch__hub-logo" src="/brand/Imagotipo-logo.svg" alt="" aria-hidden="true" />
+      <p class="arch__hub-label">{hubNode.label}</p>
+      {hubNode.sub && <p class="arch__hub-sub">{hubNode.sub}</p>}
+    </div>
+
+    <div class="arch__col arch__col--out">
+      {outputList.map((node) => (
+        <div class="arch__card" data-arch-card>
+          <p class="arch__card-label">{node.label}</p>
+          {node.sub && <p class="arch__card-sub">{node.sub}</p>}
+        </div>
       ))}
     </div>
   </div>
@@ -36,24 +83,56 @@ const nodeList = nodes ?? [];
 
   function initArch() {
     const section = document.querySelector('[data-gsap-section="arch"]');
-    if (!section || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!section) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     gsap.from(section.querySelectorAll('[data-count-badge]'), {
-      opacity: 0,
-      y: 16,
-      duration: 0.5,
-      stagger: 0.08,
-      ease: 'expo.out',
+      opacity: 0, y: 16, duration: 0.5, stagger: 0.08, ease: 'expo.out',
       scrollTrigger: { trigger: section, start: 'top 78%' },
     });
 
-    gsap.from(section.querySelectorAll('[data-arch-node]'), {
-      opacity: 0,
-      scale: 0.9,
-      duration: 0.5,
-      stagger: 0.08,
-      ease: 'expo.out',
-      scrollTrigger: { trigger: section, start: 'top 70%' },
+    const diagram = section.querySelector('[data-arch-diagram]');
+    if (!diagram) return;
+
+    if (reduced) return;
+
+    gsap.from(section.querySelectorAll('[data-arch-card]'), {
+      opacity: 0, y: 16, duration: 0.5, stagger: 0.07, ease: 'expo.out',
+      scrollTrigger: { trigger: diagram, start: 'top 75%' },
+    });
+    gsap.from(section.querySelector('[data-arch-hub]'), {
+      opacity: 0, scale: 0.85, duration: 0.6, ease: 'back.out(1.6)',
+      scrollTrigger: { trigger: diagram, start: 'top 72%' },
+    });
+
+    const cables = section.querySelectorAll('[data-arch-cable]');
+    cables.forEach((cable) => {
+      gsap.fromTo(cable, { opacity: 0 }, {
+        opacity: 1, duration: 0.6,
+        scrollTrigger: { trigger: diagram, start: 'top 70%' },
+      });
+
+      const length = cable.getTotalLength();
+      const packet = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      packet.setAttribute('r', '1.4');
+      packet.setAttribute('fill', 'var(--accent)');
+      packet.style.filter = 'drop-shadow(0 0 3px color-mix(in srgb, var(--accent) 70%, transparent))';
+      cable.parentNode.appendChild(packet);
+
+      const obj = { d: 0 };
+      gsap.to(obj, {
+        d: length,
+        duration: 1.8,
+        repeat: -1,
+        delay: gsap.utils.random(0, 1),
+        ease: 'power1.inOut',
+        scrollTrigger: { trigger: diagram, start: 'top 85%', end: 'bottom top' },
+        onUpdate: () => {
+          const p = cable.getPointAtLength(obj.d);
+          packet.setAttribute('cx', String(p.x));
+          packet.setAttribute('cy', String(p.y));
+        },
+      });
     });
   }
 
@@ -62,46 +141,92 @@ const nodeList = nodes ?? [];
 
 <style>
   .arch { padding-block: var(--space-2xl); background-color: var(--bg-secondary); }
-  .arch__inner { display: grid; gap: var(--space-lg); }
+  .arch__head { display: grid; gap: var(--space-sm); margin-bottom: var(--space-xl); max-width: 70ch; }
   .arch__title {
     font-family: var(--font-heading);
-    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-size: clamp(2.2rem, 5.4vw, 3.6rem);
     line-height: 1.1;
     letter-spacing: -0.02em;
   }
-  .arch__text { font-size: var(--text-lg); color: var(--text-secondary); max-width: 60ch; line-height: 1.6; margin-block: var(--space-sm); }
+  .arch__text { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; }
   .arch__link { color: var(--accent); font-weight: 600; text-decoration: none; }
 
-  .arch__badges { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-md); }
+  .arch__badges { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-sm); }
   .arch__badge {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--navy);
     background-color: var(--bg-primary);
     border: 1px solid var(--border);
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-xs) var(--space-md);
     border-radius: var(--radius-full);
   }
 
-  .arch__mini {
-    display: flex;
+  .arch__diagram {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    padding-block: var(--space-lg);
+  }
+  .arch__cables { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; display: none; }
+  .arch__cable { stroke: var(--border); stroke-width: 1.4; fill: none; opacity: 0; }
+
+  .arch__col { position: relative; z-index: 1; display: grid; gap: var(--space-md); }
+
+  .arch__card {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .arch__card-label { font-family: var(--font-heading); font-size: var(--text-base); color: var(--text-primary); }
+  .arch__card-sub { font-size: var(--text-sm); color: var(--text-secondary); }
+
+  .arch__logos { display: flex; gap: var(--space-xs); margin-bottom: var(--space-xs); }
+  .arch__logo-chip {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-sm);
-    flex-wrap: wrap;
-    padding: var(--space-lg);
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-lg);
+    height: 28px;
+    padding-inline: 8px;
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-secondary);
   }
-  .arch__node {
-    font-size: var(--text-sm);
-    color: var(--accent-hover);
-    background-color: color-mix(in srgb, var(--accent) 10%, transparent);
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--radius-full);
+  .arch__logo-chip img { height: 14px; width: auto; display: block; }
+  .arch__logo-chip--transbank { background-color: var(--tone-transbank); }
+  .arch__logo-chip--getnet { background-color: var(--tone-getnet); }
+  .arch__logo-chip--light { background-color: var(--bg-secondary); }
+  .arch__logo-chip--light img { height: 18px; }
+
+  .arch__hub {
+    position: relative;
+    z-index: 1;
+    justify-self: center;
+    align-self: center;
+    width: 168px;
+    aspect-ratio: 1;
+    border-radius: 32px;
+    background: var(--accent-gradient);
+    color: var(--on-accent);
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
   }
+  .arch__hub-logo { height: 22px; width: auto; filter: brightness(0) invert(1); margin-bottom: var(--space-xs); }
+  .arch__hub-label { font-family: var(--font-heading); font-size: var(--text-base); line-height: 1.2; }
+  .arch__hub-sub { font-size: var(--text-xs); color: color-mix(in srgb, var(--on-accent) 80%, transparent); }
 
   @media (min-width: 1024px) {
-    .arch__inner { grid-template-columns: 1fr 1fr; align-items: center; gap: var(--space-2xl); }
+    .arch__diagram { grid-template-columns: 1fr 168px 1fr; align-items: center; gap: var(--space-2xl); }
+    .arch__cables { display: block; }
+    .arch__col--out { justify-items: end; }
+    .arch__col--out .arch__card { text-align: right; justify-items: end; }
   }
 </style>

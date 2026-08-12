@@ -128,9 +128,26 @@ const schemaData = {
 
   <ArchitectureTeaser
     title="Se integra con lo que ya tienes, no lo reemplaza"
-    text="Mobile One no duplica reglas de negocio: consulta el stock a tu ERP (SAP Business One o SmartOrder), delega las promociones a tu motor de promociones y opera sobre el hardware de pago que ya certificaste."
-    badges={['SAP Business One (Service Layer)', 'Agnóstico de hardware POS', 'Multi-tenant con feature flags']}
-    nodes={['POS Mobile', 'Mobile One Core', 'SAP / SmartOrder', 'CloudPromo / Prism', 'Facturador']}
+    text="Mobile One no duplica reglas de negocio: consulta el stock a tu ERP, delega las promociones a tu motor de promociones y opera sobre el hardware de pago que ya certificaste."
+    badges={['Service Layer nativo', 'Agnóstico de hardware POS', 'Multi-tenant con feature flags']}
+    inputs={[
+      {
+        label: 'Transbank · Getnet · Mercado Pago',
+        sub: 'El hardware de pago que ya certificaste',
+        logos: [
+          { src: '/images/logo-transbank-white.png', tone: 'transbank' },
+          { src: '/images/logo-getnet-white.png', tone: 'getnet' },
+          { src: '/images/logo-mercadopago-color.svg', tone: 'light' },
+        ],
+      },
+      { label: 'SAP Business One', sub: 'Tu ERP, sin duplicar datos' },
+      { label: 'CloudPromo / Prism', sub: 'Tu motor de promociones' },
+    ]}
+    hub={{ label: 'Mobile One Core', sub: 'Orquesta, no reemplaza' }}
+    outputs={[
+      { label: 'App de venta móvil', sub: 'Vendedores en la sala' },
+      { label: 'Facturador electrónico', sub: 'Boleta y factura al instante' },
+    ]}
   />
 
   <SocialProofStat
