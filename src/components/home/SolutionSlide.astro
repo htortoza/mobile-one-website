@@ -123,10 +123,15 @@ const list = panels ?? [];
   .sslide__head { display: grid; gap: var(--space-sm); margin-bottom: var(--space-lg); }
   .sslide__logo { height: 28px; width: auto; margin-bottom: var(--space-xs); }
   .sslide__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
-  .sslide__title { font-family: var(--font-heading); font-size: clamp(1.9rem, 4.6vw, 3rem); letter-spacing: -0.02em; max-width: 34ch; }
+  .sslide__title { font-family: var(--font-heading); font-size: clamp(2.2rem, 5.2vw, 3.4rem); letter-spacing: -0.02em; max-width: 34ch; }
 
   .sslide__pin { height: 100vh; display: flex; align-items: center; }
-  .sslide__track { display: flex; will-change: transform; }
+  .sslide__track {
+    display: flex;
+    will-change: transform;
+    padding-inline-start: max(var(--container-pad), calc((100vw - var(--content-max-xl)) / 2));
+    padding-inline-end: var(--space-xl);
+  }
 
   .sslide__panel {
     flex: 0 0 auto;
@@ -144,19 +149,19 @@ const list = panels ?? [];
   }
   .sslide__img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  .sslide__copy { display: grid; gap: var(--space-xs); }
+  .sslide__copy { display: grid; gap: var(--space-sm); }
   .sslide__num {
     font-family: var(--font-heading);
-    font-size: var(--text-xl);
+    font-size: var(--text-2xl);
     color: var(--accent);
   }
   .sslide__heading {
     font-family: var(--font-heading);
-    font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+    font-size: clamp(1.6rem, 2.8vw, 2.2rem);
     letter-spacing: -0.01em;
     color: var(--text-primary);
   }
-  .sslide__text { color: var(--text-secondary); line-height: 1.6; max-width: 40ch; }
+  .sslide__text { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; max-width: 40ch; }
 
   .sslide__mobile-only { display: none; }
   @media (max-width: 1023px), (prefers-reduced-motion: reduce) {
