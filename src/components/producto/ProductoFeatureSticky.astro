@@ -79,15 +79,15 @@ const list = features ?? [];
     padding: var(--space-xs) var(--space-sm);
     border-radius: var(--radius-full);
   }
-  .pfs__title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(2rem, 4.6vw, 3rem); letter-spacing: -0.02em; line-height: 1.1; color: var(--navy); max-width: 22ch; }
+  .pfs__title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(2.2rem, 5vw, 3.4rem); letter-spacing: -0.03em; line-height: 1.08; color: var(--navy); max-width: 22ch; }
   .pfs__frame { border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
   .pfs__img { width: 100%; height: 100%; object-fit: cover; display: block; aspect-ratio: 4 / 3; }
 
   .pfs__ledger { display: grid; }
   .pfs__row { position: relative; display: grid; gap: var(--space-xs); padding-block: var(--space-md); }
   .pfs__num { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-sm); color: var(--accent-hover); }
-  .pfs__heading { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-lg); color: var(--navy); letter-spacing: -0.01em; }
-  .pfs__text { font-size: var(--text-base); color: var(--text-secondary); line-height: 1.6; max-width: 60ch; }
+  .pfs__heading { font-family: var(--font-heading); font-weight: 600; font-size: clamp(1.3rem, 1.6vw, 1.5rem); color: var(--navy); letter-spacing: -0.02em; }
+  .pfs__text { font-size: clamp(1rem, 1.1vw, 1.1rem); color: var(--text-secondary); line-height: 1.6; max-width: 60ch; }
   .pfs__rule { position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background-color: var(--border); }
 
   @media (min-width: 900px) {

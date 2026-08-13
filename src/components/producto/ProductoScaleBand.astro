@@ -138,9 +138,9 @@ const TILES = Array.from({ length: GRID_COLS * GRID_ROWS });
   .psb__stat {
     font-family: var(--font-heading);
     font-weight: 600;
-    font-size: clamp(3.5rem, 8vw, 6rem);
+    font-size: clamp(4rem, 9vw, 6.5rem);
     line-height: 1;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
   }
   .psb__stat-label {
     display: block;
@@ -155,12 +155,12 @@ const TILES = Array.from({ length: GRID_COLS * GRID_ROWS });
   .psb__title {
     font-family: var(--font-heading);
     font-weight: 600;
-    font-size: clamp(2rem, 4vw, 2.8rem);
-    letter-spacing: -0.02em;
-    line-height: 1.15;
+    font-size: clamp(2.3rem, 4.6vw, 3.4rem);
+    letter-spacing: -0.03em;
+    line-height: 1.12;
     max-width: 20ch;
   }
-  .psb__text { font-size: var(--text-lg); color: color-mix(in srgb, var(--on-accent) 88%, transparent); line-height: 1.6; max-width: 46ch; }
+  .psb__text { font-size: clamp(1.15rem, 1.6vw, 1.35rem); color: color-mix(in srgb, var(--on-accent) 88%, transparent); line-height: 1.6; max-width: 46ch; }
 
   /* ── Escena: 1 flag prende una pared de terminales ── */
   .psb__scene { display: none; }
