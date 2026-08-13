@@ -1,0 +1,101 @@
+---
+// src/components/producto/ProductoFeatureBento.astro
+// /producto §5.2 — POS Mobile. Bento grid (§16.3) para 8 funcionalidades, con
+// intro asimétrica texto+foto real (mismo lenguaje visual que SolutionPair de
+// Home). Estilo claro, sin tema oscuro propio.
+const { id, eyebrow, title, note, image, imageAlt, features } = Astro.props;
+const list = features ?? [];
+---
+
+<section id={id} class="pfb" data-gsap-section={`pfb-${id}`}>
+  <div class="container pfb__intro">
+    <div class="pfb__copy">
+      {eyebrow && <p class="pfb__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
+      <h2 class="pfb__title" data-gsap-animate="fade-up">{title}</h2>
+      {note && <p class="pfb__note" data-gsap-animate="fade-up">{note}</p>}
+    </div>
+    {image && (
+      <div class="pfb__frame" data-gsap-animate="fade-up">
+        <img class="pfb__img" src={image} alt={imageAlt ?? ''} />
+      </div>
+    )}
+  </div>
+
+  <div class="container pfb__grid">
+    {list.map((f, i) => (
+      <article class={`pfb__card pfb__card--${i} ${f.image ? 'pfb__card--media' : ''}`} data-pfb-card>
+        {f.image && (
+          <div class="pfb__card-frame">
+            <img class="pfb__card-img" src={f.image} alt={f.imageAlt ?? ''} />
+          </div>
+        )}
+        <span class="pfb__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+        <h3 class="pfb__heading">{f.title}</h3>
+        <p class="pfb__text">{f.text}</p>
+      </article>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll('[data-pfb-card]').forEach((card) => {
+      if (card.dataset.pfbInit) return;
+      card.dataset.pfbInit = '1';
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      gsap.from(card, {
+        opacity: 0, y: 20, duration: 0.6, ease: 'expo.out',
+        scrollTrigger: { trigger: card, start: 'top 88%' },
+      });
+    });
+  });
+</script>
+
+<style>
+  .pfb { padding-block: var(--space-2xl); background-color: var(--bg-primary); }
+
+  .pfb__intro { display: grid; gap: var(--space-lg); margin-bottom: var(--space-xl); }
+  .pfb__copy { display: grid; gap: var(--space-sm); max-width: 56ch; }
+  .pfb__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+  .pfb__title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(2rem, 4.6vw, 3rem); letter-spacing: -0.02em; line-height: 1.1; color: var(--navy); }
+  .pfb__note { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; }
+
+  .pfb__frame { border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+  .pfb__img { width: 100%; height: 100%; object-fit: cover; display: block; aspect-ratio: 16 / 9; }
+
+  .pfb__grid { display: grid; gap: var(--space-md); grid-template-columns: 1fr; }
+  .pfb__card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    display: grid;
+    gap: var(--space-xs);
+    align-content: start;
+  }
+  .pfb__card--media { padding: 0; overflow: hidden; }
+  .pfb__card-frame { aspect-ratio: 16 / 10; overflow: hidden; }
+  .pfb__card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pfb__card--media .pfb__num,
+  .pfb__card--media .pfb__heading,
+  .pfb__card--media .pfb__text { padding-inline: var(--space-md); }
+  .pfb__card--media .pfb__num { margin-top: var(--space-md); }
+  .pfb__card--media .pfb__text { padding-bottom: var(--space-md); }
+
+  .pfb__num { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-sm); color: var(--accent-hover); }
+  .pfb__heading { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-lg); color: var(--navy); letter-spacing: -0.01em; }
+  .pfb__text { font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.55; }
+
+  @media (min-width: 900px) {
+    .pfb__intro { grid-template-columns: 1fr 1fr; align-items: center; }
+
+    .pfb__grid { grid-template-columns: repeat(4, 1fr); }
+    .pfb__card--0 { grid-column: span 2; }
+    .pfb__card--3 { grid-column: span 2; }
+  }
+</style>

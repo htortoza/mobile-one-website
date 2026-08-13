@@ -1,0 +1,65 @@
+---
+// src/components/producto/ProductoBridge.astro
+// /producto — banda puente entre POS Mobile y BackOffice (§16.2.3
+// anti-repetición: ni bento ni ledger). Isotipo repetido como watermark de
+// fondo a opacidad muy baja — recurso de marca distinto a la rejilla del Hero.
+const { text } = Astro.props;
+---
+
+<section class="pbr" data-gsap-section="pbr">
+  <div class="pbr__watermark" aria-hidden="true">
+    {Array.from({ length: 6 }).map(() => (
+      <img src="/brand/Isotipo-logo.svg" alt="" class="pbr__mark" />
+    ))}
+  </div>
+  <p class="container pbr__text" data-gsap-animate="fade-up">{text}</p>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    const section = document.querySelector('[data-gsap-section="pbr"]');
+    const text = section && section.querySelector('[data-gsap-animate="fade-up"]');
+    if (!text || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    gsap.from(text, {
+      opacity: 0, y: 16, duration: 0.7, ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 82%' },
+    });
+  });
+</script>
+
+<style>
+  .pbr {
+    position: relative;
+    padding-block: var(--space-lg);
+    background-color: var(--navy);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .pbr__watermark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    opacity: 0.06;
+    pointer-events: none;
+  }
+  .pbr__mark { width: 72px; height: 72px; flex-shrink: 0; filter: brightness(0) invert(1); }
+  .pbr__text {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-heading);
+    font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+    letter-spacing: -0.01em;
+    color: var(--on-accent);
+    max-width: 46ch;
+  }
+</style>

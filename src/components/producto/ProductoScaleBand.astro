@@ -1,0 +1,84 @@
+---
+// src/components/producto/ProductoScaleBand.astro
+// /producto §5.4 — "Diseñado para escalar". Banda full-bleed azul con textura
+// M (mismo lenguaje de marca que el Hero/CTA de Home, §4 dirección de arte),
+// tercer formato de la página (distinto del bento y del ledger de §5.2/5.3).
+const { title, text, stat, statLabel } = Astro.props;
+---
+
+<section class="psb bg-pattern-m" data-gsap-section="psb">
+  <div class="container psb__inner" data-gsap-animate="psb-content">
+    {stat && (
+      <p class="psb__stat" data-psb-stat data-value={stat}>0{statLabel && <span class="psb__stat-label">{statLabel}</span>}</p>
+    )}
+    <h2 class="psb__title">{title}</h2>
+    <p class="psb__text">{text}</p>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    const section = document.querySelector('[data-gsap-section="psb"]');
+    const content = section && section.querySelector('[data-gsap-animate="psb-content"]');
+    if (!content) return;
+    const stat = section.querySelector('[data-psb-stat]');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (stat) {
+      const target = Number(stat.dataset.value) || 0;
+      if (reduced) {
+        stat.firstChild.textContent = String(target);
+      } else {
+        const counter = { n: 0 };
+        gsap.to(counter, {
+          n: target,
+          duration: 1.1,
+          ease: 'power1.out',
+          onUpdate: () => { stat.firstChild.textContent = String(Math.round(counter.n)); },
+          scrollTrigger: { trigger: section, start: 'top 78%' },
+        });
+      }
+    }
+
+    if (reduced) return;
+    gsap.from(content, {
+      opacity: 0, y: 24, duration: 0.8, ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 80%' },
+    });
+  });
+</script>
+
+<style>
+  .psb { padding-block: var(--space-2xl); color: var(--on-accent); text-align: center; }
+  .psb__inner { display: grid; gap: var(--space-sm); justify-items: center; max-width: 60ch; margin-inline: auto; }
+  .psb__stat {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: clamp(3.5rem, 10vw, 7rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .psb__stat-label {
+    display: block;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--on-accent) 75%, transparent);
+    margin-top: var(--space-xs);
+  }
+  .psb__title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: clamp(2rem, 4.6vw, 3.2rem);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .psb__text { font-size: var(--text-lg); color: color-mix(in srgb, var(--on-accent) 88%, transparent); line-height: 1.6; }
+</style>

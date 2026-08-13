@@ -1,185 +1,157 @@
 ---
 // src/components/producto/ProductoHero.astro
-// /producto — Hero a sangre completa con foto real (no split centrado como
-// HeroSplit de Home). Tipografía gigante superpuesta a la imagen, marquee
-// vertical de keywords en el borde derecho, CTA anclado abajo.
-const { eyebrow, headline, subheadline, ctaText, ctaHref, keywords } = Astro.props;
-const kw = keywords ?? [];
+// /producto §5.1 — Hero propio, distinto al split azul/claro de Home
+// (HeroSplit). Fondo claro con grid+degradado de marca (mismo recurso visual
+// de hero-split__light::before, reusado aquí a página completa) y el
+// selector de las 2 superficies del producto como pieza central del Hero,
+// no como tabs de texto aparte.
+const { eyebrow, headline, subheadline, surfaces } = Astro.props;
+const list = surfaces ?? [];
 ---
 
-<section class="phero" data-gsap-section="phero">
-  <img class="phero__bg" src="/images/producto/hero-venta.webp" alt="Vendedor cobrando con terminal Mobile One en una tienda de ropa de noche" />
-  <div class="phero__scrim" aria-hidden="true"></div>
+<section class="phero2" data-gsap-section="phero2">
+  <div class="phero2__grid" aria-hidden="true"></div>
 
-  <div class="phero__vmarquee" aria-hidden="true">
-    <div class="phero__vtrack">
-      {[...kw, ...kw].map((k) => <span>{k}</span>)}
-    </div>
+  <div class="container phero2__inner">
+    {eyebrow && <p class="phero2__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
+    <h1 class="phero2__headline" data-gsap-split="words">
+      {headline.map((part, i) => (
+        <>
+          <span class="phero2__word-outer">
+            <span class={`phero2__word ${part.accent ? `phero2__word--${part.accent}` : ''}`}>{part.text}</span>
+          </span>
+          {part.break && <span class="phero2__break" aria-hidden="true"></span>}
+        </>
+      ))}
+    </h1>
+    <p class="phero2__sub" data-gsap-animate="fade-up">{subheadline}</p>
   </div>
 
-  <div class="container phero__inner">
-    {eyebrow && (
-      <p class="phero__eyebrow" data-gsap-animate="fade-up">
-        <span class="phero__dot" aria-hidden="true"></span>{eyebrow}
-      </p>
-    )}
-    <h1 class="phero__headline" data-gsap-animate="headline">{headline}</h1>
-
-    <div class="phero__foot" data-gsap-animate="fade-up">
-      <p class="phero__sub">{subheadline}</p>
-      <a href={ctaHref} class="phero__btn">{ctaText}</a>
-    </div>
+  <div class="container phero2__surfaces">
+    {list.map((s, i) => (
+      <a href={s.href} class="phero2__card" data-phero2-card data-index={i}>
+        <div class="phero2__card-frame">
+          <img src={s.image} alt={s.alt} class="phero2__card-img" />
+        </div>
+        <div class="phero2__card-foot">
+          <span class="phero2__card-label">{s.label}</span>
+          <span class="phero2__card-sub">{s.sub}</span>
+        </div>
+      </a>
+    ))}
   </div>
 </section>
 
 <script>
   import { gsap } from 'gsap';
 
-  function initHero() {
-    const section = document.querySelector('[data-gsap-section="phero"]');
+  function initHero2() {
+    const section = document.querySelector('[data-gsap-section="phero2"]');
     if (!section) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const grid = section.querySelector('.phero2__grid');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const headline = section.querySelector('[data-gsap-animate="headline"]');
-    const rest = section.querySelectorAll('[data-gsap-animate="fade-up"]');
-    const bg = section.querySelector('.phero__bg');
+    if (!reduced) {
+      const words = section.querySelectorAll('.phero2__word');
+      const eyebrow = section.querySelector('[data-gsap-animate="fade-up"]');
+      const sub = section.querySelectorAll('[data-gsap-animate="fade-up"]')[1];
+      const cards = section.querySelectorAll('[data-phero2-card]');
 
-    const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
-    if (bg) tl.from(bg, { scale: 1.12, duration: 1.6, ease: 'power2.out' });
-    if (headline) tl.from(headline, { y: 60, opacity: 0, duration: 1 }, '-=1.3');
-    tl.from(rest, { y: 20, opacity: 0, stagger: 0.1, duration: 0.8 }, '-=0.6');
+      const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+      if (eyebrow) tl.from(eyebrow, { y: 16, opacity: 0, duration: 0.7 });
+      tl.from(words, { y: 40, opacity: 0, stagger: 0.04, duration: 0.9 }, '-=0.3');
+      if (sub) tl.from(sub, { y: 20, opacity: 0, duration: 0.8 }, '-=0.4');
+      tl.from(cards, { y: 30, opacity: 0, stagger: 0.12, duration: 0.8 }, '-=0.5');
 
-    const mm = gsap.matchMedia();
-    mm.add('(min-width: 900px)', () => {
-      gsap.to(bg, {
-        yPercent: 10,
-        ease: 'none',
-        scrollTrigger: { trigger: section, start: 'top top', end: 'bottom top', scrub: true },
+      const mm = gsap.matchMedia();
+      mm.add('(min-width: 900px)', () => {
+        if (grid) {
+          gsap.to(grid, {
+            yPercent: 8,
+            ease: 'none',
+            scrollTrigger: { trigger: section, start: 'top top', end: 'bottom top', scrub: true },
+          });
+        }
+        cards.forEach((card) => {
+          const qx = gsap.quickTo(card, 'rotateY', { duration: 0.4, ease: 'power3.out' });
+          const qy = gsap.quickTo(card, 'rotateX', { duration: 0.4, ease: 'power3.out' });
+          card.addEventListener('mousemove', (e) => {
+            const r = card.getBoundingClientRect();
+            qx(((e.clientX - r.left) / r.width - 0.5) * 8);
+            qy(-((e.clientY - r.top) / r.height - 0.5) * 8);
+          });
+          card.addEventListener('mouseleave', () => {
+            gsap.to(card, { rotateX: 0, rotateY: 0, duration: 0.6, ease: 'power2.out' });
+          });
+        });
       });
-    });
+    }
   }
 
-  document.addEventListener('astro:page-load', initHero);
+  document.addEventListener('astro:page-load', initHero2);
 </script>
 
 <style>
-  .phero {
+  .phero2 {
     position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: flex-end;
+    padding-block: var(--space-xl) var(--space-2xl);
+    background-color: var(--bg-primary);
     overflow: hidden;
-    color: var(--text-primary);
   }
-  .phero__bg {
+  .phero2__grid {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 30%;
-    z-index: 0;
-  }
-  .phero__scrim {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background:
-      linear-gradient(to top, color-mix(in srgb, var(--bg-primary) 92%, transparent) 0%, color-mix(in srgb, var(--bg-primary) 20%, transparent) 55%, transparent 85%),
-      linear-gradient(to right, color-mix(in srgb, var(--bg-primary) 55%, transparent) 0%, transparent 40%);
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--navy) 8%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--navy) 8%, transparent) 1px, transparent 1px);
+    background-size: 32px 32px;
+    -webkit-mask-image: radial-gradient(circle at 50% 20%, black 0%, black 25%, transparent 65%);
+    mask-image: radial-gradient(circle at 50% 20%, black 0%, black 25%, transparent 65%);
   }
 
-  .phero__vmarquee {
-    position: absolute;
-    top: 0; right: var(--space-md); bottom: 0;
-    z-index: 1;
-    width: 24px;
-    overflow: hidden;
-    display: none;
-  }
-  .phero__vtrack {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-    writing-mode: vertical-rl;
-    animation: phero-vscroll 22s linear infinite;
-  }
-  .phero__vtrack span {
-    font-size: var(--text-xs);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--text-primary) 55%, transparent);
-    white-space: nowrap;
-  }
-  @keyframes phero-vscroll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
-
-  .phero__inner {
-    position: relative;
-    z-index: 2;
-    padding-block-end: var(--space-2xl);
-    display: grid;
-    gap: var(--space-lg);
-  }
-
-  .phero__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: var(--text-sm);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--text-primary) 75%, transparent);
-  }
-  .phero__dot {
-    width: 7px; height: 7px;
-    border-radius: var(--radius-full);
-    background-color: var(--accent-hover);
-    box-shadow: 0 0 10px 2px color-mix(in srgb, var(--accent-hover) 70%, transparent);
-    animation: phero-pulse 1.8s ease-in-out infinite;
-  }
-  @keyframes phero-pulse { 50% { opacity: 0.35; } }
-
-  .phero__headline {
-    font-family: var(--font-heading);
-    font-weight: 500;
-    font-size: clamp(3rem, 10vw, 8rem);
-    line-height: 0.96;
-    letter-spacing: -0.03em;
-    max-width: 18ch;
-  }
-
-  .phero__foot {
+  .phero2__inner { position: relative; z-index: 1; display: grid; gap: var(--space-md); max-width: 62ch; margin-bottom: var(--space-xl); }
+  .phero2__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+  .phero2__headline {
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--space-lg);
-    border-top: 1px solid color-mix(in srgb, var(--text-primary) 20%, transparent);
-    padding-top: var(--space-md);
+    column-gap: 0.22em;
+    row-gap: 0.05em;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    color: var(--navy);
   }
-  .phero__sub {
-    font-size: var(--text-lg);
-    line-height: 1.5;
-    color: color-mix(in srgb, var(--text-primary) 80%, transparent);
-    max-width: 42ch;
-  }
-  .phero__btn {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    font-family: var(--font-body);
-    font-weight: 500;
-    font-size: var(--text-base);
-    padding: var(--space-sm) var(--space-lg);
-    border-radius: var(--radius-full);
-    background-color: var(--accent);
-    color: var(--on-accent);
-    text-decoration: none;
-    transition: transform var(--transition-fast), background-color var(--transition-fast);
-  }
-  .phero__btn:hover { transform: translateY(-2px); background-color: var(--accent-hover); }
+  .phero2__word-outer { overflow: hidden; padding-bottom: 0.06em; margin-bottom: -0.06em; }
+  .phero2__break { flex-basis: 100%; height: 0; }
+  .phero2__word { display: block; }
+  .phero2__word--accent { color: var(--accent); }
+  .phero2__word--navy { color: var(--accent-hover); }
+  .phero2__sub { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; }
 
-  @media (min-width: 900px) {
-    .phero__vmarquee { display: block; }
+  .phero2__surfaces { position: relative; z-index: 1; display: grid; gap: var(--space-md); grid-template-columns: 1fr; }
+  .phero2__card {
+    display: block;
+    text-decoration: none;
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transform-style: preserve-3d;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+  .phero2__card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+  .phero2__card-frame { aspect-ratio: 4 / 3; overflow: hidden; }
+  .phero2__card-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--transition-smooth); }
+  .phero2__card:hover .phero2__card-img { transform: scale(1.04); }
+  .phero2__card-foot { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-sm); padding: var(--space-md); }
+  .phero2__card-label { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-lg); color: var(--navy); }
+  .phero2__card-sub { font-size: var(--text-sm); color: var(--accent); font-weight: 500; }
+
+  @media (min-width: 800px) {
+    .phero2__surfaces { grid-template-columns: 1fr 1fr; }
   }
 </style>

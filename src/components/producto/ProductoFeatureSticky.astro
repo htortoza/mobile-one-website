@@ -1,0 +1,97 @@
+---
+// src/components/producto/ProductoFeatureSticky.astro
+// /producto §5.3 — BackOffice. Formato distinto al bento de §5.2 (§16.2.3
+// anti-repetición): título fijo (sticky) a la izquierda + ledger de
+// funcionalidades con reglas que se dibujan a la derecha (§16.3).
+const { id, eyebrow, title, image, imageAlt, features } = Astro.props;
+const list = features ?? [];
+---
+
+<section id={id} class="pfs" data-gsap-section={`pfs-${id}`}>
+  <div class="container pfs__grid">
+    <div class="pfs__rail" data-pfs-rail>
+      {eyebrow && <span class="pfs__eyebrow" data-gsap-animate="fade-up">{eyebrow}</span>}
+      <h2 class="pfs__title" data-gsap-animate="fade-up">{title}</h2>
+      {image && (
+        <div class="pfs__frame" data-gsap-animate="fade-up">
+          <img class="pfs__img" src={image} alt={imageAlt ?? ''} />
+        </div>
+      )}
+    </div>
+
+    <div class="pfs__ledger">
+      {list.map((f, i) => (
+        <article class="pfs__row" data-pfs-row>
+          <span class="pfs__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <div class="pfs__copy">
+            <h3 class="pfs__heading">{f.title}</h3>
+            <p class="pfs__text">{f.text}</p>
+          </div>
+          <span class="pfs__rule" data-pfs-rule aria-hidden="true"></span>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll('[data-pfs-row]').forEach((row) => {
+      if (row.dataset.pfsInit) return;
+      row.dataset.pfsInit = '1';
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const rule = row.querySelector('[data-pfs-rule]');
+      gsap.from(row, {
+        opacity: 0, y: 16, duration: 0.6, ease: 'expo.out',
+        scrollTrigger: { trigger: row, start: 'top 88%' },
+      });
+      if (rule) {
+        gsap.fromTo(rule, { scaleX: 0 }, {
+          scaleX: 1, duration: 0.8, ease: 'expo.out', transformOrigin: 'left',
+          scrollTrigger: { trigger: row, start: 'top 85%' },
+        });
+      }
+    });
+  });
+</script>
+
+<style>
+  .pfs { padding-block: var(--space-2xl); background-color: var(--bg-secondary); }
+  .pfs__grid { display: grid; gap: var(--space-lg); }
+
+  .pfs__rail { display: grid; gap: var(--space-md); align-self: start; }
+  .pfs__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--on-accent);
+    background-color: var(--navy);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+  }
+  .pfs__title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(2rem, 4.6vw, 3rem); letter-spacing: -0.02em; line-height: 1.1; color: var(--navy); max-width: 22ch; }
+  .pfs__frame { border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+  .pfs__img { width: 100%; height: 100%; object-fit: cover; display: block; aspect-ratio: 4 / 3; }
+
+  .pfs__ledger { display: grid; }
+  .pfs__row { position: relative; display: grid; gap: var(--space-xs); padding-block: var(--space-md); }
+  .pfs__num { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-sm); color: var(--accent-hover); }
+  .pfs__heading { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-lg); color: var(--navy); letter-spacing: -0.01em; }
+  .pfs__text { font-size: var(--text-base); color: var(--text-secondary); line-height: 1.6; max-width: 60ch; }
+  .pfs__rule { position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background-color: var(--border); }
+
+  @media (min-width: 900px) {
+    .pfs__grid { grid-template-columns: 320px 1fr; gap: var(--space-2xl); }
+    .pfs__rail { position: sticky; top: var(--space-xl); }
+  }
+</style>
