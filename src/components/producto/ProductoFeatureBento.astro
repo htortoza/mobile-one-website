@@ -1,10 +1,20 @@
 ---
 // src/components/producto/ProductoFeatureBento.astro
-// /producto §5.2 — POS Mobile. Bento grid (§16.3) para 8 funcionalidades, con
-// intro asimétrica texto+foto real (mismo lenguaje visual que SolutionPair de
-// Home). Estilo claro, sin tema oscuro propio.
+// /producto §5.2 — POS Mobile. Bento grid premium (§16.3, referencia
+// Linear/Vercel): cada card tiene icono propio o foto real (nunca texto
+// plano solo), numeral fantasma gigante como elemento gráfico de fondo,
+// hover con lift+glow+zoom. Intro asimétrica texto+foto (SolutionPair Home).
 const { id, eyebrow, title, note, image, imageAlt, features } = Astro.props;
 const list = features ?? [];
+
+const ICONS = {
+  qr: 'M4 4h4v1H5v3H4V4Z|M16 4h4v4h-1V5h-3V4Z|M4 16h4v4H4v-4Z|M9 9h6v6H9V9Z',
+  search: 'M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Z|M21 21l-4.3-4.3',
+  cart: 'M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6|M9.5 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z|M17.5 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z',
+  receipt: 'M6 2h12v20l-2-1-2 1-2-1-2 1-2-1-2 1V2Z|M9 7h6|M9 11h6|M9 15h4',
+  users: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z|M4 20c0-3 2-5.5 5-5.5s5 2.5 5 5.5|M17 8.5A2.5 2.5 0 1 1 17 3.5|M17.5 13c1.8 0 3.5 1.6 3.5 4v3h-3',
+  chart: 'M4 20V10|M10 20V4|M16 20v-7|M20 20H4',
+};
 ---
 
 <section id={id} class="pfb" data-gsap-section={`pfb-${id}`}>
@@ -24,14 +34,26 @@ const list = features ?? [];
   <div class="container pfb__grid">
     {list.map((f, i) => (
       <article class={`pfb__card pfb__card--${i} ${f.image ? 'pfb__card--media' : ''}`} data-pfb-card>
+        <span class="pfb__ghost" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+        <div class="pfb__sheen" aria-hidden="true"></div>
+
         {f.image && (
           <div class="pfb__card-frame">
-            <img class="pfb__card-img" src={f.image} alt={f.imageAlt ?? ''} />
+            <img class="pfb__card-img" src={f.image} alt={f.imageAlt ?? ''} loading="lazy" />
           </div>
         )}
-        <span class="pfb__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-        <h3 class="pfb__heading">{f.title}</h3>
-        <p class="pfb__text">{f.text}</p>
+        <div class="pfb__card-body">
+          {f.icon && (
+            <span class="pfb__icon" data-pfb-icon aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                {ICONS[f.icon].split('|').map((d) => <path d={d} />)}
+              </svg>
+            </span>
+          )}
+          <span class="pfb__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <h3 class="pfb__heading">{f.title}</h3>
+          <p class="pfb__text">{f.text}</p>
+        </div>
       </article>
     ))}
   </div>
@@ -44,14 +66,26 @@ const list = features ?? [];
   gsap.registerPlugin(ScrollTrigger);
 
   document.addEventListener('astro:page-load', () => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePointer = window.matchMedia('(pointer: fine)').matches;
+
     document.querySelectorAll('[data-pfb-card]').forEach((card) => {
       if (card.dataset.pfbInit) return;
       card.dataset.pfbInit = '1';
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      gsap.from(card, {
-        opacity: 0, y: 20, duration: 0.6, ease: 'expo.out',
-        scrollTrigger: { trigger: card, start: 'top 88%' },
-      });
+
+      if (!reduced) {
+        gsap.from(card, {
+          opacity: 0, y: 20, duration: 0.6, ease: 'expo.out',
+          scrollTrigger: { trigger: card, start: 'top 88%' },
+        });
+      }
+
+      if (!reduced && finePointer) {
+        const icon = card.querySelector('[data-pfb-icon]');
+        card.addEventListener('mouseenter', () => {
+          if (icon) gsap.fromTo(icon, { scale: 0.8, rotate: -6 }, { scale: 1, rotate: 0, duration: 0.45, ease: 'back.out(2.2)' });
+        });
+      }
     });
   });
 </script>
@@ -69,26 +103,73 @@ const list = features ?? [];
   .pfb__img { width: 100%; height: 100%; object-fit: cover; display: block; aspect-ratio: 16 / 9; }
 
   .pfb__grid { display: grid; gap: var(--space-md); grid-template-columns: 1fr; }
+
   .pfb__card {
+    position: relative;
     background-color: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: var(--space-md);
-    display: grid;
-    gap: var(--space-xs);
-    align-content: start;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
   }
-  .pfb__card--media { padding: 0; overflow: hidden; }
-  .pfb__card-frame { aspect-ratio: 16 / 10; overflow: hidden; }
-  .pfb__card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .pfb__card--media .pfb__num,
-  .pfb__card--media .pfb__heading,
-  .pfb__card--media .pfb__text { padding-inline: var(--space-md); }
-  .pfb__card--media .pfb__num { margin-top: var(--space-md); }
-  .pfb__card--media .pfb__text { padding-bottom: var(--space-md); }
+  .pfb__card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  }
 
-  .pfb__num { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-sm); color: var(--accent-hover); }
-  .pfb__heading { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-lg); color: var(--navy); letter-spacing: -0.01em; }
+  /* Numeral fantasma — elemento gráfico de fondo (§16.2 "cifras como
+     elemento gráfico"), no un simple label de texto. */
+  .pfb__ghost {
+    position: absolute;
+    top: -0.15em;
+    right: var(--space-sm);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: clamp(3.5rem, 7vw, 5.5rem);
+    line-height: 1;
+    color: color-mix(in srgb, var(--navy) 5%, transparent);
+    z-index: 0;
+    pointer-events: none;
+    transition: color var(--transition-fast);
+  }
+  .pfb__card:hover .pfb__ghost { color: color-mix(in srgb, var(--accent) 8%, transparent); }
+
+  /* Sheen — barrido de brillo diagonal al hover, recurso clásico de bento premium */
+  .pfb__sheen {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(115deg, transparent 40%, color-mix(in srgb, var(--accent) 10%, transparent) 50%, transparent 60%);
+    transform: translateX(-120%);
+    transition: transform 0.6s var(--ease-expo);
+  }
+  .pfb__card:hover .pfb__sheen { transform: translateX(120%); }
+
+  .pfb__card-body { position: relative; z-index: 1; display: grid; gap: var(--space-xs); align-content: start; padding: var(--space-md); flex: 1; }
+  .pfb__card--media { padding: 0; }
+  .pfb__card-frame { position: relative; z-index: 1; aspect-ratio: 16 / 10; overflow: hidden; }
+  .pfb__card-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--transition-smooth); }
+  .pfb__card:hover .pfb__card-img { transform: scale(1.06); }
+
+  .pfb__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    margin-bottom: var(--space-xs);
+    border-radius: var(--radius-md);
+    background-color: color-mix(in srgb, var(--accent) 10%, var(--bg-primary));
+    color: var(--accent);
+  }
+  .pfb__icon svg { width: 20px; height: 20px; }
+
+  .pfb__num { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-xs); letter-spacing: 0.05em; color: var(--accent-hover); }
+  .pfb__heading { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-lg); color: var(--navy); letter-spacing: -0.01em; line-height: 1.2; }
   .pfb__text { font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.55; }
 
   @media (min-width: 900px) {
