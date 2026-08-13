@@ -190,7 +190,7 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
 
 <style>
   .arch { padding-block: var(--space-2xl); background-color: var(--bg-secondary); }
-  .arch__head { display: grid; gap: var(--space-sm); margin-bottom: var(--space-xl); max-width: 70ch; }
+  .arch__head { display: grid; gap: var(--space-sm); margin-bottom: var(--space-xl); max-width: 70ch; margin-inline: auto; justify-items: center; text-align: center; }
   .arch__title {
     font-family: var(--font-heading);
     font-size: clamp(2.2rem, 5.4vw, 3.6rem);
@@ -200,7 +200,7 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
   .arch__text { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; }
   .arch__link { color: var(--accent); font-weight: 600; text-decoration: none; }
 
-  .arch__badges { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .arch__badges { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-sm); margin-top: var(--space-sm); }
   .arch__badge {
     font-size: var(--text-sm);
     font-weight: 500;
