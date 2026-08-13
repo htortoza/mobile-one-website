@@ -1,12 +1,14 @@
 ---
 // src/components/producto/ProductoScaleBand.astro
-// /producto §5.4 — "Diseñado para escalar". Banda full-bleed azul, ahora con
-// un diagrama propio (hub + nodos-tienda conectados, mismo lenguaje visual
-// de cables/paquetes que ArchitectureTeaser en Home) para que la sección no
-// sea solo texto — el diagrama ilustra "1 código base" alimentando a toda
-// la red de tiendas al mismo tiempo.
+// /producto §5.4 — "Diseñado para escalar". El diagrama literaliza el
+// mensaje: un solo feature flag (switch) se activa y una grilla de
+// terminales — toda la red — se enciende al mismo tiempo. Más narrativo que
+// un hub-a-nodos: es un solo gesto (flip) con una consecuencia visible en
+// muchos lugares a la vez, no una red estática de líneas.
 const { title, text, stat, statLabel } = Astro.props;
-const NODE_COUNT = 5;
+const GRID_COLS = 4;
+const GRID_ROWS = 3;
+const TILES = Array.from({ length: GRID_COLS * GRID_ROWS });
 ---
 
 <section class="psb" data-gsap-section="psb">
@@ -19,22 +21,21 @@ const NODE_COUNT = 5;
       <p class="psb__text">{text}</p>
     </div>
 
-    <div class="psb__diagram" data-psb-diagram aria-hidden="true">
-      <svg class="psb__cables" viewBox="0 0 100 100" preserveAspectRatio="none">
-        {Array.from({ length: NODE_COUNT }).map((_, i) => (
-          <path class="psb__cable" data-psb-cable data-index={i} />
-        ))}
-      </svg>
-      <div class="psb__hub">
-        <span class="psb__hub-dot"></span>
-      </div>
-      <div class="psb__nodes">
-        {Array.from({ length: NODE_COUNT }).map((_, i) => (
-          <span class="psb__node" data-psb-node data-index={i}>
+    <div class="psb__scene" data-psb-scene aria-hidden="true">
+      <button class="psb__flag" data-psb-flag type="button" tabindex="-1">
+        <span class="psb__flag-track">
+          <span class="psb__flag-knob"></span>
+        </span>
+        <span class="psb__flag-label">feature flag</span>
+      </button>
+
+      <div class="psb__wall" data-psb-wall>
+        {TILES.map((_, i) => (
+          <span class="psb__tile" data-psb-tile data-index={i}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 10 12 4l8 6" />
-              <path d="M5 10v10h14V10" />
-              <path d="M10 20v-6h4v6" />
+              <rect x="6" y="2.5" width="12" height="19" rx="2.2" />
+              <path d="M9.5 6.5h5" />
+              <path d="M9.5 9.8h5" />
             </svg>
           </span>
         ))}
@@ -49,34 +50,12 @@ const NODE_COUNT = 5;
 
   gsap.registerPlugin(ScrollTrigger);
 
-  function layoutDiagram(diagram) {
-    const svg = diagram.querySelector('.psb__cables');
-    const hub = diagram.querySelector('.psb__hub');
-    const nodes = diagram.querySelectorAll('[data-psb-node]');
-    if (!svg || !hub || window.innerWidth < 900) return;
-
-    const box = diagram.getBoundingClientRect();
-    const toPct = (x, y) => ({ x: ((x - box.left) / box.width) * 100, y: ((y - box.top) / box.height) * 100 });
-
-    const hubBox = hub.getBoundingClientRect();
-    const start = toPct(hubBox.right, hubBox.top + hubBox.height / 2);
-
-    nodes.forEach((node) => {
-      const i = node.dataset.index;
-      const nodeBox = node.getBoundingClientRect();
-      const end = toPct(nodeBox.left, nodeBox.top + nodeBox.height / 2);
-      const midX = (start.x + end.x) / 2;
-      const d = `M ${start.x} ${start.y} C ${midX} ${start.y}, ${midX} ${end.y}, ${end.x} ${end.y}`;
-      svg.querySelectorAll(`[data-index="${i}"]`).forEach((p) => p.setAttribute('d', d));
-    });
-  }
-
   document.addEventListener('astro:page-load', () => {
     const section = document.querySelector('[data-gsap-section="psb"]');
     const content = section && section.querySelector('[data-gsap-animate="psb-content"]');
     if (!content) return;
     const stat = section.querySelector('[data-psb-stat]');
-    const diagram = section.querySelector('[data-psb-diagram]');
+    const scene = section.querySelector('[data-psb-scene]');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (stat) {
@@ -95,14 +74,6 @@ const NODE_COUNT = 5;
       }
     }
 
-    if (diagram) {
-      layoutDiagram(diagram);
-      const onResize = () => layoutDiagram(diagram);
-      window.addEventListener('resize', onResize);
-      document.addEventListener('astro:before-swap', () => window.removeEventListener('resize', onResize), { once: true });
-      ScrollTrigger.addEventListener('refresh', () => layoutDiagram(diagram));
-    }
-
     if (reduced) return;
 
     gsap.from(content, {
@@ -110,23 +81,50 @@ const NODE_COUNT = 5;
       scrollTrigger: { trigger: section, start: 'top 80%' },
     });
 
-    if (diagram) {
-      const nodes = diagram.querySelectorAll('[data-psb-node]');
-      const cables = diagram.querySelectorAll('[data-psb-cable]');
-      gsap.from(diagram.querySelector('.psb__hub'), {
-        opacity: 0, scale: 0.7, duration: 0.5, ease: 'back.out(2)',
-        scrollTrigger: { trigger: section, start: 'top 75%' },
+    if (scene) {
+      const flag = scene.querySelector('[data-psb-flag]');
+      const tiles = Array.from(scene.querySelectorAll('[data-psb-tile]'));
+      const cols = 4;
+
+      gsap.from(flag, {
+        opacity: 0, y: 12, duration: 0.5, ease: 'expo.out',
+        scrollTrigger: { trigger: scene, start: 'top 82%' },
       });
-      gsap.from(cables, {
-        opacity: 0, duration: 0.5, stagger: 0.08,
-        scrollTrigger: { trigger: section, start: 'top 72%' },
+      gsap.from(tiles, {
+        opacity: 0, scale: 0.85, duration: 0.4, stagger: 0.02, ease: 'power2.out',
+        clearProps: 'opacity,scale,transform',
+        scrollTrigger: { trigger: scene, start: 'top 82%' },
       });
-      gsap.from(nodes, {
-        opacity: 0, scale: 0.6, duration: 0.5, stagger: 0.08, ease: 'back.out(2)',
-        scrollTrigger: { trigger: section, start: 'top 70%' },
+
+      // Distancia de cada tile a la posición del flag (arriba-izquierda del
+      // wall) determina el orden del "ripple" — se enciende de cerca a lejos.
+      const order = tiles
+        .map((tile, i) => {
+          const row = Math.floor(i / cols);
+          const col = i % cols;
+          return { tile, dist: Math.hypot(row, col) };
+        })
+        .sort((a, b) => a.dist - b.dist);
+
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: scene, start: 'top 65%' },
+        delay: 0.3,
       });
-      gsap.to(diagram.querySelector('.psb__hub-dot'), {
-        scale: 1.6, opacity: 0.4, duration: 1.4, repeat: -1, yoyo: true, ease: 'sine.inOut',
+      tl.add(() => flag.querySelector('.psb__flag-track').classList.add('is-on'), 0);
+      tl.to(scene.querySelector('.psb__flag-knob'), {
+        x: 20, duration: 0.3, ease: 'power2.out',
+      }, 0);
+
+      // GSAP no interpola color-mix()/var(); se anima un proxy numérico y se
+      // escribe la custom property a mano — la interpolación real la hace el CSS.
+      order.forEach(({ tile }, idx) => {
+        const proxy = { v: 0 };
+        tl.to(proxy, {
+          v: 1,
+          duration: 0.35,
+          ease: 'power1.out',
+          onUpdate: () => tile.style.setProperty('--tile-on', proxy.v),
+        }, 0.15 + idx * 0.045);
       });
     }
   });
@@ -164,50 +162,63 @@ const NODE_COUNT = 5;
   }
   .psb__text { font-size: var(--text-lg); color: color-mix(in srgb, var(--on-accent) 88%, transparent); line-height: 1.6; max-width: 46ch; }
 
-  /* ── Diagrama: hub "1 código base" irradiando a N tiendas ── */
-  .psb__diagram { position: relative; display: none; }
-  .psb__cables { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .psb__cable {
-    stroke: color-mix(in srgb, var(--on-accent) 35%, transparent);
-    stroke-width: 1.2;
-    fill: none;
-    vector-effect: non-scaling-stroke;
+  /* ── Escena: 1 flag prende una pared de terminales ── */
+  .psb__scene { display: none; }
+  .psb__flag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: none;
+    border: none;
+    cursor: default;
+    margin-bottom: var(--space-lg);
   }
-  .psb__hub {
+  .psb__flag-track {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background-color: color-mix(in srgb, var(--on-accent) 20%, transparent);
+    border: 1px solid color-mix(in srgb, var(--on-accent) 35%, transparent);
+    transition: background-color 0.3s;
+  }
+  .psb__flag-track.is-on { background-color: color-mix(in srgb, var(--on-accent) 55%, transparent); }
+  .psb__flag-knob {
     position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 64px;
-    height: 64px;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
     border-radius: var(--radius-full);
     background-color: var(--on-accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 0 8px color-mix(in srgb, var(--on-accent) 12%, transparent);
-    z-index: 1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   }
-  .psb__hub-dot { width: 14px; height: 14px; border-radius: var(--radius-full); background: var(--accent); }
+  .psb__flag-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.05em;
+    color: color-mix(in srgb, var(--on-accent) 70%, transparent);
+  }
 
-  .psb__nodes { display: flex; flex-direction: column; justify-content: space-between; height: 100%; margin-left: auto; width: fit-content; }
-  .psb__node {
+  .psb__wall { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-sm); }
+  .psb__tile {
+    --tile-on: 0;
     position: relative;
-    z-index: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
+    aspect-ratio: 1;
     border-radius: var(--radius-md);
-    background-color: color-mix(in srgb, var(--on-accent) 14%, transparent);
     color: var(--on-accent);
-    border: 1px solid color-mix(in srgb, var(--on-accent) 25%, transparent);
+    background-color: color-mix(in srgb, var(--on-accent) calc(4% + var(--tile-on) * 32%), transparent);
+    border: 1px solid color-mix(in srgb, var(--on-accent) calc(14% + var(--tile-on) * 60%), transparent);
+    box-shadow: 0 0 calc(var(--tile-on) * 22px) color-mix(in srgb, var(--on-accent) calc(var(--tile-on) * 70%), transparent);
+    opacity: calc(0.4 + var(--tile-on) * 0.6);
   }
-  .psb__node svg { width: 22px; height: 22px; }
+  .psb__tile svg { width: 40%; height: 40%; }
 
   @media (min-width: 900px) {
     .psb__grid { grid-template-columns: 1.1fr 0.9fr; align-items: center; }
-    .psb__diagram { display: block; height: 320px; }
+    .psb__scene { display: block; max-width: 320px; margin-inline: auto; }
   }
 </style>
