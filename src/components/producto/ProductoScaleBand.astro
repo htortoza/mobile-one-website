@@ -6,7 +6,7 @@
 const { title, text, stat, statLabel } = Astro.props;
 ---
 
-<section class="psb bg-pattern-m" data-gsap-section="psb">
+<section class="psb" data-gsap-section="psb">
   <div class="container psb__inner" data-gsap-animate="psb-content">
     {stat && (
       <p class="psb__stat" data-psb-stat data-value={stat}>0{statLabel && <span class="psb__stat-label">{statLabel}</span>}</p>
@@ -54,8 +54,8 @@ const { title, text, stat, statLabel } = Astro.props;
 </script>
 
 <style>
-  .psb { padding-block: var(--space-2xl); color: var(--on-accent); text-align: center; }
-  .psb__inner { display: grid; gap: var(--space-sm); justify-items: center; max-width: 60ch; margin-inline: auto; }
+  .psb { padding-block: var(--space-2xl); background: var(--accent-gradient); color: var(--on-accent); text-align: center; }
+  .psb__inner { display: grid; gap: var(--space-sm); justify-items: center; }
   .psb__stat {
     font-family: var(--font-heading);
     font-weight: 600;
@@ -80,5 +80,5 @@ const { title, text, stat, statLabel } = Astro.props;
     letter-spacing: -0.02em;
     line-height: 1.15;
   }
-  .psb__text { font-size: var(--text-lg); color: color-mix(in srgb, var(--on-accent) 88%, transparent); line-height: 1.6; }
+  .psb__text { font-size: var(--text-lg); color: color-mix(in srgb, var(--on-accent) 88%, transparent); line-height: 1.6; max-width: 60ch; margin-inline: auto; }
 </style>
