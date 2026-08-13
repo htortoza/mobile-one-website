@@ -2,14 +2,15 @@
 // src/pages/producto.astro
 // Deep-dive de producto (§5 doc maestro). Comparte el ADN visual del Home
 // (paleta, tipografía ≤600, bloques azules bookend) pero no es un clon: Hero
-// propio (ProductoHero), formatos que no se repiten entre sí (bento → banda
-// puente con isotipo → ledger sticky → banda azul con stat → CTA), acentos
+// propio (ProductoHero) + ProductoSwitcher (sub-nav sticky bajo el header)
+// que alterna entre los paneles POS Mobile (bento) y BackOffice (ledger
+// sticky) con una transición de crossfade — nunca los 2 a la vez. Acentos
 // secundarios --accent-hover/--navy y peso 600 para más fuerza tipográfica
 // que Home. Spec: docs/superpowers/specs/2026-08-13-mobile-one-producto-design.md
 import Layout from '../layouts/Layout.astro';
 import ProductoHero from '../components/producto/ProductoHero.astro';
+import ProductoSwitcher from '../components/producto/ProductoSwitcher.astro';
 import ProductoFeatureBento from '../components/producto/ProductoFeatureBento.astro';
-import ProductoBridge from '../components/producto/ProductoBridge.astro';
 import ProductoFeatureSticky from '../components/producto/ProductoFeatureSticky.astro';
 import ProductoScaleBand from '../components/producto/ProductoScaleBand.astro';
 import CtaClose from '../components/home/CtaClose.astro';
@@ -36,59 +37,52 @@ const schemaData = {
       { text: 'y' }, { text: 'el', accent: 'navy' }, { text: 'panel', accent: 'navy' }, { text: 'de', accent: 'navy' }, { text: 'administración', accent: 'navy' },
     ]}
     subheadline="Todo lo que necesitas para operar la venta directamente en tu terminal de cobro, y todo lo que necesitas para controlarla desde un panel web, en un solo sistema."
-    surfaces={[
-      {
-        label: 'POS Mobile',
-        sub: 'El terminal de venta →',
-        href: '#pos-mobile',
-        image: '/images/hero-mobile-pos-v2-final.webp',
-        alt: 'Terminal Mobile One mostrando un carrito de venta con productos, descuento aplicado y botón de cobro',
-      },
-      {
-        label: 'BackOffice',
-        sub: 'El panel de administración →',
-        href: '#backoffice',
-        image: '/images/solucion-backoffice.webp',
-        alt: 'Encargada de tienda revisando ventas y stock en un panel web desde laptop y tablet',
-      },
+  />
+
+  <ProductoSwitcher
+    tabs={[
+      { label: 'POS Mobile', sub: 'El terminal de venta', target: 'pos-mobile', icon: 'pos' },
+      { label: 'BackOffice', sub: 'El panel de administración', target: 'backoffice', icon: 'panel' },
     ]}
   />
 
-  <ProductoFeatureBento
-    id="pos-mobile"
-    eyebrow="POS Mobile"
-    title="La venta corre en el terminal que ya usas para cobrar"
-    note="POS Mobile no requiere un celular adicional: se instala y opera directamente sobre el terminal de pago (Android) que la tienda ya tiene certificado con su proveedor — Getnet, Transbank o Mercado Pago."
-    image="/images/solucion-fila.webp"
-    imageAlt="Vendedora cobrando con terminal Mobile One en la sala de venta"
-    features={[
-      { title: 'Acceso rápido por QR', text: 'El vendedor escanea su credencial y el QR de la tienda directamente en el terminal; el sistema valida vigencia y pertenencia antes de dejarlo operar.' },
-      { title: 'Carrito de venta flexible', text: 'Crear, modificar y eliminar líneas de producto libremente. Cantidad mínima de línea es 1; para retirar un producto se ejecuta la acción explícita de eliminar, evitando errores de digitación.' },
-      { title: 'Cobro sin fricción', text: 'El monto a pagar aparece automáticamente en la pantalla de cobro. Soporta pagos mixtos: efectivo + tarjeta, o dos tarjetas distintas, con cálculo automático de vuelto.' },
-      { title: 'Venta omnicanal', text: 'Tres modalidades en la misma transacción: venta directa, retiro programado en otra tienda (con fecha) y despacho a domicilio — incluyendo despacho multidirección cuando un mismo pedido va a más de un destino.', image: '/images/solucion-stock.webp', imageAlt: 'Vendedor consultando stock de toda la red para despachar un pedido' },
-      { title: 'Documentos electrónicos al instante', text: 'Boleta o factura se genera e imprime apenas se aprueba el pago, integrado a tu facturador electrónico.' },
-      { title: 'Búsqueda y postventa', text: 'Buscador de ventas por folio, RUT/cliente o fecha, con reimpresión de documentos y generación de tickets de cambio.' },
-      { title: 'Recepción de mercadería', text: 'Ingreso vinculado a documentos de transferencia del ERP (almacenes en tránsito), escaneo por SKU, cuadratura de cantidades y comprobante de recepción.', image: '/images/solucion-bulto.webp', imageAlt: 'Trabajador escaneando un bulto sellado con el terminal' },
-      { title: 'Cierre de turno', text: 'Resumen de ventas del día con impresión, sin pasos administrativos adicionales para el cajero.' },
-    ]}
-  />
+  <div data-psw-panels style="--container-max: min(94vw, 1600px)">
+  <div data-psw-panel="pos-mobile">
+    <ProductoFeatureBento
+      eyebrow="POS Mobile"
+      title="La venta corre en el terminal que ya usas para cobrar"
+      note="POS Mobile no requiere un celular adicional: se instala y opera directamente sobre el terminal de pago (Android) que la tienda ya tiene certificado con su proveedor — Getnet, Transbank o Mercado Pago."
+      image="/images/solucion-fila.webp"
+      imageAlt="Vendedora cobrando con terminal Mobile One en la sala de venta"
+      features={[
+        { title: 'Acceso rápido por QR', text: 'El vendedor escanea su credencial y el QR de la tienda directamente en el terminal; el sistema valida vigencia y pertenencia antes de dejarlo operar.' },
+        { title: 'Carrito de venta flexible', text: 'Crear, modificar y eliminar líneas de producto libremente. Cantidad mínima de línea es 1; para retirar un producto se ejecuta la acción explícita de eliminar, evitando errores de digitación.' },
+        { title: 'Cobro sin fricción', text: 'El monto a pagar aparece automáticamente en la pantalla de cobro. Soporta pagos mixtos: efectivo + tarjeta, o dos tarjetas distintas, con cálculo automático de vuelto.' },
+        { title: 'Venta omnicanal', text: 'Tres modalidades en la misma transacción: venta directa, retiro programado en otra tienda (con fecha) y despacho a domicilio — incluyendo despacho multidirección cuando un mismo pedido va a más de un destino.', image: '/images/solucion-stock.webp', imageAlt: 'Vendedor consultando stock de toda la red para despachar un pedido' },
+        { title: 'Documentos electrónicos al instante', text: 'Boleta o factura se genera e imprime apenas se aprueba el pago, integrado a tu facturador electrónico.' },
+        { title: 'Búsqueda y postventa', text: 'Buscador de ventas por folio, RUT/cliente o fecha, con reimpresión de documentos y generación de tickets de cambio.' },
+        { title: 'Recepción de mercadería', text: 'Ingreso vinculado a documentos de transferencia del ERP (almacenes en tránsito), escaneo por SKU, cuadratura de cantidades y comprobante de recepción.', image: '/images/solucion-bulto.webp', imageAlt: 'Trabajador escaneando un bulto sellado con el terminal' },
+        { title: 'Cierre de turno', text: 'Resumen de ventas del día con impresión, sin pasos administrativos adicionales para el cajero.' },
+      ]}
+    />
+  </div>
 
-  <ProductoBridge text="Todo lo que el vendedor hace en el terminal se refleja al instante en el panel — sin digitación doble ni cierres manuales." />
-
-  <ProductoFeatureSticky
-    id="backoffice"
-    eyebrow="BackOffice"
-    title="Visibilidad y control desde un panel web"
-    image="/images/solucion-backoffice.webp"
-    imageAlt="Encargada de tienda revisando ventas y stock en un panel web desde laptop y tablet"
-    features={[
-      { title: 'Gestión de ventas', text: 'Consulta de todas las ventas por tienda, estado o folio, con detalle completo: transacción, cliente, ítems, pagos y resumen financiero. Descarga de DTE en PDF.' },
-      { title: 'Carros con pago pendiente', text: 'Visibilidad de ventas que quedaron a mitad de camino en el POS, con verificación directa del estado del cobro en Mercado Pago para decidir si se completa o se retira.' },
-      { title: 'Maestros centralizados', text: 'Tiendas, artículos, stock y clientes sincronizados con tu ERP — consulta centralizada sin tener que abrir el sistema de escritorio.' },
-      { title: 'Administración del sistema', text: 'Gestión de usuarios (perfiles, credenciales QR, vigencia) y de releases (registro de versiones), con activación/desactivación de funcionalidades por cliente vía feature flags — sin tocar código ni afectar a otros clientes.' },
-      { title: 'Trazabilidad y auditoría', text: 'Nada se borra: las transacciones con incidencias se marcan como no visibles pero se conservan para auditoría completa.' },
-    ]}
-  />
+  <div data-psw-panel="backoffice" hidden>
+    <ProductoFeatureSticky
+      eyebrow="BackOffice"
+      title="Visibilidad y control desde un panel web"
+      image="/images/solucion-backoffice.webp"
+      imageAlt="Encargada de tienda revisando ventas y stock en un panel web desde laptop y tablet"
+      features={[
+        { title: 'Gestión de ventas', text: 'Consulta de todas las ventas por tienda, estado o folio, con detalle completo: transacción, cliente, ítems, pagos y resumen financiero. Descarga de DTE en PDF.' },
+        { title: 'Carros con pago pendiente', text: 'Visibilidad de ventas que quedaron a mitad de camino en el POS, con verificación directa del estado del cobro en Mercado Pago para decidir si se completa o se retira.' },
+        { title: 'Maestros centralizados', text: 'Tiendas, artículos, stock y clientes sincronizados con tu ERP — consulta centralizada sin tener que abrir el sistema de escritorio.' },
+        { title: 'Administración del sistema', text: 'Gestión de usuarios (perfiles, credenciales QR, vigencia) y de releases (registro de versiones), con activación/desactivación de funcionalidades por cliente vía feature flags — sin tocar código ni afectar a otros clientes.' },
+        { title: 'Trazabilidad y auditoría', text: 'Nada se borra: las transacciones con incidencias se marcan como no visibles pero se conservan para auditoría completa.' },
+      ]}
+    />
+  </div>
+  </div>
 
   <ProductoScaleBand
     stat={1}

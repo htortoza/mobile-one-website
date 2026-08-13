@@ -2,11 +2,9 @@
 // src/components/producto/ProductoHero.astro
 // /producto §5.1 — Hero propio, distinto al split azul/claro de Home
 // (HeroSplit). Fondo claro con grid+degradado de marca (mismo recurso visual
-// de hero-split__light::before, reusado aquí a página completa) y el
-// selector de las 2 superficies del producto como pieza central del Hero,
-// no como tabs de texto aparte.
-const { eyebrow, headline, subheadline, surfaces } = Astro.props;
-const list = surfaces ?? [];
+// de hero-split__light::before, reusado aquí a página completa). El selector
+// de las 2 superficies vive aparte, en <ProductoSwitcher> (se vuelve sticky).
+const { eyebrow, headline, subheadline } = Astro.props;
 ---
 
 <section class="phero2" data-gsap-section="phero2">
@@ -26,20 +24,6 @@ const list = surfaces ?? [];
     </h1>
     <p class="phero2__sub" data-gsap-animate="fade-up">{subheadline}</p>
   </div>
-
-  <div class="container phero2__surfaces">
-    {list.map((s, i) => (
-      <a href={s.href} class="phero2__card" data-phero2-card data-index={i}>
-        <div class="phero2__card-frame">
-          <img src={s.image} alt={s.alt} class="phero2__card-img" />
-        </div>
-        <div class="phero2__card-foot">
-          <span class="phero2__card-label">{s.label}</span>
-          <span class="phero2__card-sub">{s.sub}</span>
-        </div>
-      </a>
-    ))}
-  </div>
 </section>
 
 <script>
@@ -55,13 +39,11 @@ const list = surfaces ?? [];
       const words = section.querySelectorAll('.phero2__word');
       const eyebrow = section.querySelector('[data-gsap-animate="fade-up"]');
       const sub = section.querySelectorAll('[data-gsap-animate="fade-up"]')[1];
-      const cards = section.querySelectorAll('[data-phero2-card]');
 
       const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
       if (eyebrow) tl.from(eyebrow, { y: 16, opacity: 0, duration: 0.7 });
       tl.from(words, { y: 40, opacity: 0, stagger: 0.04, duration: 0.9 }, '-=0.3');
       if (sub) tl.from(sub, { y: 20, opacity: 0, duration: 0.8 }, '-=0.4');
-      tl.from(cards, { y: 30, opacity: 0, stagger: 0.12, duration: 0.8 }, '-=0.5');
 
       const mm = gsap.matchMedia();
       mm.add('(min-width: 900px)', () => {
@@ -72,18 +54,6 @@ const list = surfaces ?? [];
             scrollTrigger: { trigger: section, start: 'top top', end: 'bottom top', scrub: true },
           });
         }
-        cards.forEach((card) => {
-          const qx = gsap.quickTo(card, 'rotateY', { duration: 0.4, ease: 'power3.out' });
-          const qy = gsap.quickTo(card, 'rotateX', { duration: 0.4, ease: 'power3.out' });
-          card.addEventListener('mousemove', (e) => {
-            const r = card.getBoundingClientRect();
-            qx(((e.clientX - r.left) / r.width - 0.5) * 8);
-            qy(-((e.clientY - r.top) / r.height - 0.5) * 8);
-          });
-          card.addEventListener('mouseleave', () => {
-            gsap.to(card, { rotateX: 0, rotateY: 0, duration: 0.6, ease: 'power2.out' });
-          });
-        });
       });
     }
   }
@@ -141,29 +111,7 @@ const list = surfaces ?? [];
   .phero2__word--navy { color: var(--accent-hover); }
   .phero2__sub { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; }
 
-  .phero2__surfaces { position: relative; z-index: 1; display: grid; gap: var(--space-md); grid-template-columns: 1fr; }
-  .phero2__card {
-    display: block;
-    text-decoration: none;
-    color: var(--text-primary);
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-    transform-style: preserve-3d;
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-  }
-  .phero2__card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
-  .phero2__card-frame { aspect-ratio: 4 / 3; overflow: hidden; }
-  .phero2__card-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--transition-smooth); }
-  .phero2__card:hover .phero2__card-img { transform: scale(1.04); }
-  .phero2__card-foot { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-sm); padding: var(--space-md); }
-  .phero2__card-label { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-lg); color: var(--navy); }
-  .phero2__card-sub { font-size: var(--text-sm); color: var(--accent); font-weight: 500; }
-
   @media (min-width: 800px) {
-    .phero2__surfaces { grid-template-columns: 1fr 1fr; }
     .phero2__inner { width: 60%; }
   }
 </style>
