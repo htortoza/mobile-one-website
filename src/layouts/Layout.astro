@@ -77,6 +77,16 @@ const {
         };
         gsap.ticker.add(rafCallback);
         gsap.ticker.lagSmoothing(0);
+
+        // Los componentes miden posiciones de pin/scrub apenas se registran
+        // (astro:page-load). Si una fuente (Satoshi) termina de cargar
+        // después y cambia el alto de la página (line-wrap distinto al de
+        // la fuente de respaldo), esas posiciones quedan obsoletas — el pin
+        // siguiente arranca "adelantado/atrasado" respecto al scroll real.
+        // Se refresca atado a eventos reales de carga, nunca a un timeout
+        // arbitrario (un refresh a mitad de un pin activo rompe el layout).
+        document.fonts?.ready?.then(() => ScrollTrigger.refresh());
+        window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
       }
 
       // Antes del swap: destruir Lenis y matar todos los ScrollTriggers
