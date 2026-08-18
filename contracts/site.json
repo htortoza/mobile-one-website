@@ -13,6 +13,7 @@
     "address": "Chile"
   },
   "orderUrl": "/contacto",
+  "loginUrl": "https://mobile-one-dev.dotsolutions.io/login",
   "navigation": [
     { "label": "Producto",          "href": "/producto" },
     { "label": "Soluciones",        "href": "/soluciones" },
