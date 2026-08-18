@@ -1,0 +1,283 @@
+---
+// src/components/contact/ContactSplit.astro
+// /contacto — 2 columnas (referencia: adereso.ai/contacto): izquierda info +
+// confianza (bullets + logos), derecha formulario. Copy de H1/subheadline y
+// los 3 bullets de confianza viene textual del doc maestro §11. Logos de
+// marca: mismos wordmarks placeholder de ClientLogos (Home) — NO son
+// clientes reales, ver comentario ahí. El formulario valida en el cliente y
+// muestra un estado de éxito, pero no envía a ningún backend todavía — se
+// deja marcado para conectar antes de producción.
+const { eyebrow, title, subheadline, trustPoints, logos, ctaText } = Astro.props;
+const points = trustPoints ?? [];
+const logoList = logos ?? [];
+
+const INDUSTRY_OPTIONS = ['Moda y calzado', 'Electrónica y tecnología', 'Multitienda / holdings', 'Retail con ERP SAP', 'Otra'];
+const SOLUTION_OPTIONS = ['POS Mobile', 'BackOffice', 'Integraciones', 'Seguridad', 'No estoy seguro'];
+
+const ICONS = {
+  clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z|M12 7v5l3 3',
+  card: 'M3 6h18v12H3z|M3 10h18|M7 15h4',
+  link: 'M8 12l-2 2a3 3 0 0 0 4 4l2-2|M16 12l2-2a3 3 0 0 0-4-4l-2 2|M9.5 14.5l5-5',
+};
+---
+
+<section class="contact" data-gsap-section="contact">
+  <div class="container contact__grid">
+    <div class="contact__info" data-gsap-animate="fade-up">
+      {eyebrow && <p class="contact__eyebrow">{eyebrow}</p>}
+      <h1 class="contact__title">{title}</h1>
+      <p class="contact__sub">{subheadline}</p>
+
+      <ul class="contact__trust">
+        {points.map((p) => (
+          <li class="contact__trust-item">
+            <span class="contact__trust-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                {ICONS[p.icon].split('|').map((d) => <path d={d} />)}
+              </svg>
+            </span>
+            <span>{p.text}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div class="contact__logos-block">
+        <p class="contact__logos-label">Marcas que ya confían en nosotros</p>
+        <div class="contact__logos-grid">
+          {logoList.map((name) => (
+            <span class="contact__logo">{name}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div class="contact__form-wrap" data-gsap-animate="fade-up-delay">
+      <form class="contact__form" data-contact-form novalidate>
+        <div class="contact__row">
+          <div class="contact__field">
+            <label for="cf-nombre">Nombre</label>
+            <input id="cf-nombre" name="nombre" type="text" autocomplete="given-name" required />
+          </div>
+          <div class="contact__field">
+            <label for="cf-apellido">Apellido</label>
+            <input id="cf-apellido" name="apellido" type="text" autocomplete="family-name" required />
+          </div>
+        </div>
+
+        <div class="contact__field">
+          <label for="cf-email">Email corporativo</label>
+          <input id="cf-email" name="email" type="email" autocomplete="email" required />
+        </div>
+
+        <div class="contact__row">
+          <div class="contact__field">
+            <label for="cf-telefono">Teléfono</label>
+            <input id="cf-telefono" name="telefono" type="tel" autocomplete="tel" />
+          </div>
+          <div class="contact__field">
+            <label for="cf-empresa">Empresa</label>
+            <input id="cf-empresa" name="empresa" type="text" autocomplete="organization" required />
+          </div>
+        </div>
+
+        <div class="contact__row">
+          <div class="contact__field">
+            <label for="cf-industria">Industria</label>
+            <select id="cf-industria" name="industria" required>
+              <option value="" selected disabled>Selecciona una opción</option>
+              {INDUSTRY_OPTIONS.map((opt) => <option value={opt}>{opt}</option>)}
+            </select>
+          </div>
+          <div class="contact__field">
+            <label for="cf-solucion">Solución de interés</label>
+            <select id="cf-solucion" name="solucion" required>
+              <option value="" selected disabled>Selecciona una opción</option>
+              {SOLUTION_OPTIONS.map((opt) => <option value={opt}>{opt}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div class="contact__field">
+          <label for="cf-reto">¿Cuál es tu reto empresarial?</label>
+          <textarea id="cf-reto" name="reto" rows="4" required></textarea>
+        </div>
+
+        <label class="contact__consent">
+          <input type="checkbox" name="consentimiento" required />
+          <span>Acepto que Mobile One me contacte según la <a href="/privacidad">Política de Privacidad</a>.</span>
+        </label>
+
+        <button type="submit" class="contact__submit">{ctaText}</button>
+      </form>
+
+      <div class="contact__success" data-contact-success hidden>
+        <div class="contact__success-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9.5" />
+            <path d="M8 12.5l2.5 2.5L16 9" />
+          </svg>
+        </div>
+        <h2>¡Listo!</h2>
+        <p>Te contactaremos a la brevedad para agendar tu demo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    const section = document.querySelector('[data-gsap-section="contact"]');
+    if (!section) return;
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.from(section.querySelectorAll('[data-gsap-animate]'), {
+        opacity: 0, y: 20, duration: 0.7, stagger: 0.1, ease: 'expo.out',
+        scrollTrigger: { trigger: section, start: 'top 85%' },
+      });
+    }
+
+    const form = section.querySelector('[data-contact-form]');
+    const success = section.querySelector('[data-contact-success]');
+    if (!form || !success) return;
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      // AGENTE: conectar a un backend/CRM real (ej. HubSpot, Web3Forms, endpoint
+      // propio) antes de producción. Hoy el formulario solo valida en el
+      // cliente y muestra este estado de éxito — no envía datos a ningún lado.
+      const data = Object.fromEntries(new FormData(form).entries());
+      console.log('[contacto] formulario listo para enviar (sin backend conectado):', data);
+
+      form.hidden = true;
+      success.hidden = false;
+      success.focus?.();
+    });
+  });
+</script>
+
+<style>
+  .contact { padding-block: var(--space-2xl); background-color: var(--bg-primary); }
+  .contact__grid { display: grid; gap: var(--space-2xl); }
+
+  /* ── Columna info ── */
+  .contact__info { display: grid; gap: var(--space-md); align-content: start; }
+  .contact__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+  .contact__title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: clamp(2.2rem, 4.6vw, 3.2rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--navy);
+    max-width: 16ch;
+  }
+  .contact__sub { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; max-width: 44ch; }
+
+  .contact__trust { list-style: none; display: grid; gap: var(--space-sm); margin-top: var(--space-md); }
+  .contact__trust-item { display: flex; align-items: center; gap: var(--space-sm); font-size: var(--text-base); color: var(--text-primary); }
+  .contact__trust-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-md);
+    background-color: color-mix(in srgb, var(--accent) 10%, var(--bg-secondary));
+    color: var(--accent);
+  }
+  .contact__trust-icon svg { width: 18px; height: 18px; }
+
+  .contact__logos-block { margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--border); }
+  .contact__logos-label { font-size: var(--text-xs); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--space-sm); }
+  .contact__logos-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-sm) var(--space-md); }
+  .contact__logo {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    opacity: 0.7;
+    filter: grayscale(1);
+  }
+
+  /* ── Columna formulario ── */
+  .contact__form-wrap {
+    position: relative;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md);
+  }
+  .contact__form[hidden] { display: none; }
+  .contact__form { display: grid; gap: var(--space-md); }
+  .contact__row { display: grid; gap: var(--space-md); grid-template-columns: 1fr; }
+
+  .contact__field { display: grid; gap: var(--space-xs); min-width: 0; }
+  .contact__field label { font-size: var(--text-sm); font-weight: 500; color: var(--navy); }
+  .contact__field input,
+  .contact__field select,
+  .contact__field textarea {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-sm);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+  .contact__field textarea { resize: vertical; min-height: 5rem; }
+  .contact__field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a6472' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right var(--space-sm) center; background-size: 16px; padding-right: var(--space-lg); }
+  .contact__field select:invalid { color: var(--text-secondary); }
+  .contact__field input:focus,
+  .contact__field select:focus,
+  .contact__field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+
+  .contact__consent { display: flex; align-items: flex-start; gap: var(--space-xs); font-size: var(--text-xs); color: var(--text-secondary); line-height: 1.5; }
+  .contact__consent input { margin-top: 3px; accent-color: var(--accent); flex-shrink: 0; }
+  .contact__consent a { color: var(--accent); }
+
+  .contact__submit {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: var(--text-base);
+    color: var(--on-accent);
+    background: var(--accent-gradient);
+    border: none;
+    border-radius: var(--radius-full);
+    padding: var(--space-sm) var(--space-lg);
+    cursor: pointer;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+  .contact__submit:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+  .contact__success[hidden] { display: none; }
+  .contact__success { display: grid; justify-items: center; gap: var(--space-sm); text-align: center; padding-block: var(--space-xl); }
+  .contact__success-icon { color: var(--accent); }
+  .contact__success-icon svg { width: 56px; height: 56px; }
+  .contact__success h2 { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-2xl); color: var(--navy); }
+  .contact__success p { color: var(--text-secondary); max-width: 34ch; }
+
+  @media (min-width: 640px) {
+    .contact__row { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (min-width: 1024px) {
+    .contact__grid { grid-template-columns: 0.85fr 1.15fr; align-items: start; }
+    .contact__logos-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>

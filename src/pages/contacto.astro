@@ -1,0 +1,32 @@
+---
+// src/pages/contacto.astro — §11 doc maestro. Referencia de layout: adereso.ai/contacto.
+import Layout from '../layouts/Layout.astro';
+import ContactSplit from '../components/contact/ContactSplit.astro';
+
+const schemaData = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: 'Mobile One — Contacto',
+  url: 'https://mobileone.dotsolutions.io/contacto',
+};
+---
+
+<Layout
+  title="Agenda una demo | Mobile One 2.0"
+  description="Solicita una demo de Mobile One 2.0 y te mostramos la plataforma funcionando con tu catálogo de productos."
+  image="/images/og-default.png"
+  schemaData={schemaData}
+>
+  <ContactSplit
+    eyebrow="Contacto"
+    title="Veamos Mobile One funcionando con tu catálogo"
+    subheadline="30 minutos. Sin compromiso. Te mostramos el flujo completo: venta, stock multitienda e integración con tu ERP."
+    trustPoints={[
+      { icon: 'clock', text: 'Implementación típica: horas, no semanas.' },
+      { icon: 'card', text: 'Compatible con Getnet, Transbank y Mercado Pago.' },
+      { icon: 'link', text: 'Integración directa con SAP Business One.' },
+    ]}
+    logos={['Nordén', 'Cassia', 'Verax Retail', 'Lumen', 'Ostra', 'Platto Group']}
+    ctaText="Agendar demo"
+  />
+</Layout>
