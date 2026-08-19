@@ -47,21 +47,21 @@ const columns = [
 
     <div class="site-footer__cols">
       {columns.map((col) => (
-        <nav class="site-footer__col" aria-label={col.title}>
+        <div class="site-footer__col">
           <h3>{col.title}</h3>
           <ul role="list">
             {col.links.map((item) => (
-              <li><a href={item.href}>{item.label}</a></li>
+              <li><span class="site-footer__disabled">{item.label}</span></li>
             ))}
           </ul>
-        </nav>
+        </div>
       ))}
 
       <div class="site-footer__col">
         <h3>Legal</h3>
         <ul role="list">
           {legalLinks.map((item) => (
-            <li><a href={item.href}>{item.label}</a></li>
+            <li><span class="site-footer__disabled">{item.label}</span></li>
           ))}
           {company.email && <li><a href={`mailto:${company.email}`}>{company.email}</a></li>}
         </ul>
@@ -127,6 +127,7 @@ const columns = [
     overflow-wrap: break-word;
   }
   .site-footer__col a:hover { color: var(--accent); }
+  .site-footer__disabled { opacity: 0.55; cursor: default; }
 
   .site-footer__bottom {
     padding-top: var(--space-md);

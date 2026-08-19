@@ -1,7 +1,6 @@
 ---
 // src/pages/index.astro — Home. Copy fuente: doc maestro "Mobile One 2.0 — Sitio Web de Ventas" §4.
 import Layout from '../layouts/Layout.astro';
-import ClientLogos from '../components/home/ClientLogos.astro';
 import ProblemHook from '../components/home/ProblemHook.astro';
 import SolutionSlide from '../components/home/SolutionSlide.astro';
 import HeroSplit from '../components/home/HeroSplit.astro';
@@ -18,10 +17,23 @@ const schemaData = {
   name: 'Mobile One',
   url: 'https://mobileone.dotsolutions.io',
 };
+
+// Logos reales de clientes (autorizados, ver /public/logos-clientes). Variante
+// blanca — sobre el panel azul del hero.
+const CLIENT_LOGOS = [
+  { slug: 'dbs', alt: 'DBS' },
+  { slug: '100-futbol', alt: '100% Fútbol' },
+  { slug: 'wayu', alt: 'Wayú' },
+  { slug: 'superzoo', alt: 'Superzoo' },
+  { slug: 'superpet', alt: 'Superpet' },
+  { slug: 'flores', alt: 'Flores' },
+  { slug: 'sei', alt: 'SEI' },
+];
+const heroLogos = CLIENT_LOGOS.map((c) => ({ src: `/logos-clientes/white/${c.slug}.svg`, alt: c.alt }));
 ---
 
 <Layout
-  title="Mobile One 2.0: POS móvil para retail con inventario conectado"
+  title="Mobile One: POS móvil para retail con inventario conectado"
   description="Convierte a tus vendedores en un punto de venta móvil. Vende con el stock de toda tu red, integrado a SAP Business One y a tu hardware de pago actual. Implementación en horas."
   image="/images/og-default.png"
   schemaData={schemaData}
@@ -31,16 +43,13 @@ const schemaData = {
     headline="Cada terminal de cobro, un vendedor asistido y potenciado."
     accentPhrase="asistido y potenciado"
     breakAfterAccent={true}
-    subheadline="Mobile One 2.0 no reemplaza a tu vendedor: le da un pasillo infinito de productos —el stock de toda tu red— y las herramientas para cobrar, recomendar y facturar desde donde está el cliente, con el mismo terminal Getnet, Transbank o Mercado Pago que ya tienen."
+    subheadline="Mobile One no reemplaza a tu vendedor: le da un pasillo infinito de productos y las herramientas para cobrar, recomendar y facturar desde donde está el cliente, con el mismo terminal Getnet, Transbank o Mercado Pago que ya tienen."
     ctaText="Agendar demo"
     ctaHref="/contacto"
     ctaSecondaryText="Ver cómo funciona"
     ctaSecondaryHref="#compatibilidad"
-  />
-
-  <ClientLogos
-    claim="Compatible con el stack de pago y ERP que ya usan las cadenas retail más exigentes."
-    logos={['Nordén', 'Cassia', 'Verax Retail', 'Lumen', 'Ostra', 'Platto Group']}
+    logosLabel="Marcas que ya confían en Mobile One"
+    logos={heroLogos}
   />
 
   <ProblemHook
@@ -60,7 +69,7 @@ const schemaData = {
 
   <SolutionSlide
     eyebrow="Así lo resuelve"
-    title="La misma pregunta, respondida tres veces"
+    title="Un mismo terminal, tres problemas resueltos"
     panels={[
       {
         num: '01',

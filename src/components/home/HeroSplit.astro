@@ -11,7 +11,10 @@ const {
   ctaHref,
   ctaSecondaryText,
   ctaSecondaryHref,
+  logosLabel,
+  logos,
 } = Astro.props;
+const logoList = logos ?? [];
 
 const words = headline ? headline.split(' ') : [];
 const normalize = (w) => w.replace(/[.,]/g, '').toLowerCase();
@@ -54,6 +57,23 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
         <a href={ctaHref} class="hero-split__btn hero-split__btn--primary">{ctaText}</a>
         <a href={ctaSecondaryHref} class="hero-split__btn hero-split__btn--ghost">{ctaSecondaryText}</a>
       </div>
+
+      {logoList.length > 0 && (
+        <div class="hero-split__logos" data-gsap-animate="fade-up-logos">
+          {logosLabel && <p class="hero-split__logos-label">{logosLabel}</p>}
+          <div class="hero-split__logos-marquee" aria-hidden="true">
+            <div class="hero-split__logos-track">
+              {logoList.map((l) => (
+                <img src={l.src} alt={l.alt} class="hero-split__logo" />
+              ))}
+              {logoList.map((l) => (
+                <img src={l.src} alt="" class="hero-split__logo" data-logo-dupe />
+              ))}
+            </div>
+          </div>
+          <p class="sr-only">{logoList.map((l) => l.alt).join(' · ')}</p>
+        </div>
+      )}
     </div>
   </div>
 
@@ -76,6 +96,7 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     const eyebrow = section.querySelector('[data-gsap-animate="fade-up"]');
     const sub = section.querySelectorAll('[data-gsap-animate="fade-up"]')[1];
     const cta = section.querySelector('[data-gsap-animate="fade-up-delay"]');
+    const logosRow = section.querySelector('[data-gsap-animate="fade-up-logos"]');
     const mockups = section.querySelector('[data-gsap-animate="mockup"]');
 
     const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
@@ -83,6 +104,7 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     tl.from(words, { y: 40, opacity: 0, stagger: 0.05, duration: 0.9 }, '-=0.3');
     if (sub) tl.from(sub, { y: 20, opacity: 0, duration: 0.8 }, '-=0.4');
     if (cta) tl.from(cta, { y: 20, opacity: 0, duration: 0.7 }, '-=0.5');
+    if (logosRow) tl.from(logosRow, { y: 16, opacity: 0, duration: 0.6 }, '-=0.4');
     if (mockups) tl.from(mockups, { opacity: 0, scale: 0.96, duration: 0.9 }, '-=0.6');
 
     // CTA magnético — desktop (pointer: fine) only
@@ -197,6 +219,57 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     border: 1px solid color-mix(in srgb, var(--on-accent) 45%, transparent);
   }
   .hero-split__btn--ghost:hover { background-color: color-mix(in srgb, var(--on-accent) 12%, transparent); }
+
+  /* ── Barra de logos de clientes — pequeña, dentro del panel azul,
+     acotada a su ancho (min-width:0 + overflow:hidden) para que el
+     marquee nunca invada el panel claro ni el espacio bajo el hero. ── */
+  .hero-split__logos { min-width: 0; margin-top: var(--space-xs); }
+  .hero-split__logos-label {
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--on-accent) 65%, transparent);
+    margin-bottom: var(--space-xs);
+  }
+  .hero-split__logos-marquee {
+    overflow: hidden;
+    min-width: 0;
+    width: 100%;
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
+    mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
+  }
+  .hero-split__logos-marquee:hover .hero-split__logos-track { animation-play-state: paused; }
+  .hero-split__logos-track {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    width: max-content;
+    animation: hero-split-logos-marquee 26s linear infinite;
+  }
+  .hero-split__logo {
+    height: 18px;
+    width: auto;
+    opacity: 0.7;
+    transition: opacity var(--transition-fast);
+  }
+  .hero-split__logos-marquee:hover .hero-split__logo { opacity: 1; }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  @keyframes hero-split-logos-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-split__logos-track { animation: none; flex-wrap: wrap; width: 100%; }
+    .hero-split__logo[data-logo-dupe] { display: none; }
+  }
 
   /* ── Panel claro / mockups ── */
   .hero-split__light {

@@ -4,7 +4,6 @@
 import site from '../../contracts/site.json';
 
 const { siteName } = site.site;
-const nav = site.navigation ?? [];
 const orderUrl = site.orderUrl ?? '#';
 const loginUrl = site.loginUrl ?? '#';
 
@@ -17,14 +16,6 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
     <a href="/" class="logo" aria-label={`${siteName}: Inicio`}>
       <img src="/brand/Imagotipo-logo.svg" alt={siteName} class="logo__img" />
     </a>
-
-    <nav class="main-nav" aria-label="Navegación principal">
-      <ul role="list">
-        {nav.map((item) => (
-          <li><a href={item.href}>{item.label}</a></li>
-        ))}
-      </ul>
-    </nav>
 
     <div class="header-actions">
       <a href={loginUrl} class="header-login">
@@ -54,13 +45,6 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
 
   <!-- Overlay móvil -->
   <div class="mobile-overlay" id="mobile-overlay" data-overlay hidden>
-    <nav aria-label="Navegación móvil">
-      <ul role="list">
-        {nav.map((item) => (
-          <li><a href={item.href} data-overlay-link>{item.label}</a></li>
-        ))}
-      </ul>
-    </nav>
     <div class="overlay-actions">
       <a href={loginUrl} class="overlay-login">
         <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -149,37 +133,6 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
     display: block;
   }
 
-  /* ── Nav desktop ── */
-  .main-nav ul {
-    display: flex;
-    gap: var(--space-sm);
-    list-style: none;
-  }
-  .main-nav a {
-    position: relative;
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    letter-spacing: 0.04em;
-    color: var(--text-secondary);
-    text-decoration: none;
-    white-space: nowrap;
-    transition: color var(--transition-fast);
-  }
-  .main-nav a::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -4px;
-    width: 100%;
-    height: 1px;
-    background-color: var(--accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--transition-fast);
-  }
-  .main-nav a:hover { color: var(--text-primary); }
-  .main-nav a:hover::after { transform: scaleX(1); }
-
   /* ── Acciones header (login + CTA) ── */
   .header-actions {
     display: flex;
@@ -264,15 +217,6 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
   }
   .mobile-overlay.is-open { opacity: 1; }
   .mobile-overlay[hidden] { display: none; }
-  .mobile-overlay ul { list-style: none; text-align: center; display: grid; gap: var(--space-md); }
-  .mobile-overlay a {
-    font-family: var(--font-heading);
-    font-size: var(--text-2xl);
-    color: var(--text-primary);
-    text-decoration: none;
-    transition: color var(--transition-fast);
-  }
-  .mobile-overlay a:hover { color: var(--accent); }
   .overlay-actions { display: grid; gap: var(--space-sm); justify-items: center; }
   .overlay-login {
     display: inline-flex;
@@ -300,7 +244,7 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
 
   /* ── Responsive ── */
   @media (max-width: 860px) {
-    .main-nav, .header-actions { display: none; }
+    .header-actions { display: none; }
     .nav-toggle { display: flex; }
   }
 </style>

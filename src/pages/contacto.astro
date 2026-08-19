@@ -9,24 +9,43 @@ const schemaData = {
   name: 'Mobile One — Contacto',
   url: 'https://mobileone.dotsolutions.io/contacto',
 };
+
+// Logos reales de clientes (autorizados, ver /public/logos-clientes). Variante
+// navy — sobre el panel claro de esta sección.
+const CLIENT_LOGOS = [
+  { slug: 'dbs', alt: 'DBS' },
+  { slug: '100-futbol', alt: '100% Fútbol' },
+  { slug: 'wayu', alt: 'Wayú' },
+  { slug: 'superzoo', alt: 'Superzoo' },
+  { slug: 'superpet', alt: 'Superpet' },
+  { slug: 'flores', alt: 'Flores' },
+  { slug: 'sei', alt: 'SEI' },
+];
+const contactLogos = CLIENT_LOGOS.map((c) => ({ src: `/logos-clientes/dark/${c.slug}.svg`, alt: c.alt }));
 ---
 
 <Layout
-  title="Agenda una demo | Mobile One 2.0"
+  title="Agenda una demo | Mobile One"
   description="Solicita una demo de Mobile One 2.0 y te mostramos la plataforma funcionando con tu catálogo de productos."
   image="/images/og-default.png"
   schemaData={schemaData}
 >
   <ContactSplit
-    eyebrow="Contacto"
-    title="Veamos Mobile One funcionando con tu catálogo"
+    title={[
+      { text: 'Veamos ' },
+      { text: 'Mobile One', accent: true },
+      { text: ' funcionando con tu catálogo' },
+    ]}
     subheadline="30 minutos. Sin compromiso. Te mostramos el flujo completo: venta, stock multitienda e integración con tu ERP."
     trustPoints={[
-      { icon: 'clock', text: 'Implementación típica: horas, no semanas.' },
+      { icon: 'clock', text: 'Implementación en horas, no semanas.' },
       { icon: 'card', text: 'Compatible con Getnet, Transbank y Mercado Pago.' },
       { icon: 'link', text: 'Integración directa con SAP Business One.' },
+      { icon: 'box', text: 'Recepción de mercadería por producto (escaneo de código de barras) o vinculada a tu documento de transferencia.' },
+      { icon: 'store', text: 'Pasillo infinito: vende el stock de toda tu red desde un solo terminal.' },
+      { icon: 'receipt', text: 'Boleta o factura electrónica al instante, sin salir del terminal.' },
     ]}
-    logos={['Nordén', 'Cassia', 'Verax Retail', 'Lumen', 'Ostra', 'Platto Group']}
+    logos={contactLogos}
     ctaText="Agendar demo"
   />
 </Layout>

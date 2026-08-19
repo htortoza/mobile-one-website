@@ -4,7 +4,10 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   // ─── Placeholder — actualizar cuando el cliente confirme el dominio final ───
-  site: 'https://mobileone.dotsolutions.io',
+  // GH_PAGES_SITE: solo lo define el workflow del repo de preview en GitHub
+  // Pages (deploy como user site, sin subpath) — el build real del cliente
+  // nunca lo setea.
+  site: process.env.GH_PAGES_SITE ?? 'https://mobileone.dotsolutions.io',
 
   integrations: [
     sitemap({

@@ -3,21 +3,35 @@
 // /contacto — 2 columnas (referencia: adereso.ai/contacto): izquierda info +
 // confianza (bullets + logos), derecha formulario. Copy de H1/subheadline y
 // los 3 bullets de confianza viene textual del doc maestro §11. Logos de
-// marca: mismos wordmarks placeholder de ClientLogos (Home) — NO son
-// clientes reales, ver comentario ahí. El formulario valida en el cliente y
-// muestra un estado de éxito, pero no envía a ningún backend todavía — se
-// deja marcado para conectar antes de producción.
+// marca: clientes reales, ver /public/logos-clientes (variante navy, para
+// fondo claro). El formulario valida en el cliente y muestra un estado de
+// éxito, pero no envía a ningún backend todavía — se deja marcado para
+// conectar antes de producción.
 const { eyebrow, title, subheadline, trustPoints, logos, ctaText } = Astro.props;
 const points = trustPoints ?? [];
 const logoList = logos ?? [];
+// title: string simple, o array de partes [{ text, accent }] para recalcar
+// palabras puntuales con peso+azul (sin bold — tope 600, ver theme §15.3).
+const titleParts = Array.isArray(title) ? title : [{ text: title }];
 
 const INDUSTRY_OPTIONS = ['Moda y calzado', 'Electrónica y tecnología', 'Multitienda / holdings', 'Retail con ERP SAP', 'Otra'];
-const SOLUTION_OPTIONS = ['POS Mobile', 'BackOffice', 'Integraciones', 'Seguridad', 'No estoy seguro'];
+// Features reales del producto (src/pages/producto.astro §5) — no genéricas.
+const SOLUTION_OPTIONS = [
+  'Venta asistida y potenciada',
+  'Pasillo infinito (stock de toda la red)',
+  'Recepción de mercadería',
+  'Venta omnicanal (retiro y despacho)',
+  'Integraciones (SAP / pagos)',
+  'No estoy seguro',
+];
 
 const ICONS = {
   clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z|M12 7v5l3 3',
   card: 'M3 6h18v12H3z|M3 10h18|M7 15h4',
   link: 'M8 12l-2 2a3 3 0 0 0 4 4l2-2|M16 12l2-2a3 3 0 0 0-4-4l-2 2|M9.5 14.5l5-5',
+  store: 'M4 9l1-5h14l1 5|M4 9v11h16V9|M9 20v-6h6v6',
+  box: 'M21 8l-9-5-9 5 9 5 9-5Z|M3 8v8l9 5 9-5V8|M12 13v8',
+  receipt: 'M6 2h12v20l-3-2-3 2-3-2-3 2V2Z|M9 7h6|M9 11h6|M9 15h4',
 };
 ---
 
@@ -25,7 +39,11 @@ const ICONS = {
   <div class="container contact__grid">
     <div class="contact__info" data-gsap-animate="fade-up">
       {eyebrow && <p class="contact__eyebrow">{eyebrow}</p>}
-      <h1 class="contact__title">{title}</h1>
+      <h1 class="contact__title">
+        {titleParts.map((part) => (
+          <span class={part.accent ? 'contact__title-word contact__title-word--accent' : 'contact__title-word'}>{part.text}</span>
+        ))}
+      </h1>
       <p class="contact__sub">{subheadline}</p>
 
       <ul class="contact__trust">
@@ -36,22 +54,32 @@ const ICONS = {
                 {ICONS[p.icon].split('|').map((d) => <path d={d} />)}
               </svg>
             </span>
-            <span>{p.text}</span>
+            <span class="contact__trust-text">{p.text}</span>
           </li>
         ))}
       </ul>
 
       <div class="contact__logos-block">
         <p class="contact__logos-label">Marcas que ya confían en nosotros</p>
-        <div class="contact__logos-grid">
-          {logoList.map((name) => (
-            <span class="contact__logo">{name}</span>
-          ))}
+        <div class="contact__logos-marquee" aria-hidden="true">
+          <div class="contact__logos-track">
+            {logoList.map((l) => (
+              <img src={l.src} alt={l.alt} class="contact__logo" />
+            ))}
+            {logoList.map((l) => (
+              <img src={l.src} alt="" class="contact__logo" data-logo-dupe />
+            ))}
+          </div>
         </div>
+        <p class="sr-only">{logoList.map((l) => l.alt).join(' · ')}</p>
       </div>
     </div>
 
     <div class="contact__form-wrap" data-gsap-animate="fade-up-delay">
+      <div class="contact__form-note">
+        <p class="contact__form-note-title">Hablar con un experto</p>
+        <p class="contact__form-note-sub">Hoy operamos en +100 tiendas, muchas con varios POS por local.</p>
+      </div>
       <form class="contact__form" data-contact-form novalidate>
         <div class="contact__row">
           <div class="contact__field">
@@ -164,25 +192,58 @@ const ICONS = {
 </script>
 
 <style>
-  .contact { padding-block: var(--space-2xl); background-color: var(--bg-primary); }
-  .contact__grid { display: grid; gap: var(--space-2xl); }
+  /* Fondo full-bleed azul. Grid en capa propia (::before) para poder degradarla
+     hacia los bordes con mask radial sin afectar el contenido — mismo recurso
+     de HeroSplit .hero-split__light::before, aquí con líneas on-accent sobre
+     var(--accent-gradient) en vez de navy sobre gris. NO es el patrón diagonal
+     .bg-pattern-m (prohibido re-agregar, ver memoria). Padding reducido 60%
+     respecto al 2xl original (era excesivo). */
+  .contact {
+    position: relative;
+    padding-block: 24px;
+    background: var(--accent-gradient);
+    overflow: hidden;
+  }
+  .contact::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--on-accent) 14%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--on-accent) 14%, transparent) 1px, transparent 1px);
+    background-size: 32px 32px;
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, black 30%, transparent 72%);
+    mask-image: radial-gradient(circle at 50% 50%, black 0%, black 30%, transparent 72%);
+  }
+
+  /* Único panel blanco translúcido que envuelve ambas columnas (info + form) */
+  .contact__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 24px;
+    background-color: color-mix(in srgb, var(--on-accent) 90%, transparent);
+    border: 1px solid var(--on-accent);
+    border-radius: var(--radius-lg);
+    padding: 36px;
+  }
 
   /* ── Columna info ── */
-  .contact__info { display: grid; gap: var(--space-md); align-content: start; }
-  .contact__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+  .contact__info { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-content: center; min-width: 0; }
+  .contact__eyebrow { font-size: var(--text-sm); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
   .contact__title {
     font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: clamp(2.2rem, 4.6vw, 3.2rem);
-    line-height: 1.1;
+    font-weight: 400;
+    font-size: clamp(1.9rem, 3.6vw, 2.6rem);
+    line-height: 1.12;
     letter-spacing: -0.03em;
     color: var(--navy);
-    max-width: 16ch;
   }
+  .contact__title-word--accent { font-weight: 500; color: var(--accent); }
   .contact__sub { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; max-width: 44ch; }
 
-  .contact__trust { list-style: none; display: grid; gap: var(--space-sm); margin-top: var(--space-md); }
-  .contact__trust-item { display: flex; align-items: center; gap: var(--space-sm); font-size: var(--text-base); color: var(--text-primary); }
+  .contact__trust { list-style: none; display: grid; gap: var(--space-sm); }
+  .contact__trust-item { display: flex; align-items: center; gap: var(--space-sm); font-size: var(--text-base); font-weight: 500; color: var(--text-primary); }
   .contact__trust-icon {
     flex-shrink: 0;
     display: inline-flex;
@@ -195,30 +256,63 @@ const ICONS = {
     color: var(--accent);
   }
   .contact__trust-icon svg { width: 18px; height: 18px; }
+  .contact__trust-text { min-width: 0; }
 
-  .contact__logos-block { margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--border); }
-  .contact__logos-label { font-size: var(--text-xs); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--space-sm); }
-  .contact__logos-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-sm) var(--space-md); }
+  .contact__logos-block { border-top: 1px solid var(--border); padding-top: 20px; }
+  .contact__logos-label { font-size: var(--text-xs); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--space-sm); }
+
+  /* Carrusel de logos — mismo recurso de ClientLogos (Home): track duplicado +
+     animación CSS, pausa en hover, fallback estático con reduced-motion. */
+  .contact__logos-marquee { overflow: hidden; min-width: 0; width: 100%; }
+  .contact__logos-marquee:hover .contact__logos-track { animation-play-state: paused; }
+  .contact__logos-track {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    width: max-content;
+    animation: contact-logos-marquee 22s linear infinite;
+  }
   .contact__logo {
-    font-family: var(--font-heading);
-    font-weight: 500;
-    font-size: var(--text-base);
-    color: var(--text-secondary);
+    height: 20px;
+    width: auto;
     opacity: 0.7;
-    filter: grayscale(1);
+    transition: opacity var(--transition-fast);
+  }
+  .contact__logos-marquee:hover .contact__logo { opacity: 1; }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  @keyframes contact-logos-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact__logos-track { animation: none; flex-wrap: wrap; width: 100%; }
+    .contact__logo[data-logo-dupe] { display: none; }
   }
 
   /* ── Columna formulario ── */
   .contact__form-wrap {
     position: relative;
+    min-width: 0;
     background-color: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: var(--space-lg);
+    padding: 28px;
     box-shadow: var(--shadow-md);
   }
+  .contact__form-note { margin-bottom: var(--space-md); }
+  .contact__form-note-title { font-family: var(--font-heading); font-weight: 500; font-size: var(--text-lg); color: var(--navy); }
+  .contact__form-note-sub { font-size: var(--text-sm); color: var(--text-secondary); margin-top: 4px; }
+
   .contact__form[hidden] { display: none; }
-  .contact__form { display: grid; gap: var(--space-md); }
+  .contact__form { display: grid; gap: 12px; }
   .contact__row { display: grid; gap: var(--space-md); grid-template-columns: 1fr; }
 
   .contact__field { display: grid; gap: var(--space-xs); min-width: 0; }
@@ -233,7 +327,7 @@ const ICONS = {
     background-color: var(--bg-primary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: var(--space-sm) var(--space-sm);
+    padding: 12px;
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   }
   .contact__field textarea { resize: vertical; min-height: 5rem; }
@@ -253,7 +347,7 @@ const ICONS = {
 
   .contact__submit {
     font-family: var(--font-body);
-    font-weight: 600;
+    font-weight: 500;
     font-size: var(--text-base);
     color: var(--on-accent);
     background: var(--accent-gradient);
@@ -269,7 +363,7 @@ const ICONS = {
   .contact__success { display: grid; justify-items: center; gap: var(--space-sm); text-align: center; padding-block: var(--space-xl); }
   .contact__success-icon { color: var(--accent); }
   .contact__success-icon svg { width: 56px; height: 56px; }
-  .contact__success h2 { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-2xl); color: var(--navy); }
+  .contact__success h2 { font-family: var(--font-heading); font-weight: 500; font-size: var(--text-2xl); color: var(--navy); }
   .contact__success p { color: var(--text-secondary); max-width: 34ch; }
 
   @media (min-width: 640px) {
@@ -277,7 +371,6 @@ const ICONS = {
   }
 
   @media (min-width: 1024px) {
-    .contact__grid { grid-template-columns: 0.85fr 1.15fr; align-items: start; }
-    .contact__logos-grid { grid-template-columns: repeat(3, 1fr); }
+    .contact__grid { grid-template-columns: 1fr 1fr; align-items: center; }
   }
 </style>
