@@ -1,6 +1,7 @@
 ---
 // src/pages/404.astro
 import Layout from '../layouts/Layout.astro';
+import { withBase } from '../utils/base.js';
 ---
 
 <Layout
@@ -10,7 +11,7 @@ import Layout from '../layouts/Layout.astro';
   <section class="error-page container">
     <h1>404</h1>
     <p>Esta página no existe o fue movida.</p>
-    <a href="/" class="btn btn--primary btn--md">Volver al inicio</a>
+    <a href={withBase('/')} class="btn btn--primary btn--md">Volver al inicio</a>
   </section>
 </Layout>
 

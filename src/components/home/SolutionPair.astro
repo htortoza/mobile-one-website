@@ -4,6 +4,7 @@
 // (promociones + backoffice). Par asimétrico con foto real, no bento de 4
 // celdas iguales ni mockup abstracto. Formato distinto a SolutionSlide
 // (galería horizontal) y BrandCompat (pin con imagen/color).
+import { withBase } from '../../utils/base.js';
 const { eyebrow, title, items } = Astro.props;
 const list = items ?? [];
 ---
@@ -18,7 +19,7 @@ const list = items ?? [];
     {list.map((item, i) => (
       <article class={`spair__card spair__card--${i}`} data-spair-card>
         <div class="spair__frame">
-          <img class="spair__img" src={item.image} alt={item.alt} />
+          <img class="spair__img" src={withBase(item.image)} alt={item.alt} />
         </div>
         <div class="spair__copy">
           <h3 class="spair__heading">{item.heading}</h3>

@@ -5,13 +5,14 @@
 // por panel (mismo estilo cálido que BrandCompat/ProblemHook), sin mockups
 // abstractos. Mecánica de galería horizontal (§16.3), distinta al
 // rail+device que ya no usamos.
+import { withBase } from '../../utils/base.js';
 const { eyebrow, title, panels } = Astro.props;
 const list = panels ?? [];
 ---
 
 <section class="sslide" data-gsap-section="sslide">
   <div class="container sslide__head">
-    <img class="sslide__logo" src="/brand/Imagotipo-logo.svg" alt="Mobile One" data-gsap-animate="fade-up" />
+    <img class="sslide__logo" src={withBase('/brand/Imagotipo-logo.svg')} alt="Mobile One" data-gsap-animate="fade-up" />
     {eyebrow && <p class="sslide__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
     <h2 class="sslide__title" data-gsap-animate="fade-up">{title}</h2>
   </div>
@@ -21,7 +22,7 @@ const list = panels ?? [];
       {list.map((p) => (
         <article class="sslide__panel">
           <div class="sslide__frame">
-            <img class="sslide__img" src={p.image} alt={p.alt} />
+            <img class="sslide__img" src={withBase(p.image)} alt={p.alt} />
           </div>
           <div class="sslide__copy">
             <span class="sslide__num">{p.num}</span>
@@ -37,7 +38,7 @@ const list = panels ?? [];
     {list.map((p) => (
       <article class="sslide__mcard" data-sslide-mcard>
         <div class="sslide__frame">
-          <img class="sslide__img" src={p.image} alt={p.alt} />
+          <img class="sslide__img" src={withBase(p.image)} alt={p.alt} />
         </div>
         <div class="sslide__copy">
           <span class="sslide__num">{p.num}</span>

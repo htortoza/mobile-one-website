@@ -7,6 +7,7 @@
 // fondo claro). El formulario valida en el cliente y muestra un estado de
 // éxito, pero no envía a ningún backend todavía — se deja marcado para
 // conectar antes de producción.
+import { withBase } from '../../utils/base.js';
 const { eyebrow, title, subheadline, trustPoints, logos, ctaText } = Astro.props;
 const points = trustPoints ?? [];
 const logoList = logos ?? [];
@@ -64,10 +65,10 @@ const ICONS = {
         <div class="contact__logos-marquee" aria-hidden="true">
           <div class="contact__logos-track">
             {logoList.map((l) => (
-              <img src={l.src} alt={l.alt} class="contact__logo" />
+              <img src={withBase(l.src)} alt={l.alt} class="contact__logo" />
             ))}
             {logoList.map((l) => (
-              <img src={l.src} alt="" class="contact__logo" data-logo-dupe />
+              <img src={withBase(l.src)} alt="" class="contact__logo" data-logo-dupe />
             ))}
           </div>
         </div>
@@ -132,7 +133,7 @@ const ICONS = {
 
         <label class="contact__consent">
           <input type="checkbox" name="consentimiento" required />
-          <span>Acepto que Mobile One me contacte según la <a href="/privacidad">Política de Privacidad</a>.</span>
+          <span>Acepto que Mobile One me contacte según la <a href={withBase('/privacidad')}>Política de Privacidad</a>.</span>
         </label>
 
         <button type="submit" class="contact__submit">{ctaText}</button>

@@ -4,6 +4,7 @@
 // Layout fijo: foto a la izquierda, bloque de color+texto a la derecha (no invierten de lado).
 // Fondo (foto + color) hace crossfade entre 3 capítulos — Transbank (azul) → Getnet (naranja) →
 // Mercado Pago (amarillo).
+import { withBase } from '../../utils/base.js';
 const { title, eyebrow } = Astro.props;
 
 const chapters = [
@@ -56,7 +57,7 @@ const chapters = [
       <div class="compat__stage" data-compat-stage>
         <div class="compat__half compat__half--image" data-image-half>
           {chapters.map((ch, i) => (
-            <img class="compat__bg" data-compat-image={i} style={i > 0 ? 'opacity:0' : ''} src={ch.image} alt={ch.alt} />
+            <img class="compat__bg" data-compat-image={i} style={i > 0 ? 'opacity:0' : ''} src={withBase(ch.image)} alt={ch.alt} />
           ))}
         </div>
 
@@ -68,7 +69,7 @@ const chapters = [
               style={i > 0 ? 'opacity:0' : ''}
             >
               <p class="compat__kicker">{ch.kicker}</p>
-              <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} style={`${ch.logoHeight ? `height:${ch.logoHeight};` : ''}${ch.noShadow ? 'filter:none;' : ''}`} />
+              <img class="compat__brand-logo" src={withBase(ch.logo)} alt={ch.brand} style={`${ch.logoHeight ? `height:${ch.logoHeight};` : ''}${ch.noShadow ? 'filter:none;' : ''}`} />
               <p class="compat__claim">{ch.claim}</p>
               <p class="compat__detail">{ch.detail}</p>
             </div>
@@ -81,10 +82,10 @@ const chapters = [
   <div class="container compat__mobile-only">
     {chapters.map((ch) => (
       <div class="compat__card">
-        <img class="compat__card-image" src={ch.image} alt={ch.alt} />
+        <img class="compat__card-image" src={withBase(ch.image)} alt={ch.alt} />
         <div class={`compat__text ${ch.onDark ? 'compat__text--on-dark' : ''}`} style={`background-color:${ch.tone}`}>
           <p class="compat__kicker">{ch.kicker}</p>
-          <img class="compat__brand-logo" src={ch.logo} alt={ch.brand} style={`${ch.logoHeight ? `height:${ch.logoHeight};` : ''}${ch.noShadow ? 'filter:none;' : ''}`} />
+          <img class="compat__brand-logo" src={withBase(ch.logo)} alt={ch.brand} style={`${ch.logoHeight ? `height:${ch.logoHeight};` : ''}${ch.noShadow ? 'filter:none;' : ''}`} />
           <p class="compat__claim">{ch.claim}</p>
           <p class="compat__detail">{ch.detail}</p>
         </div>

@@ -2,6 +2,7 @@
 // src/components/Footer.astro
 // Chrome global del sitio. Lee contracts/site.json (marca + contacto + links legales).
 import site from '../../contracts/site.json';
+import { withBase } from '../utils/base.js';
 
 const year = new Date().getFullYear();
 const { siteName } = site.site;
@@ -41,7 +42,7 @@ const columns = [
 <footer class="site-footer">
   <div class="container site-footer__top">
     <div class="site-footer__brand">
-      <img src="/brand/Imagotipo-logo.svg" alt={siteName} class="site-footer__logo" />
+      <img src={withBase('/brand/Imagotipo-logo.svg')} alt={siteName} class="site-footer__logo" />
       <p class="site-footer__tagline">Un producto desarrollado por DOT Solutions.</p>
     </div>
 

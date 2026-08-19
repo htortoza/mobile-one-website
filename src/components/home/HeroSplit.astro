@@ -1,6 +1,7 @@
 ---
 // src/components/home/HeroSplit.astro
 // Home §4.1 — Split blue(izq)/claro(der). Mockup real de carrito + card BackOffice.
+import { withBase } from '../../utils/base.js';
 const {
   eyebrow,
   headline,
@@ -54,8 +55,8 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
       <p class="hero-split__sub" data-gsap-animate="fade-up">{subheadline}</p>
 
       <div class="hero-split__cta" data-gsap-animate="fade-up-delay">
-        <a href={ctaHref} class="hero-split__btn hero-split__btn--primary">{ctaText}</a>
-        <a href={ctaSecondaryHref} class="hero-split__btn hero-split__btn--ghost">{ctaSecondaryText}</a>
+        <a href={withBase(ctaHref)} class="hero-split__btn hero-split__btn--primary">{ctaText}</a>
+        <a href={withBase(ctaSecondaryHref)} class="hero-split__btn hero-split__btn--ghost">{ctaSecondaryText}</a>
       </div>
 
       {logoList.length > 0 && (
@@ -64,10 +65,10 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
           <div class="hero-split__logos-marquee" aria-hidden="true">
             <div class="hero-split__logos-track">
               {logoList.map((l) => (
-                <img src={l.src} alt={l.alt} class="hero-split__logo" />
+                <img src={withBase(l.src)} alt={l.alt} class="hero-split__logo" />
               ))}
               {logoList.map((l) => (
-                <img src={l.src} alt="" class="hero-split__logo" data-logo-dupe />
+                <img src={withBase(l.src)} alt="" class="hero-split__logo" data-logo-dupe />
               ))}
             </div>
           </div>
@@ -79,7 +80,7 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
 
   <div class="hero-split__light">
     <img
-      src="/images/hero-mobile-pos-v2-final.webp"
+      src={withBase('/images/hero-mobile-pos-v2-final.webp')}
       alt="Terminal Mobile One mostrando un carrito de venta con productos, descuento aplicado y botón de cobro"
       class="hero-pos-image"
       data-gsap-animate="mockup"

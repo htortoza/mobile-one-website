@@ -3,7 +3,8 @@
 // CTA de conversión persistente (Pilar 3). Aparece tras el hero, se oculta cerca del footer.
 // Lee el destino de pedido desde contracts/site.json.
 import site from '../../contracts/site.json';
-const orderUrl = site.orderUrl ?? '#';
+import { withBase } from '../utils/base.js';
+const orderUrl = withBase(site.orderUrl ?? '#');
 ---
 
 <a

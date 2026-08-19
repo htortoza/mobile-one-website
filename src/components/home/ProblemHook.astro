@@ -6,6 +6,7 @@
 // girar ni flotar. El texto se revela letra por letra y lleva un chip de fondo
 // para mantener contraste al pasar sobre la imagen. Formato distinto a
 // BrandCompat/SolutionBento/ProblemLedger.
+import { withBase } from '../../utils/base.js';
 const { lines, images } = Astro.props;
 const list = lines ?? [];
 const imgs = images ?? [];
@@ -34,7 +35,7 @@ const imgs = images ?? [];
 
       <div class="hook__card" data-hook-card>
         {imgs.map((src, i) => (
-          <img class="hook__cardimg" src={src} alt="" style={i > 0 ? 'opacity:0' : ''} data-hook-cardimg={i} />
+          <img class="hook__cardimg" src={withBase(src)} alt="" style={i > 0 ? 'opacity:0' : ''} data-hook-cardimg={i} />
         ))}
       </div>
     </div>

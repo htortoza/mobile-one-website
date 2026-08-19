@@ -4,6 +4,7 @@
 // Linear/Vercel): cada card tiene icono propio o foto real (nunca texto
 // plano solo), numeral fantasma gigante como elemento gráfico de fondo,
 // hover con lift+glow+zoom. Intro asimétrica texto+foto (SolutionPair Home).
+import { withBase } from '../../utils/base.js';
 const { id, eyebrow, title, note, image, imageAlt, features } = Astro.props;
 const list = features ?? [];
 
@@ -26,7 +27,7 @@ const ICONS = {
     </div>
     {image && (
       <div class="pfb__frame" data-gsap-animate="fade-up">
-        <img class="pfb__img" src={image} alt={imageAlt ?? ''} />
+        <img class="pfb__img" src={withBase(image)} alt={imageAlt ?? ''} />
       </div>
     )}
   </div>
@@ -39,7 +40,7 @@ const ICONS = {
 
         {f.image && (
           <div class="pfb__card-frame">
-            <img class="pfb__card-img" src={f.image} alt={f.imageAlt ?? ''} loading="lazy" />
+            <img class="pfb__card-img" src={withBase(f.image)} alt={f.imageAlt ?? ''} loading="lazy" />
           </div>
         )}
         <div class="pfb__card-body">

@@ -1,6 +1,7 @@
 ---
 // src/components/home/CtaClose.astro
 // Home §4.9 — CTA de cierre. Bookend azul con Hero/4.3 (mismo bg-pattern-m).
+import { withBase } from '../../utils/base.js';
 const { title, body, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref } = Astro.props;
 ---
 
@@ -9,8 +10,8 @@ const { title, body, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref } = As
     <h2 class="cta-close__title">{title}</h2>
     <p class="cta-close__body">{body}</p>
     <div class="cta-close__actions">
-      <a href={ctaHref} class="cta-close__btn cta-close__btn--primary">{ctaText}</a>
-      {ctaSecondaryText && <a href={ctaSecondaryHref} class="cta-close__btn cta-close__btn--ghost">{ctaSecondaryText}</a>}
+      <a href={withBase(ctaHref)} class="cta-close__btn cta-close__btn--primary">{ctaText}</a>
+      {ctaSecondaryText && <a href={withBase(ctaSecondaryHref)} class="cta-close__btn cta-close__btn--ghost">{ctaSecondaryText}</a>}
     </div>
   </div>
 </section>

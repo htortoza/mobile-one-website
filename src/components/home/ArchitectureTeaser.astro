@@ -6,6 +6,7 @@
 // viajan (§16.3/§21.3). Logos reales donde existen (Transbank/Getnet/
 // Mercado Pago, ya usados en BrandCompat); el resto son wordmarks de texto,
 // no logos fabricados.
+import { withBase } from '../../utils/base.js';
 const { title, text, badges, inputs, hub, outputs } = Astro.props;
 const badgeList = badges ?? [];
 const inputList = inputs ?? [];
@@ -17,7 +18,7 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
   <div class="container arch__head">
     <h2 class="arch__title" data-gsap-animate="fade-up">{title}</h2>
     <p class="arch__text">{text}</p>
-    <a href="/integraciones" class="arch__link">Ver arquitectura completa →</a>
+    <a href={withBase('/integraciones')} class="arch__link">Ver arquitectura completa →</a>
 
     {badgeList.length > 0 && (
       <div class="arch__badges">
@@ -51,7 +52,7 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
             <div class="arch__logos">
               {node.logos.map((logo) => (
                 <span class={`arch__logo-chip ${logo.tone ? `arch__logo-chip--${logo.tone}` : ''}`}>
-                  <img src={logo.src} alt="" />
+                  <img src={withBase(logo.src)} alt="" />
                 </span>
               ))}
             </div>
@@ -63,7 +64,7 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
     </div>
 
     <div class="arch__hub" data-arch-hub>
-      <img class="arch__hub-logo" src="/brand/Imagotipo-logo.svg" alt="" aria-hidden="true" />
+      <img class="arch__hub-logo" src={withBase('/brand/Imagotipo-logo.svg')} alt="" aria-hidden="true" />
       <p class="arch__hub-label">{hubNode.label}</p>
       {hubNode.sub && <p class="arch__hub-sub">{hubNode.sub}</p>}
     </div>
@@ -75,7 +76,7 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
             <div class="arch__logos">
               {node.logos.map((logo) => (
                 <span class={`arch__logo-chip ${logo.tone ? `arch__logo-chip--${logo.tone}` : ''}`}>
-                  <img src={logo.src} alt="" />
+                  <img src={withBase(logo.src)} alt="" />
                 </span>
               ))}
             </div>

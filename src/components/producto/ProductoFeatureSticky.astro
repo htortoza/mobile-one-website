@@ -3,6 +3,7 @@
 // /producto §5.3 — BackOffice. Formato distinto al bento de §5.2 (§16.2.3
 // anti-repetición): título fijo (sticky) a la izquierda + ledger de
 // funcionalidades con reglas que se dibujan a la derecha (§16.3).
+import { withBase } from '../../utils/base.js';
 const { id, eyebrow, title, image, imageAlt, features } = Astro.props;
 const list = features ?? [];
 ---
@@ -14,7 +15,7 @@ const list = features ?? [];
       <h2 class="pfs__title" data-gsap-animate="fade-up">{title}</h2>
       {image && (
         <div class="pfs__frame" data-gsap-animate="fade-up">
-          <img class="pfs__img" src={image} alt={imageAlt ?? ''} />
+          <img class="pfs__img" src={withBase(image)} alt={imageAlt ?? ''} />
         </div>
       )}
     </div>
