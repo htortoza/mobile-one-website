@@ -1,0 +1,132 @@
+---
+// src/components/producto/ProductoChapterNav.astro
+// /producto — rail sticky con los 9 capítulos narrativos (spec
+// 2026-08-24). Reemplaza a ProductoSwitcher: en vez de alternar 2 paneles,
+// da orientación mientras se scrollea un flujo único. Un solo mecanismo de
+// tracking (ScrollTrigger por capítulo) alimenta dos renders — rail
+// completo en desktop, contador simple en mobile (§15.6.1: sticky
+// transformado es patrón desktop-only).
+const { chapters } = Astro.props;
+const list = chapters ?? [];
+---
+
+<nav class="pcn" data-pcn aria-label="Capítulos de producto">
+  <ol class="pcn__list">
+    {list.map((ch, i) => (
+      <>
+        {i > 0 && ch.group !== list[i - 1].group && <li class="pcn__sep" aria-hidden="true"></li>}
+        <li>
+          <a class="pcn__link" data-pcn-link href={`#${ch.id}`} data-target={ch.id}>
+            <span class="pcn__num">{ch.num}</span>
+            <span class="pcn__label">{ch.label}</span>
+          </a>
+        </li>
+      </>
+    ))}
+  </ol>
+  <p class="pcn__counter" data-pcn-counter aria-hidden="true">
+    01 / {String(list.length).padStart(2, '0')}
+  </p>
+</nav>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initChapterNav() {
+    const nav = document.querySelector('[data-pcn]');
+    if (!nav) return;
+    const links = Array.from(nav.querySelectorAll('[data-pcn-link]'));
+    const counter = nav.querySelector('[data-pcn-counter]');
+    if (!links.length) return;
+
+    const total = links.length;
+
+    links.forEach((link, i) => {
+      const target = document.getElementById(link.dataset.target);
+      if (!target) return;
+
+      const setActive = () => {
+        links.forEach((l) => l.classList.remove('is-active'));
+        link.classList.add('is-active');
+        if (counter) counter.textContent = `${String(i + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+      };
+
+      ScrollTrigger.create({
+        trigger: target,
+        start: 'top 50%',
+        end: 'bottom 50%',
+        onEnter: setActive,
+        onEnterBack: setActive,
+      });
+    });
+
+    const hero = document.querySelector('[data-gsap-section="phero2"]');
+    if (hero) {
+      ScrollTrigger.create({
+        trigger: hero,
+        start: 'bottom top',
+        onEnter: () => nav.classList.add('is-visible'),
+        onLeaveBack: () => nav.classList.remove('is-visible'),
+      });
+    } else {
+      nav.classList.add('is-visible');
+    }
+  }
+
+  document.addEventListener('astro:page-load', initChapterNav);
+</script>
+
+<style>
+  .pcn {
+    position: fixed;
+    z-index: var(--z-above);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--ease-out);
+  }
+  .pcn.is-visible { opacity: 1; pointer-events: auto; }
+
+  .pcn__list { list-style: none; }
+
+  .pcn__counter {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--navy);
+    background-color: color-mix(in srgb, var(--bg-primary) 85%, transparent);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: 4px 10px;
+  }
+
+  @media (max-width: 899px) {
+    .pcn { right: var(--space-sm); bottom: var(--space-sm); left: auto; top: auto; }
+    .pcn__list { display: none; }
+  }
+
+  @media (min-width: 900px) {
+    .pcn { left: var(--space-md); top: 50%; transform: translateY(-50%); }
+    .pcn__list { display: grid; gap: var(--space-xs); }
+    .pcn__counter { display: none; }
+
+    .pcn__sep { height: 1px; background-color: var(--border); margin-block: var(--space-xs); }
+
+    .pcn__link {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-xs);
+      text-decoration: none;
+      padding: 4px 0;
+      opacity: 0.45;
+      transition: opacity var(--transition-fast);
+    }
+    .pcn__link:hover { opacity: 0.8; }
+    .pcn__link.is-active { opacity: 1; }
+
+    .pcn__num { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--accent-hover); }
+    .pcn__label { font-size: var(--text-xs); color: var(--navy); white-space: nowrap; }
+  }
+</style>
