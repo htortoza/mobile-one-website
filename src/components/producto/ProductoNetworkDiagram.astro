@@ -1,0 +1,207 @@
+---
+// src/components/producto/ProductoNetworkDiagram.astro
+// /producto capítulo 08 — "La red completa". Reusa la técnica de diagrama
+// de ArchitectureTeaser.astro (Home §4.7): cables SVG medidos por posición
+// real de cada card + paquetes que viajan (§16.3/§21.3 CLAUDE.md).
+// Contenido propio: Stock + Maestros (entradas) → Red sincronizada (hub) →
+// Entregas y despachos (salida). No repite contenido de Home, solo la
+// técnica del diagrama.
+const { id, eyebrow, title, inputs, hub, outputs } = Astro.props;
+const inputList = inputs ?? [];
+const outputList = outputs ?? [];
+const hubNode = hub ?? { label: 'Red sincronizada' };
+---
+
+<section id={id} class="pnd" data-gsap-section="pnd">
+  <div class="container pnd__head">
+    {eyebrow && <p class="pnd__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
+    <h2 class="pnd__title" data-gsap-animate="fade-up">{title}</h2>
+  </div>
+
+  <div class="container pnd__diagram" data-pnd-diagram>
+    <svg class="pnd__cables" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      {inputList.map((_, i) => (
+        <>
+          <path class="pnd__cable" data-pnd-cable data-side="in" data-index={i} />
+          <path class="pnd__beam" data-pnd-beam data-side="in" data-index={i} pathLength="100" />
+        </>
+      ))}
+      {outputList.map((_, i) => (
+        <>
+          <path class="pnd__cable" data-pnd-cable data-side="out" data-index={i} />
+          <path class="pnd__beam" data-pnd-beam data-side="out" data-index={i} pathLength="100" />
+        </>
+      ))}
+    </svg>
+
+    <div class="pnd__col pnd__col--in">
+      {inputList.map((node, i) => (
+        <div class="pnd__card" data-pnd-card="in" data-pnd-index={i}>
+          <p class="pnd__card-label">{node.label}</p>
+          {node.sub && <p class="pnd__card-sub">{node.sub}</p>}
+        </div>
+      ))}
+    </div>
+
+    <div class="pnd__hub" data-pnd-hub>
+      <p class="pnd__hub-label">{hubNode.label}</p>
+      {hubNode.sub && <p class="pnd__hub-sub">{hubNode.sub}</p>}
+    </div>
+
+    <div class="pnd__col pnd__col--out">
+      {outputList.map((node, i) => (
+        <div class="pnd__card" data-pnd-card="out" data-pnd-index={i}>
+          <p class="pnd__card-label">{node.label}</p>
+          {node.sub && <p class="pnd__card-sub">{node.sub}</p>}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function layoutCables(diagram) {
+    const svg = diagram.querySelector('.pnd__cables');
+    const hub = diagram.querySelector('[data-pnd-hub]');
+    if (!svg || !hub || window.innerWidth < 1024) return;
+
+    const box = diagram.getBoundingClientRect();
+    const toPct = (x, y) => ({ x: ((x - box.left) / box.width) * 100, y: ((y - box.top) / box.height) * 100 });
+
+    const hubBox = hub.getBoundingClientRect();
+    const hubLeft = toPct(hubBox.left, hubBox.top + hubBox.height / 2);
+    const hubRight = toPct(hubBox.right, hubBox.top + hubBox.height / 2);
+
+    diagram.querySelectorAll('[data-pnd-card="in"]').forEach((card) => {
+      const i = card.dataset.pndIndex;
+      const cardBox = card.getBoundingClientRect();
+      const start = toPct(cardBox.right, cardBox.top + cardBox.height / 2);
+      const midX = (start.x + hubLeft.x) / 2;
+      const d = `M ${start.x} ${start.y} C ${midX} ${start.y}, ${midX} ${hubLeft.y}, ${hubLeft.x} ${hubLeft.y}`;
+      svg.querySelectorAll(`[data-side="in"][data-index="${i}"]`).forEach((p) => p.setAttribute('d', d));
+    });
+
+    diagram.querySelectorAll('[data-pnd-card="out"]').forEach((card) => {
+      const i = card.dataset.pndIndex;
+      const cardBox = card.getBoundingClientRect();
+      const end = toPct(cardBox.left, cardBox.top + cardBox.height / 2);
+      const midX = (hubRight.x + end.x) / 2;
+      const d = `M ${hubRight.x} ${hubRight.y} C ${midX} ${hubRight.y}, ${midX} ${end.y}, ${end.x} ${end.y}`;
+      svg.querySelectorAll(`[data-side="out"][data-index="${i}"]`).forEach((p) => p.setAttribute('d', d));
+    });
+  }
+
+  function initNetworkDiagram() {
+    const section = document.querySelector('[data-gsap-section="pnd"]');
+    if (!section) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const diagram = section.querySelector('[data-pnd-diagram]');
+    if (!diagram) return;
+
+    layoutCables(diagram);
+    const onResize = () => layoutCables(diagram);
+    window.addEventListener('resize', onResize);
+    window.addEventListener('load', onResize, { once: true });
+    document.addEventListener('astro:before-swap', () => window.removeEventListener('resize', onResize), { once: true });
+
+    if (reduced) return;
+
+    gsap.from(section.querySelectorAll('[data-pnd-card]'), {
+      opacity: 0, y: 16, duration: 0.5, stagger: 0.07, ease: 'expo.out',
+      scrollTrigger: { trigger: diagram, start: 'top 75%' },
+    });
+    gsap.from(section.querySelector('[data-pnd-hub]'), {
+      opacity: 0, scale: 0.85, duration: 0.6, ease: 'back.out(1.6)',
+      scrollTrigger: { trigger: diagram, start: 'top 72%' },
+    });
+
+    ScrollTrigger.addEventListener('refresh', () => layoutCables(diagram));
+
+    section.querySelectorAll('[data-pnd-cable]').forEach((cable) => {
+      gsap.fromTo(cable, { opacity: 0 }, {
+        opacity: 1, duration: 0.6,
+        scrollTrigger: { trigger: diagram, start: 'top 70%' },
+      });
+    });
+
+    section.querySelectorAll('[data-pnd-beam]').forEach((beam) => {
+      gsap.set(beam, { attr: { 'stroke-dasharray': '16 100', 'stroke-dashoffset': 0 } });
+      gsap.to(beam, {
+        attr: { 'stroke-dashoffset': -116 },
+        duration: 1.6,
+        repeat: -1,
+        delay: gsap.utils.random(0, 1.2),
+        ease: 'power1.inOut',
+        scrollTrigger: { trigger: diagram, start: 'top 85%', end: 'bottom top' },
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initNetworkDiagram);
+</script>
+
+<style>
+  .pnd { padding-block: var(--space-2xl); background-color: var(--bg-secondary); }
+  .pnd__head { display: grid; gap: var(--space-sm); margin-bottom: var(--space-xl); max-width: 70ch; }
+  .pnd__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+  .pnd__title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(2.2rem, 5vw, 3.4rem); letter-spacing: -0.03em; line-height: 1.08; color: var(--navy); }
+
+  .pnd__diagram { position: relative; display: grid; grid-template-columns: 1fr; gap: var(--space-xl); padding-block: var(--space-lg); }
+  .pnd__cables { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; display: none; overflow: visible; }
+  .pnd__cable { stroke: var(--border); stroke-width: 1.4; fill: none; opacity: 0; vector-effect: non-scaling-stroke; }
+  .pnd__beam {
+    stroke: var(--accent-hover);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    fill: none;
+    vector-effect: non-scaling-stroke;
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 75%, transparent));
+  }
+
+  .pnd__col { position: relative; z-index: 1; display: grid; gap: var(--space-md); }
+  .pnd__card {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .pnd__card-label { font-family: var(--font-heading); font-size: var(--text-base); color: var(--text-primary); }
+  .pnd__card-sub { font-size: var(--text-sm); color: var(--text-secondary); }
+
+  .pnd__hub {
+    position: relative;
+    z-index: 1;
+    justify-self: center;
+    align-self: center;
+    width: 100%;
+    max-width: 240px;
+    min-height: 160px;
+    border-radius: 32px;
+    background: var(--accent-gradient);
+    color: var(--on-accent);
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-lg) var(--space-md);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+  }
+  .pnd__hub-label { font-family: var(--font-heading); font-size: var(--text-lg); line-height: 1.3; max-width: 16ch; }
+  .pnd__hub-sub { font-size: var(--text-sm); color: color-mix(in srgb, var(--on-accent) 82%, transparent); }
+
+  @media (min-width: 1024px) {
+    .pnd__diagram { grid-template-columns: 1fr 240px 1fr; align-items: center; gap: var(--space-2xl); }
+    .pnd__cables { display: block; }
+    .pnd__col--out { justify-items: end; }
+    .pnd__col--out .pnd__card { text-align: right; justify-items: end; }
+  }
+</style>
