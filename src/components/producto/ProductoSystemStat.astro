@@ -1,0 +1,94 @@
+---
+// src/components/producto/ProductoSystemStat.astro
+// /producto capítulo 09 — "Control del sistema". Cifras protagonistas en
+// el mismo lenguaje visual que el slide "Cómo operamos" del deck de evento
+// Perú (MO2-Especificacion-Slides-Evento-Peru.md, slide 10) — reusa
+// vocabulario de marca ya validado entre sitio y keynote.
+const { id, eyebrow, title, text, stats } = Astro.props;
+const list = stats ?? [];
+---
+
+<section id={id} class="pss" data-gsap-section="pss">
+  <div class="container pss__grid">
+    <div class="pss__copy">
+      {eyebrow && <p class="pss__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
+      <h2 class="pss__title" data-gsap-animate="fade-up">{title}</h2>
+      <p class="pss__text" data-gsap-animate="fade-up">{text}</p>
+    </div>
+
+    <div class="pss__stats">
+      {list.map((s, i) => (
+        <div class="pss__stat" data-pss-stat data-numeric={s.isNumeric ? 'true' : 'false'} data-value={s.isNumeric ? s.value : undefined} data-index={i}>
+          <p class="pss__stat-value">{s.value}</p>
+          <p class="pss__stat-label">{s.label}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    const section = document.querySelector('[data-gsap-section="pss"]');
+    if (!section) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const copy = section.querySelectorAll('[data-gsap-animate="fade-up"]');
+    if (!reduced) {
+      gsap.from(copy, {
+        opacity: 0, y: 20, duration: 0.7, stagger: 0.08, ease: 'expo.out',
+        scrollTrigger: { trigger: section, start: 'top 80%' },
+      });
+    }
+
+    section.querySelectorAll('[data-pss-stat]').forEach((stat, i) => {
+      if (reduced) return;
+      const isNumeric = stat.dataset.numeric === 'true';
+      const valueEl = stat.querySelector('.pss__stat-value');
+
+      if (isNumeric && valueEl) {
+        const target = Number(stat.dataset.value) || 0;
+        const counter = { n: 0 };
+        gsap.to(counter, {
+          n: target,
+          duration: 1,
+          ease: 'power1.out',
+          onUpdate: () => { valueEl.textContent = String(Math.round(counter.n)); },
+          scrollTrigger: { trigger: section, start: 'top 78%' },
+        });
+      } else {
+        gsap.from(stat, {
+          opacity: 0, y: 14, duration: 0.5, delay: i * 0.1, ease: 'power2.out',
+          scrollTrigger: { trigger: section, start: 'top 78%' },
+        });
+      }
+    });
+  });
+</script>
+
+<style>
+  .pss { padding-block: var(--space-2xl); background-color: var(--bg-primary); }
+  .pss__grid { display: grid; gap: var(--space-xl); }
+
+  .pss__copy { display: grid; gap: var(--space-sm); max-width: 56ch; }
+  .pss__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+  .pss__title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(2.2rem, 5vw, 3.4rem); letter-spacing: -0.03em; line-height: 1.08; color: var(--navy); }
+  .pss__text { font-size: clamp(1.1rem, 1.5vw, 1.3rem); color: var(--text-secondary); line-height: 1.6; }
+
+  .pss__stats { display: grid; gap: var(--space-md); }
+  .pss__stat { border-top: 1px solid var(--border); padding-block: var(--space-sm); }
+  .pss__stat-value { font-family: var(--font-mono); font-weight: 600; font-size: clamp(1.5rem, 3vw, 2.2rem); color: var(--accent-hover); letter-spacing: -0.01em; }
+  .pss__stat-label { font-size: var(--text-sm); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-top: var(--space-xs); }
+
+  @media (min-width: 900px) {
+    .pss__grid { grid-template-columns: 1fr 1fr; align-items: center; }
+    .pss__stats { grid-template-columns: repeat(3, 1fr); }
+    .pss__stat { border-top: none; border-left: 1px solid var(--border); padding-inline-start: var(--space-md); padding-block: 0; }
+    .pss__stat:first-child { border-left: none; padding-inline-start: 0; }
+  }
+</style>
