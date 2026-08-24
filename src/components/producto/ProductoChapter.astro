@@ -1,0 +1,134 @@
+---
+// src/components/producto/ProductoChapter.astro
+// /producto capítulos 01, 02, 03, 06 — componente flexible para features
+// agrupadas por momento del flujo de trabajo (spec 2026-08-24). `variant`
+// cambia el layout: 'solo' (1 feature, beat corto, sin foto), 'duo' (foto +
+// 2 sub-features lado a lado), 'photo-callout' (foto grande + checklist
+// corto, foto va primero). Copy de cada feature es el original de
+// producto.astro — no se reescribe, solo se reorganiza en capítulos.
+import { withBase } from '../../utils/base.js';
+const { id, variant, eyebrow, num, title, image, imageAlt, items } = Astro.props;
+const list = items ?? [];
+
+const ICONS = {
+  qr: 'M4 4h4v1H5v3H4V4Z|M16 4h4v4h-1V5h-3V4Z|M4 16h4v4H4v-4Z|M9 9h6v6H9V9Z',
+  search: 'M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Z|M21 21l-4.3-4.3',
+  cart: 'M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6|M9.5 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z|M17.5 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z',
+  receipt: 'M6 2h12v20l-2-1-2 1-2-1-2 1-2-1-2 1V2Z|M9 7h6|M9 11h6|M9 15h4',
+};
+---
+
+<section id={id} class="pch" data-gsap-section={`pch-${id}`} data-variant={variant}>
+  <div class="container pch__grid">
+    <div class="pch__copy">
+      <span class="pch__num" aria-hidden="true">{num}</span>
+      {eyebrow && <p class="pch__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
+      <h2 class="pch__title" data-gsap-animate="fade-up">{title}</h2>
+
+      <div class="pch__items">
+        {list.map((it) => (
+          <article class="pch__item" data-pch-item>
+            {it.icon && ICONS[it.icon] && (
+              <span class="pch__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  {ICONS[it.icon].split('|').map((d) => <path d={d} />)}
+                </svg>
+              </span>
+            )}
+            <h3 class="pch__item-title">{it.title}</h3>
+            <p class="pch__item-text">{it.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    {image && (
+      <div class="pch__frame" data-gsap-animate="fade-up">
+        <img class="pch__img" src={withBase(image)} alt={imageAlt ?? ''} loading="lazy" />
+      </div>
+    )}
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll('[data-gsap-section^="pch-"]').forEach((section) => {
+      if (section.dataset.pchInit) return;
+      section.dataset.pchInit = '1';
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const frame = section.querySelector('[data-gsap-animate="fade-up"]');
+      const items = section.querySelectorAll('[data-pch-item]');
+
+      gsap.from(section.querySelectorAll('.pch__eyebrow, .pch__title'), {
+        opacity: 0, y: 20, duration: 0.7, stagger: 0.06, ease: 'expo.out',
+        scrollTrigger: { trigger: section, start: 'top 82%' },
+      });
+      if (items.length) {
+        gsap.from(items, {
+          opacity: 0, y: 16, duration: 0.6, stagger: 0.08, ease: 'expo.out',
+          scrollTrigger: { trigger: section, start: 'top 78%' },
+        });
+      }
+      if (frame) {
+        gsap.from(frame, {
+          opacity: 0, scale: 0.96, duration: 0.7, ease: 'expo.out',
+          scrollTrigger: { trigger: section, start: 'top 78%' },
+        });
+      }
+    });
+  });
+</script>
+
+<style>
+  .pch { padding-block: var(--space-xl); background-color: var(--bg-primary); }
+
+  .pch__grid { display: grid; gap: var(--space-lg); }
+  .pch__copy { display: grid; gap: var(--space-sm); position: relative; }
+  .pch__num { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-sm); color: var(--accent-hover); }
+  .pch__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+  .pch__title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -0.02em; line-height: 1.1; color: var(--navy); }
+
+  .pch__items { display: grid; gap: var(--space-md); margin-top: var(--space-sm); }
+  .pch__item { display: grid; gap: var(--space-xs); min-width: 0; }
+  .pch__icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px;
+    border-radius: var(--radius-md);
+    background-color: color-mix(in srgb, var(--accent) 10%, var(--bg-primary));
+    color: var(--accent);
+  }
+  .pch__icon svg { width: 20px; height: 20px; }
+  .pch__item-title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(1.1rem, 1.4vw, 1.3rem); color: var(--navy); }
+  .pch__item-text { font-size: var(--text-base); color: var(--text-secondary); line-height: 1.55; max-width: 52ch; }
+
+  .pch__frame { border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+  .pch__img { width: 100%; height: 100%; object-fit: cover; display: block; aspect-ratio: 4 / 3; }
+
+  /* solo — beat corto, sin foto, un solo item centrado */
+  .pch[data-variant="solo"] .pch__grid { justify-items: center; text-align: center; max-width: 60ch; margin-inline: auto; }
+  .pch[data-variant="solo"] .pch__items { justify-items: center; }
+  .pch[data-variant="solo"] .pch__icon { width: 56px; height: 56px; }
+  .pch[data-variant="solo"] .pch__icon svg { width: 28px; height: 28px; }
+
+  /* photo-callout — checklist compacto con regla lateral */
+  .pch[data-variant="photo-callout"] .pch__item { border-left: 2px solid var(--border); padding-left: var(--space-sm); }
+
+  @media (min-width: 900px) {
+    .pch[data-variant="duo"] .pch__grid,
+    .pch[data-variant="photo-callout"] .pch__grid {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: var(--space-2xl);
+    }
+    .pch[data-variant="duo"] .pch__items { grid-template-columns: 1fr 1fr; }
+
+    /* photo-callout: la foto va primero, más protagonismo visual */
+    .pch[data-variant="photo-callout"] .pch__frame { order: -1; }
+  }
+</style>
