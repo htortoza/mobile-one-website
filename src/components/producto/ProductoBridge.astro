@@ -1,0 +1,63 @@
+---
+// src/components/producto/ProductoBridge.astro
+// /producto — banda angosta de transición entre el bloque POS Mobile y el
+// bloque BackOffice (planeada en el spec del 13-08 §7, nunca construida
+// porque el switcher la hacía innecesaria). Isotipo watermark + una frase
+// puente corta.
+import { withBase } from '../../utils/base.js';
+const { text } = Astro.props;
+---
+
+<section class="pbr" data-gsap-section="pbr">
+  <img class="pbr__mark" src={withBase('/brand/Isotipo-logo.svg')} alt="" aria-hidden="true" />
+  <div class="container pbr__inner">
+    <span class="pbr__rule" data-pbr-rule aria-hidden="true"></span>
+    <p class="pbr__text" data-gsap-animate="fade-up">{text}</p>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    const section = document.querySelector('[data-gsap-section="pbr"]');
+    if (!section) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const rule = section.querySelector('[data-pbr-rule]');
+    const text = section.querySelector('[data-gsap-animate="fade-up"]');
+
+    if (rule) {
+      gsap.fromTo(rule, { scaleX: 0 }, {
+        scaleX: 1, duration: 0.8, ease: 'expo.out', transformOrigin: 'left',
+        scrollTrigger: { trigger: section, start: 'top 82%' },
+      });
+    }
+    if (text) {
+      gsap.from(text, {
+        opacity: 0, y: 12, duration: 0.6, ease: 'expo.out',
+        scrollTrigger: { trigger: section, start: 'top 78%' },
+      });
+    }
+  });
+</script>
+
+<style>
+  .pbr { position: relative; padding-block: var(--space-lg); background-color: var(--bg-secondary); overflow: hidden; }
+  .pbr__mark {
+    position: absolute;
+    top: 50%;
+    right: -5%;
+    width: 320px;
+    height: 320px;
+    transform: translateY(-50%);
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  .pbr__inner { display: grid; gap: var(--space-sm); max-width: 48ch; }
+  .pbr__rule { display: block; width: 48px; height: 2px; background-color: var(--accent); }
+  .pbr__text { font-family: var(--font-heading); font-size: clamp(1.3rem, 2.4vw, 1.8rem); color: var(--navy); letter-spacing: -0.01em; }
+</style>
