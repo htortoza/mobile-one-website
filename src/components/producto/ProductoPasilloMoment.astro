@@ -1,0 +1,93 @@
+---
+// src/components/producto/ProductoPasilloMoment.astro
+// /producto capítulo 04 — único momento "flagship" de la página (Pilar 2
+// de marca, "pasillo infinito"). El titular reusa el copy ya validado de
+// Home (SolutionSlide panel 02) para consistencia de marca; el cuerpo es
+// el copy original de la feature "Venta omnicanal" de producto.astro. No
+// se repite este tratamiento tipográfico en ningún otro capítulo.
+import { withBase } from '../../utils/base.js';
+const { id, eyebrow, title, text, image, imageAlt } = Astro.props;
+---
+
+<section id={id} class="ppm" data-gsap-section="ppm">
+  <div class="ppm__frame" aria-hidden="true">
+    <img class="ppm__img" src={withBase(image)} alt="" loading="lazy" />
+    <div class="ppm__overlay"></div>
+  </div>
+
+  <div class="container ppm__copy">
+    {eyebrow && <p class="ppm__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
+    <h2 class="ppm__title" data-gsap-split="words">{title}</h2>
+    <p class="ppm__text" data-gsap-animate="fade-up">{text}</p>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initPasillo() {
+    const section = document.querySelector('[data-gsap-section="ppm"]');
+    if (!section) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const titleEl = section.querySelector('[data-gsap-split="words"]');
+    if (titleEl && !titleEl.dataset.split) {
+      titleEl.dataset.split = '1';
+      const words = titleEl.textContent.trim().split(/\s+/);
+      titleEl.innerHTML = words
+        .map((w) => `<span class="ppm__word-outer"><span class="ppm__word">${w}</span></span>`)
+        .join(' ');
+    }
+
+    gsap.from(section.querySelectorAll('.ppm__word'), {
+      y: '100%', opacity: 0, duration: 0.9, stagger: 0.05, ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 75%' },
+    });
+
+    const text = section.querySelector('[data-gsap-animate="fade-up"]');
+    if (text) {
+      gsap.from(text, {
+        y: 20, opacity: 0, duration: 0.8, ease: 'expo.out',
+        scrollTrigger: { trigger: section, start: 'top 70%' },
+      });
+    }
+
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 768px)', () => {
+      gsap.to(section.querySelector('.ppm__img'), {
+        yPercent: 10, ease: 'none',
+        scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: true },
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initPasillo);
+</script>
+
+<style>
+  .ppm { position: relative; padding-block: var(--space-2xl); overflow: hidden; background-color: var(--navy); }
+
+  .ppm__frame { position: absolute; inset: 0; z-index: 0; }
+  .ppm__img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0.55; }
+  .ppm__overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--navy) 55%, transparent), var(--navy) 92%);
+  }
+
+  .ppm__copy { position: relative; z-index: 1; display: grid; gap: var(--space-md); max-width: 60ch; }
+  .ppm__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: color-mix(in srgb, var(--on-accent) 70%, transparent); }
+  .ppm__title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: clamp(2.6rem, 6.5vw, 5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--on-accent);
+  }
+  .ppm__word-outer { display: inline-block; overflow: hidden; vertical-align: top; }
+  .ppm__word { display: inline-block; }
+  .ppm__text { font-size: clamp(1.1rem, 1.6vw, 1.35rem); color: color-mix(in srgb, var(--on-accent) 85%, transparent); line-height: 1.6; }
+</style>
