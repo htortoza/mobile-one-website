@@ -136,7 +136,11 @@ const ICONS = {
           <span>Acepto que Mobile One me contacte según la <a href={withBase('/privacidad')}>Política de Privacidad</a>.</span>
         </label>
 
-        <button type="submit" class="contact__submit">{ctaText}</button>
+        <p class="contact__hp" aria-hidden="true"><label>No llenar<input name="hp" tabindex="-1" autocomplete="off" /></label></p>
+
+        <p class="contact__form-error" data-form-error hidden></p>
+
+        <button type="submit" class="contact__submit" data-btn-submit>{ctaText}</button>
       </form>
 
       <div class="contact__success" data-contact-success hidden>
@@ -156,6 +160,7 @@ const ICONS = {
 <script>
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { withBase } from '../../utils/base.js';
 
   gsap.registerPlugin(ScrollTrigger);
 
@@ -171,23 +176,47 @@ const ICONS = {
 
     const form = section.querySelector('[data-contact-form]');
     const success = section.querySelector('[data-contact-success]');
-    if (!form || !success) return;
+    const errorEl = section.querySelector('[data-form-error]');
+    const btn = section.querySelector('[data-btn-submit]');
+    if (!form || !success || !btn) return;
 
-    form.addEventListener('submit', (e) => {
+    const btnLabel = btn.textContent;
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!form.checkValidity()) {
         form.reportValidity();
         return;
       }
-      // AGENTE: conectar a un backend/CRM real (ej. HubSpot, Web3Forms, endpoint
-      // propio) antes de producción. Hoy el formulario solo valida en el
-      // cliente y muestra este estado de éxito — no envía datos a ningún lado.
-      const data = Object.fromEntries(new FormData(form).entries());
-      console.log('[contacto] formulario listo para enviar (sin backend conectado):', data);
+      if (errorEl) errorEl.hidden = true;
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
 
-      form.hidden = true;
-      success.hidden = false;
-      success.focus?.();
+      // Mismo endpoint/lógica que smartorder/public/contact.php: POST a
+      // /contact.php (PHP en cPanel, fuera del build de Astro). Crea una
+      // tarea en ClickUp (si hay credenciales) y envía notificación por
+      // correo a contacto@dotsolutions.io. Ver public/contact-config.sample.php.
+      const body = new URLSearchParams(new FormData(form));
+      try {
+        const res = await fetch(withBase('/contact.php'), { method: 'POST', body });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || 'Error desconocido');
+
+        form.querySelectorAll('input,select,textarea').forEach((el) => {
+          if (el.type === 'checkbox') el.checked = false;
+          else el.value = '';
+        });
+        form.hidden = true;
+        success.hidden = false;
+        success.focus?.();
+      } catch (err) {
+        if (errorEl) {
+          errorEl.textContent = `No se pudo enviar: ${err.message}. Vuelva a intentar en un momento.`;
+          errorEl.hidden = false;
+        }
+        btn.disabled = false;
+        btn.textContent = btnLabel;
+      }
     });
   });
 </script>
@@ -345,6 +374,12 @@ const ICONS = {
   .contact__consent { display: flex; align-items: flex-start; gap: var(--space-xs); font-size: var(--text-xs); color: var(--text-secondary); line-height: 1.5; }
   .contact__consent input { margin-top: 3px; accent-color: var(--accent); flex-shrink: 0; }
   .contact__consent a { color: var(--accent); }
+
+  /* Honeypot anti-spam — fuera de pantalla, no display:none (mismo truco de smartorder) */
+  .contact__hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  .contact__form-error { font-size: var(--text-sm); color: var(--accent); }
+  .contact__form-error[hidden] { display: none; }
 
   .contact__submit {
     font-family: var(--font-body);

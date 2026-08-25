@@ -55,6 +55,7 @@ const imgs = images ?? [];
 
     const pinEl = section.querySelector('[data-hook-pin]');
     const stage = section.querySelector('[data-hook-stage]');
+    const card = section.querySelector('[data-hook-card]');
     const lines = section.querySelectorAll('[data-hook-line]');
     const cardImgs = section.querySelectorAll('[data-hook-cardimg]');
     if (!pinEl || !lines.length) return;
@@ -75,7 +76,7 @@ const imgs = images ?? [];
         scrollTrigger: {
           trigger: pinEl,
           start: 'top top',
-          end: '+=' + (lines.length * 110) + '%',
+          end: '+=' + (lines.length * 90) + '%',
           scrub: 1,
           pin: pinEl,
           anticipatePin: 1,
@@ -85,7 +86,7 @@ const imgs = images ?? [];
 
       lines.forEach((line, i) => {
         if (i === 0) return;
-        tl.to({}, { duration: 0.5 }); // hold la línea anterior
+        tl.to({}, { duration: 0.35 }); // hold la línea anterior (lectura, no pausa muerta)
         tl.to(lines[i - 1], { opacity: 0, y: -16, duration: 0.35, ease: 'power1.in' });
         tl.set(line, { opacity: 1 }, '<');
         tl.set(stage, { attr: { 'data-side': i % 2 === 0 ? 'left' : 'right' } }, '<');
@@ -98,7 +99,14 @@ const imgs = images ?? [];
         if (cardImgs[i - 1]) tl.to(cardImgs[i - 1], { opacity: 0, duration: 0.35 }, '<');
         if (cardImgs[i]) tl.to(cardImgs[i], { opacity: 1, duration: 0.35 }, '<');
       });
-      tl.to({}, { duration: 0.6 }); // hold la última línea
+      tl.to({}, { duration: 0.2 }); // breve respiro final, no muro muerto
+
+      // Ken Burns continuo sobre toda la duración del pin: la card nunca
+      // queda "congelada" durante los holds de lectura, siempre hay
+      // movimiento atado al scroll aunque el texto no esté cambiando.
+      if (card) {
+        tl.fromTo(card, { scale: 1 }, { scale: 1.06, ease: 'none', duration: tl.duration() }, 0);
+      }
     });
 
     mm.add('(max-width: 767px), (prefers-reduced-motion: reduce)', () => {
