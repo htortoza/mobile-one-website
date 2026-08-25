@@ -72,6 +72,11 @@ const {
         // Sincronizar ScrollTrigger con Lenis
         lenis.on('scroll', ScrollTrigger.update);
 
+        // Expuesto para que componentes con anclas internas (ej.
+        // ProductoChapterNav) puedan pedir un scroll suave real en vez de
+        // depender del salto nativo de <a href="#...">.
+        (window as any).__lenis = lenis;
+
         rafCallback = (time: number) => {
           lenis!.raf(time * 1000);
         };
@@ -93,6 +98,7 @@ const {
       // para evitar fugas de memoria y triggers duplicados
       document.addEventListener('astro:before-swap', () => {
         lenis?.destroy();
+        if ((window as any).__lenis === lenis) (window as any).__lenis = undefined;
         if (rafCallback) {
           gsap.ticker.remove(rafCallback);
           rafCallback = undefined;
