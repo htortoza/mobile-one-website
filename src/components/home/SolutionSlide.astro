@@ -167,8 +167,28 @@ const list = panels ?? [];
   .sslide__mobile-only { display: none; }
   @media (max-width: 1023px), (prefers-reduced-motion: reduce) {
     .sslide__desktop-only { display: none; }
-    .sslide__mobile-only { display: grid; gap: var(--space-xl); }
-    .sslide__mcard { display: grid; gap: var(--space-md); }
+
+    /* Mismo formato que desktop (galería que se recorre lateralmente) — se
+       adapta a scroll horizontal táctil nativo en vez de pin+scrub con
+       mouse/scroll-wheel, no se reemplaza por una lista vertical (§15.6.1:
+       el pin "bueno" donde el contenido avanza se mantiene en mobile). */
+    .sslide__mobile-only {
+      display: flex;
+      gap: var(--space-lg);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--container-pad);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .sslide__mobile-only::-webkit-scrollbar { display: none; }
+    .sslide__mcard {
+      flex: 0 0 82%;
+      scroll-snap-align: start;
+      display: grid;
+      gap: var(--space-md);
+    }
     .sslide__mcard .sslide__frame { aspect-ratio: 4 / 3; }
   }
 </style>
