@@ -81,7 +81,7 @@ const chapters = [
 
   <div class="container compat__mobile-only">
     {chapters.map((ch) => (
-      <div class="compat__card">
+      <div class="compat__card" data-compat-mcard>
         <img class="compat__card-image" src={withBase(ch.image)} alt={ch.alt} />
         <div class={`compat__text ${ch.onDark ? 'compat__text--on-dark' : ''}`} style={`background-color:${ch.tone}`}>
           <p class="compat__kicker">{ch.kicker}</p>
@@ -160,6 +160,19 @@ const chapters = [
       tl.to({}, { duration: 0.55 }); // hold capítulo 2
       tl.add(transition(2, false), '+=0'); // vuelve: imagen -> izquierda, color -> derecha
       tl.to({}, { duration: 0.55 }); // hold capítulo 3
+    });
+
+    // Mobile: sin pin/crossfade (§15.6.1 — pin que solo transforma en su eje
+    // atrapa al usuario), pero la animación NO se elimina: cada tarjeta
+    // entra con fade-up al llegar a viewport, mismo patrón que
+    // SolutionSlide/HowItWorksFlow.
+    mm.add('(max-width: 899px), (prefers-reduced-motion: reduce)', () => {
+      section.querySelectorAll('[data-compat-mcard]').forEach((card) => {
+        gsap.from(card, {
+          opacity: 0, y: 24, duration: 0.7, ease: 'power2.out',
+          scrollTrigger: { trigger: card, start: 'top 82%' },
+        });
+      });
     });
   }
 
