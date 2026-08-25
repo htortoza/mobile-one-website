@@ -83,6 +83,12 @@ const list = panels ?? [];
           pin: pinEl,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          // El CTA sticky flotante tapa el copy del panel activo en mobile
+          // (pantalla completa, poco alto) — se oculta mientras dura el pin.
+          onEnter: () => document.body.classList.add('hide-sticky-cta'),
+          onLeave: () => document.body.classList.remove('hide-sticky-cta'),
+          onEnterBack: () => document.body.classList.add('hide-sticky-cta'),
+          onLeaveBack: () => document.body.classList.remove('hide-sticky-cta'),
         },
       });
 
@@ -133,9 +139,6 @@ const list = panels ?? [];
     display: grid;
     gap: var(--space-md);
   }
-  @media (max-width: 767px) {
-    .sslide__panel { width: 82vw; }
-  }
   .sslide__frame {
     width: 100%;
     aspect-ratio: 4 / 3;
@@ -158,6 +161,19 @@ const list = panels ?? [];
     color: var(--text-primary);
   }
   .sslide__text { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; max-width: 40ch; }
+
+  /* El pin fija la sección a 100vh — si el panel (imagen + copy) mide más
+     que eso, el centrado vertical corta imagen arriba y texto abajo. Se
+     achica todo (panel más angosto, imagen menos alta, tipografía y
+     espaciados menores) para que el conjunto quepa cómodo. */
+  @media (max-width: 767px) {
+    .sslide__panel { width: 78vw; gap: var(--space-xs); }
+    .sslide__frame { aspect-ratio: 3 / 2; }
+    .sslide__copy { gap: 6px; }
+    .sslide__num { font-size: var(--text-lg); }
+    .sslide__heading { font-size: clamp(1.3rem, 5.5vw, 1.6rem); line-height: 1.15; }
+    .sslide__text { font-size: var(--text-sm); line-height: 1.45; }
+  }
 
   /* Sin motion: sin pin ni desplazamiento lateral — panels en columna. */
   @media (prefers-reduced-motion: reduce) {

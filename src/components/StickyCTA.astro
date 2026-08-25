@@ -74,6 +74,14 @@ const orderUrl = withBase(site.orderUrl ?? '#');
     transform: translateY(0);
     pointer-events: auto;
   }
+
+  /* Secciones con pin a pantalla completa (ej. SolutionSlide) piden ocultarlo
+     mientras duran — tapa el copy en viewports bajos. */
+  :global(body.hide-sticky-cta) .sticky-cta.is-visible {
+    opacity: 0;
+    transform: translateY(120%);
+    pointer-events: none;
+  }
   .sticky-cta:hover { background-color: var(--accent-hover); }
 
   .sticky-cta__dot {
