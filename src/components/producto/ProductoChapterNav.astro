@@ -78,7 +78,7 @@ const list = chapters ?? [];
     // Secciones de fondo oscuro (accent-gradient) donde el texto navy del
     // rail pierde contraste — mientras el centro del viewport las cruza, el
     // rail pasa a color claro.
-    ['[data-gsap-section="psb"]', '[data-gsap-section="cta-close"]'].forEach((sel) => {
+    ['[data-gsap-section="ppm"]', '[data-gsap-section="psb"]', '[data-gsap-section="cta-close"]'].forEach((sel) => {
       const section = document.querySelector(sel);
       if (!section) return;
       ScrollTrigger.create({
