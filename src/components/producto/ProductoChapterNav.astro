@@ -74,6 +74,35 @@ const list = chapters ?? [];
     } else {
       nav.classList.add('is-visible');
     }
+
+    // Secciones de fondo oscuro (accent-gradient) donde el texto navy del
+    // rail pierde contraste — mientras el centro del viewport las cruza, el
+    // rail pasa a color claro.
+    ['[data-gsap-section="psb"]', '[data-gsap-section="cta-close"]'].forEach((sel) => {
+      const section = document.querySelector(sel);
+      if (!section) return;
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top center',
+        end: 'bottom center',
+        onEnter: () => nav.classList.add('is-dark'),
+        onEnterBack: () => nav.classList.add('is-dark'),
+        onLeave: () => nav.classList.remove('is-dark'),
+        onLeaveBack: () => nav.classList.remove('is-dark'),
+      });
+    });
+
+    // El rail no debe bajar hasta pisar el footer — se oculta un poco antes
+    // de que este entre al viewport.
+    const footer = document.querySelector('.site-footer');
+    if (footer) {
+      ScrollTrigger.create({
+        trigger: footer,
+        start: 'top bottom-=80',
+        onEnter: () => nav.classList.add('is-near-footer'),
+        onLeaveBack: () => nav.classList.remove('is-near-footer'),
+      });
+    }
   }
 
   document.addEventListener('astro:page-load', initChapterNav);
@@ -88,6 +117,7 @@ const list = chapters ?? [];
     transition: opacity 0.3s var(--ease-out);
   }
   .pcn.is-visible { opacity: 1; pointer-events: auto; }
+  .pcn.is-near-footer { opacity: 0; pointer-events: none; }
 
   .pcn__list { list-style: none; }
 
@@ -126,7 +156,22 @@ const list = chapters ?? [];
     .pcn__link:hover { opacity: 0.8; }
     .pcn__link.is-active { opacity: 1; }
 
-    .pcn__num { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--accent-hover); }
-    .pcn__label { font-size: var(--text-xs); color: var(--navy); white-space: nowrap; }
+    .pcn__num {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--accent-hover);
+      transition: color var(--transition-fast);
+    }
+    .pcn__label {
+      font-size: var(--text-xs);
+      color: var(--navy);
+      white-space: nowrap;
+      transition: color var(--transition-fast);
+    }
+
+    /* Sobre secciones de fondo azul (psb, cta-close): navy/accent-hover se
+       pierden — pasa a blanco (var(--on-accent)). */
+    .pcn.is-dark .pcn__num,
+    .pcn.is-dark .pcn__label { color: var(--on-accent); }
   }
 </style>
