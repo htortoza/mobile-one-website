@@ -89,62 +89,82 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
 </div>
 
 <script>
-  const header  = document.querySelector('[data-header]');
-  const toggle  = document.querySelector('[data-nav-toggle]');
-  const overlay = document.querySelector('[data-overlay]');
+  // Astro usa View Transitions (<ClientRouter/>): el DOM se reemplaza en
+  // cada navegación interna pero un <script> de módulo solo se evalúa una
+  // vez, así que el listener del toggle quedaba enganchado a los nodos de
+  // la PRIMERA carga — al navegar a otra página (o volver) el menú móvil
+  // dejaba de responder. Por eso todo va dentro de una función reenganchada
+  // en cada astro:page-load (mismo patrón que el resto de componentes:
+  // ProductoChapterNav, SolutionSlide, BrandCompat, etc.).
+  function initHeader() {
+    const header  = document.querySelector('[data-header]');
+    const toggle  = document.querySelector('[data-nav-toggle]');
+    const overlay = document.querySelector('[data-overlay]');
 
-  // Header se vuelve sólido al hacer scroll
-  if (header) {
-    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 40);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
+    // Header se vuelve sólido al hacer scroll
+    if (header) {
+      const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 40);
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+      document.addEventListener('astro:before-swap', () => window.removeEventListener('scroll', onScroll), { once: true });
+    }
+
+    // Toggle del overlay móvil
+    if (toggle && overlay) {
+      // Debe coincidir con --transition-smooth (panel) en la duración más
+      // larga de las dos transiciones (panel/backdrop).
+      const CLOSE_MS = 600;
+      let closeTimeout;
+
+      const setOpen = (open) => {
+        clearTimeout(closeTimeout);
+
+        if (open) {
+          // Quitar "hidden" y agregar "is-open" en el mismo tick no anima
+          // nada: el navegador nunca pinta el estado inicial (display:none →
+          // abierto en un solo frame), así que el drawer solo "aparece".
+          // Se fuerza un reflow entre ambos pasos para que sí anime.
+          overlay.removeAttribute('hidden');
+          void overlay.offsetHeight;
+          overlay.classList.add('is-open');
+        } else {
+          overlay.classList.remove('is-open');
+          closeTimeout = setTimeout(() => overlay.setAttribute('hidden', ''), CLOSE_MS);
+        }
+
+        toggle.classList.toggle('is-active', open);
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+        document.body.style.overflow = open ? 'hidden' : '';
+        // El sitio usa Lenis para el scroll suave — solo bloquear
+        // overflow del body no lo frena (Lenis intercepta wheel/touch
+        // aparte), así que hay que pausarlo/reanudarlo explícitamente.
+        const lenis = window.__lenis;
+        if (lenis) open ? lenis.stop() : lenis.start();
+      };
+
+      toggle.addEventListener('click', () => setOpen(overlay.hasAttribute('hidden')));
+      overlay.querySelector('[data-overlay-close]')?.addEventListener('click', () => setOpen(false));
+      overlay.querySelector('[data-overlay-backdrop]')?.addEventListener('click', () => setOpen(false));
+      overlay.querySelectorAll('[data-overlay-link]').forEach((a) =>
+        a.addEventListener('click', () => setOpen(false))
+      );
+
+      const onKeydown = (e) => {
+        if (e.key === 'Escape' && !overlay.hasAttribute('hidden')) setOpen(false);
+      };
+      document.addEventListener('keydown', onKeydown);
+
+      document.addEventListener('astro:before-swap', () => {
+        clearTimeout(closeTimeout);
+        document.removeEventListener('keydown', onKeydown);
+        document.body.style.overflow = '';
+        window.__lenis?.start();
+      }, { once: true });
+    }
   }
 
-  // Toggle del overlay móvil
-  if (toggle && overlay) {
-    // Debe coincidir con --transition-smooth (panel) en la duración más
-    // larga de las dos transiciones (panel/backdrop).
-    const CLOSE_MS = 600;
-    let closeTimeout;
-
-    const setOpen = (open) => {
-      clearTimeout(closeTimeout);
-
-      if (open) {
-        // Quitar "hidden" y agregar "is-open" en el mismo tick no anima
-        // nada: el navegador nunca pinta el estado inicial (display:none →
-        // abierto en un solo frame), así que el drawer solo "aparece".
-        // Se fuerza un reflow entre ambos pasos para que sí anime.
-        overlay.removeAttribute('hidden');
-        void overlay.offsetHeight;
-        overlay.classList.add('is-open');
-      } else {
-        overlay.classList.remove('is-open');
-        closeTimeout = setTimeout(() => overlay.setAttribute('hidden', ''), CLOSE_MS);
-      }
-
-      toggle.classList.toggle('is-active', open);
-      toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
-      document.body.style.overflow = open ? 'hidden' : '';
-      // El sitio usa Lenis para el scroll suave — solo bloquear
-      // overflow del body no lo frena (Lenis intercepta wheel/touch
-      // aparte), así que hay que pausarlo/reanudarlo explícitamente.
-      const lenis = window.__lenis;
-      if (lenis) open ? lenis.stop() : lenis.start();
-    };
-
-    toggle.addEventListener('click', () => setOpen(overlay.hasAttribute('hidden')));
-    overlay.querySelector('[data-overlay-close]')?.addEventListener('click', () => setOpen(false));
-    overlay.querySelector('[data-overlay-backdrop]')?.addEventListener('click', () => setOpen(false));
-    overlay.querySelectorAll('[data-overlay-link]').forEach((a) =>
-      a.addEventListener('click', () => setOpen(false))
-    );
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !overlay.hasAttribute('hidden')) setOpen(false);
-    });
-    document.addEventListener('astro:before-swap', () => { document.body.style.overflow = ''; }, { once: true });
-  }
+  document.addEventListener('astro:page-load', initHeader);
 </script>
 
 <style>
