@@ -315,6 +315,10 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     .hero-split__logos { margin-top: var(--space-xs); }
     .hero-split__logos-track { gap: var(--space-md); }
     .hero-split__logo { height: 15px; }
+
+    /* El panel claro (grid de fondo + mockup del POS) se oculta en mobile:
+       el hero es solo el panel azul con el mensaje. */
+    .hero-split__light { display: none; }
   }
 
   @media (min-width: 1024px) {

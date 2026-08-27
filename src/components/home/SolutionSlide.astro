@@ -71,6 +71,8 @@ const list = panels ?? [];
     // reacciona igual al deslizar hacia abajo con el dedo.
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       const getDistance = () => track.scrollWidth - window.innerWidth;
+      const panelCount = track.querySelectorAll('[data-sslide-panel]').length;
+      const snapTo = panelCount > 1 ? 1 / (panelCount - 1) : 1;
 
       gsap.to(track, {
         x: () => -getDistance(),
@@ -80,6 +82,10 @@ const list = panels ?? [];
           start: 'top top',
           end: () => '+=' + getDistance(),
           scrub: 1,
+          // Al soltar el scroll, en vez de quedar a mitad de camino entre
+          // paneles, anima hasta el panel más cercano — se siente como
+          // "pasar de slide" en vez de un simple drag 1:1 con el scroll.
+          snap: { snapTo, duration: { min: 0.25, max: 0.5 }, ease: 'power2.inOut' },
           pin: pinEl,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -167,7 +173,10 @@ const list = panels ?? [];
      achica todo (panel más angosto, imagen menos alta, tipografía y
      espaciados menores) para que el conjunto quepa cómodo. */
   @media (max-width: 767px) {
-    .sslide__panel { width: 78vw; gap: var(--space-xs); }
+    /* Ancho casi completo del dispositivo, respetando el mismo margen
+       lateral (--container-pad) que ya usa el track para el primer panel —
+       no un porcentaje arbitrario de vw. */
+    .sslide__panel { width: calc(100vw - (2 * var(--container-pad))); margin-right: var(--space-sm); gap: var(--space-xs); }
     .sslide__frame { aspect-ratio: 3 / 2; }
     .sslide__copy { gap: 6px; }
     .sslide__num { font-size: var(--text-lg); }
