@@ -45,23 +45,46 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
   </div>
 </header>
 
-<!-- Overlay móvil — fuera de <header>: ese elemento tiene backdrop-filter,
+<!-- Drawer móvil — fuera de <header>: ese elemento tiene backdrop-filter,
      que crea un containing block nuevo para position:fixed y hacía que el
-     overlay solo cubriera el alto del header en vez de toda la pantalla. -->
+     overlay solo cubriera el alto del header en vez de toda la pantalla.
+     Panel lateral (no full-screen) + backdrop clickeable + botón cerrar
+     propio, visible siempre dentro del panel (no depende del toggle del
+     header, que quedaba tapado detrás del overlay). -->
 <div class="mobile-overlay" id="mobile-overlay" data-overlay hidden>
-  <div class="overlay-actions">
-    <a href={loginUrl} class="overlay-login">
-      <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        {ICON_USER.split('|').map((d) => <path d={d} />)}
-      </svg>
-      Iniciar sesión
-    </a>
-    <a href={orderUrl} class="overlay-cta">
-      <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        {ICON_HEADSET.split('|').map((d) => <path d={d} />)}
-      </svg>
-      Agendar demo
-    </a>
+  <button
+    class="mobile-overlay__backdrop"
+    data-overlay-backdrop
+    aria-label="Cerrar menú"
+    tabindex="-1"
+  ></button>
+
+  <div class="mobile-overlay__panel" role="dialog" aria-modal="true" aria-label="Menú">
+    <div class="mobile-overlay__head">
+      <a href={withBase('/')} class="logo" aria-label={`${siteName}: Inicio`}>
+        <img src={withBase('/brand/Imagotipo-logo.svg')} alt={siteName} class="logo__img" />
+      </a>
+      <button class="mobile-overlay__close" data-overlay-close aria-label="Cerrar menú">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+    </div>
+
+    <nav class="overlay-actions" aria-label="Menú principal">
+      <a href={loginUrl} class="overlay-login" data-overlay-link>
+        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          {ICON_USER.split('|').map((d) => <path d={d} />)}
+        </svg>
+        Iniciar sesión
+      </a>
+      <a href={orderUrl} class="overlay-cta" data-overlay-link>
+        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          {ICON_HEADSET.split('|').map((d) => <path d={d} />)}
+        </svg>
+        Agendar demo
+      </a>
+    </nav>
   </div>
 </div>
 
@@ -89,6 +112,8 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
     };
 
     toggle.addEventListener('click', () => setOpen(overlay.hasAttribute('hidden')));
+    overlay.querySelector('[data-overlay-close]')?.addEventListener('click', () => setOpen(false));
+    overlay.querySelector('[data-overlay-backdrop]')?.addEventListener('click', () => setOpen(false));
     overlay.querySelectorAll('[data-overlay-link]').forEach((a) =>
       a.addEventListener('click', () => setOpen(false))
     );
@@ -203,24 +228,71 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
   .nav-toggle.is-active span:nth-child(1) { transform: translateY(4px) rotate(45deg); }
   .nav-toggle.is-active span:nth-child(2) { transform: translateY(-4px) rotate(-45deg); }
 
-  /* ── Overlay móvil ── */
+  /* ── Drawer móvil — panel lateral, NO full-screen ── */
   .mobile-overlay {
     position: fixed;
     inset: 0;
     z-index: var(--z-overlay);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-lg);
-    background-color: color-mix(in srgb, var(--bg-primary) 96%, transparent);
-    backdrop-filter: blur(8px);
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .mobile-overlay[hidden] { display: none; }
+  .mobile-overlay.is-open { visibility: visible; pointer-events: auto; }
+
+  .mobile-overlay__backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background-color: color-mix(in srgb, var(--navy) 55%, transparent);
     opacity: 0;
     transition: opacity var(--transition-fast);
+    cursor: default;
   }
-  .mobile-overlay.is-open { opacity: 1; }
-  .mobile-overlay[hidden] { display: none; }
-  .overlay-actions { display: grid; gap: var(--space-sm); justify-items: center; }
+  .mobile-overlay.is-open .mobile-overlay__backdrop { opacity: 1; }
+
+  .mobile-overlay__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(82vw, 340px);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-sm) var(--space-md) var(--space-lg);
+    background-color: var(--bg-primary);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(100%);
+    transition: transform var(--transition-smooth);
+  }
+  .mobile-overlay.is-open .mobile-overlay__panel { transform: translateX(0); }
+
+  .mobile-overlay__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: var(--space-xs);
+    margin-bottom: var(--space-lg);
+  }
+  .mobile-overlay__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    border-radius: var(--radius-full);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+  }
+  .mobile-overlay__close:hover { background-color: var(--bg-secondary); }
+  .mobile-overlay__close svg { width: 20px; height: 20px; }
+
+  .overlay-actions { display: grid; gap: var(--space-sm); }
   .overlay-login {
     display: inline-flex;
     align-items: center;
@@ -230,11 +302,15 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
     font-weight: 500;
     color: var(--text-secondary);
     text-decoration: none;
+    padding: var(--space-sm) var(--space-xs);
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
   }
-  .overlay-login:hover { color: var(--text-primary); }
+  .overlay-login:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
   .overlay-cta {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     font-family: var(--font-body);
     font-weight: 600;
