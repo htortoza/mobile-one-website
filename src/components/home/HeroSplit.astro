@@ -156,7 +156,10 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
   }
   .hero-split__eyebrow {
     font-family: var(--font-body);
-    font-size: var(--text-sm);
+    /* Fluido: se ajusta bajo ~411px de viewport, tope en 0.875rem (--text-sm)
+       desde ahí hacia arriba — no un tamaño fijo que se sienta grande en
+       phones angostos. */
+    font-size: clamp(0.6875rem, 3.4vw, 0.875rem);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: color-mix(in srgb, var(--on-accent) 80%, transparent);
@@ -190,25 +193,18 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 1 1 0;
-    min-width: 0;
-    white-space: normal;
+    flex: 0 1 auto;
+    white-space: nowrap;
     text-align: center;
     font-family: var(--font-body);
     font-weight: 500;
-    font-size: var(--text-sm);
-    padding: var(--space-sm) var(--space-sm);
+    /* Fluido en vez de un salto brusco a los 560px: nunca envuelve texto
+       ("Ver cómo funciona" en una sola línea) y se lee bien desde ~340px. */
+    font-size: clamp(0.8125rem, 3.4vw, 1rem);
+    padding: var(--space-sm) clamp(0.85rem, 4vw, var(--space-lg));
     border-radius: var(--radius-full);
     text-decoration: none;
     transition: transform var(--transition-fast), background-color var(--transition-fast);
-  }
-  @media (min-width: 560px) {
-    .hero-split__btn {
-      flex: 0 0 auto;
-      white-space: nowrap;
-      font-size: var(--text-base);
-      padding: var(--space-sm) var(--space-lg);
-    }
   }
   .hero-split__btn--primary {
     background-color: var(--on-accent);
@@ -276,7 +272,6 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
   .hero-split__light {
     position: relative;
     min-width: 0;
-    order: -1;
     background-color: var(--bg-secondary);
     display: flex;
     align-items: center;
@@ -308,9 +303,22 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.2));
   }
 
+  /* ── Mobile: todo el primer bloque (eyebrow, título, bajada, botones y
+     logos) debe caber en el primer vistazo, sin forzar 100vh de alto ni
+     el padding/gaps pensados para desktop (--space-xl=8rem, --space-lg
+     entre logos). ── */
+  @media (max-width: 1023px) {
+    .hero-split { min-height: auto; }
+    .hero-split__blue { padding-block: var(--space-lg) var(--space-md); }
+    .hero-split__blue-inner { gap: var(--space-sm); }
+    .hero-split__cta { margin-top: var(--space-xs); }
+    .hero-split__logos { margin-top: var(--space-xs); }
+    .hero-split__logos-track { gap: var(--space-md); }
+    .hero-split__logo { height: 15px; }
+  }
+
   @media (min-width: 1024px) {
     .hero-split { grid-template-columns: 60% 40%; }
-    .hero-split__light { order: 0; }
 
     .hero-pos-image {
       /* Sigue en flujo normal — el flex del panel (align-items:center) lo centra
