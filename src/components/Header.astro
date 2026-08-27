@@ -102,13 +102,36 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
 
   // Toggle del overlay móvil
   if (toggle && overlay) {
+    // Debe coincidir con --transition-smooth (panel) en la duración más
+    // larga de las dos transiciones (panel/backdrop).
+    const CLOSE_MS = 600;
+    let closeTimeout;
+
     const setOpen = (open) => {
-      overlay.toggleAttribute('hidden', !open);
-      overlay.classList.toggle('is-open', open);
+      clearTimeout(closeTimeout);
+
+      if (open) {
+        // Quitar "hidden" y agregar "is-open" en el mismo tick no anima
+        // nada: el navegador nunca pinta el estado inicial (display:none →
+        // abierto en un solo frame), así que el drawer solo "aparece".
+        // Se fuerza un reflow entre ambos pasos para que sí anime.
+        overlay.removeAttribute('hidden');
+        void overlay.offsetHeight;
+        overlay.classList.add('is-open');
+      } else {
+        overlay.classList.remove('is-open');
+        closeTimeout = setTimeout(() => overlay.setAttribute('hidden', ''), CLOSE_MS);
+      }
+
       toggle.classList.toggle('is-active', open);
       toggle.setAttribute('aria-expanded', String(open));
       toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
       document.body.style.overflow = open ? 'hidden' : '';
+      // El sitio usa Lenis para el scroll suave — solo bloquear
+      // overflow del body no lo frena (Lenis intercepta wheel/touch
+      // aparte), así que hay que pausarlo/reanudarlo explícitamente.
+      const lenis = window.__lenis;
+      if (lenis) open ? lenis.stop() : lenis.start();
     };
 
     toggle.addEventListener('click', () => setOpen(overlay.hasAttribute('hidden')));
@@ -292,11 +315,16 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
   .mobile-overlay__close:hover { background-color: var(--bg-secondary); }
   .mobile-overlay__close svg { width: 20px; height: 20px; }
 
-  .overlay-actions { display: grid; gap: var(--space-sm); }
+  /* flex (no grid): permite anclar el CTA abajo con margin-top:auto sin
+     importar cuánto mida el panel — si cambia el alto de pantalla, el CTA
+     sigue pegado al fondo en vez de quedar flotando a mitad de camino. */
+  .overlay-actions { display: flex; flex-direction: column; flex: 1; gap: var(--space-sm); }
   .overlay-login {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
     font-family: var(--font-body);
     font-size: var(--text-base);
     font-weight: 500;
@@ -308,15 +336,20 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
   }
   .overlay-login:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
   .overlay-cta {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: auto;
+    white-space: nowrap;
     font-family: var(--font-body);
+    font-size: var(--text-sm);
     font-weight: 600;
     color: var(--bg-primary);
     background-color: var(--accent);
-    padding: var(--space-sm) var(--space-lg);
+    padding: var(--space-sm) var(--space-xs);
     border-radius: var(--radius-full);
     text-decoration: none;
   }
