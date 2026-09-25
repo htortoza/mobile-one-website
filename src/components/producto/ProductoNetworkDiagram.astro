@@ -6,6 +6,9 @@
 // Contenido propio: Stock + Maestros (entradas) → Red sincronizada (hub) →
 // Entregas y despachos (salida). No repite contenido de Home, solo la
 // técnica del diagrama.
+// Mobile/tablet (<1024): "horquilla de flujo" — entradas lado a lado que
+// convergen (fork SVG) en el hub como banda horizontal, y una bajada a la
+// salida; pulsos de datos recorren las líneas en el sentido del flujo.
 const { id, eyebrow, title, inputs, hub, outputs } = Astro.props;
 const inputList = inputs ?? [];
 const outputList = outputs ?? [];
@@ -43,10 +46,28 @@ const hubNode = hub ?? { label: 'Red sincronizada' };
       ))}
     </div>
 
+    <!-- mobile: horquilla entradas → hub -->
+    <div class="pnd__fork" aria-hidden="true">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path class="pnd__fork-line" d="M25 0 V30 C25 70 50 55 50 100" />
+        <path class="pnd__fork-line" d="M75 0 V30 C75 70 50 55 50 100" />
+        <path class="pnd__fork-flow" d="M25 0 V30 C25 70 50 55 50 100" />
+        <path class="pnd__fork-flow pnd__fork-flow--b" d="M75 0 V30 C75 70 50 55 50 100" />
+      </svg>
+    </div>
+
     <div class="pnd__hub" data-pnd-hub>
+      <span class="pnd__hub-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 12a8 8 0 0 1-13.7 5.7" /><path d="M4 12a8 8 0 0 1 13.7-5.7" /><path d="M17.7 2.5v3.8h-3.8" /><path d="M6.3 21.5v-3.8h3.8" />
+        </svg>
+      </span>
       <p class="pnd__hub-label">{hubNode.label}</p>
       {hubNode.sub && <p class="pnd__hub-sub">{hubNode.sub}</p>}
     </div>
+
+    <!-- mobile: bajada hub → salida -->
+    <div class="pnd__drop" aria-hidden="true"><span></span></div>
 
     <div class="pnd__col pnd__col--out">
       {outputList.map((node, i) => (
@@ -112,13 +133,35 @@ const hubNode = hub ?? { label: 'Red sincronizada' };
 
     if (reduced) return;
 
-    gsap.from(section.querySelectorAll('[data-pnd-card]'), {
-      opacity: 0, y: 16, duration: 0.5, stagger: 0.07, ease: 'expo.out',
-      scrollTrigger: { trigger: diagram, start: 'top 75%' },
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 1024px)', () => {
+      gsap.from(section.querySelectorAll('[data-pnd-card]'), {
+        opacity: 0, y: 16, duration: 0.5, stagger: 0.07, ease: 'expo.out',
+        scrollTrigger: { trigger: diagram, start: 'top 75%' },
+      });
+      gsap.from(section.querySelector('[data-pnd-hub]'), {
+        opacity: 0, scale: 0.85, duration: 0.6, ease: 'back.out(1.6)',
+        scrollTrigger: { trigger: diagram, start: 'top 72%' },
+      });
     });
-    gsap.from(section.querySelector('[data-pnd-hub]'), {
-      opacity: 0, scale: 0.85, duration: 0.6, ease: 'back.out(1.6)',
-      scrollTrigger: { trigger: diagram, start: 'top 72%' },
+    // Mobile: el flujo se arma en orden al bajar — entradas, horquilla, hub,
+    // bajada y salida.
+    mm.add('(max-width: 1023px)', () => {
+      gsap.from(section.querySelectorAll('[data-pnd-card="in"]'), {
+        opacity: 0, y: 18, duration: 0.7, stagger: 0.1, ease: 'power3.out',
+        scrollTrigger: { trigger: section.querySelector('.pnd__col--in'), start: 'top 85%' },
+      });
+      [section.querySelector('.pnd__fork'), section.querySelector('.pnd__drop')].forEach((el) => {
+        gsap.from(el, { opacity: 0, scaleY: 0.4, transformOrigin: '50% 0%', duration: 0.7, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
+      });
+      gsap.from(section.querySelector('[data-pnd-hub]'), {
+        opacity: 0, scale: 0.92, duration: 0.7, ease: 'back.out(1.5)',
+        scrollTrigger: { trigger: section.querySelector('[data-pnd-hub]'), start: 'top 88%' },
+      });
+      gsap.from(section.querySelectorAll('[data-pnd-card="out"]'), {
+        opacity: 0, y: 18, duration: 0.7, ease: 'power3.out',
+        scrollTrigger: { trigger: section.querySelector('.pnd__col--out'), start: 'top 90%' },
+      });
     });
 
     ScrollTrigger.addEventListener('refresh', () => layoutCables(diagram));
@@ -197,6 +240,106 @@ const hubNode = hub ?? { label: 'Red sincronizada' };
   }
   .pnd__hub-label { font-family: var(--font-heading); font-size: var(--text-lg); line-height: 1.3; max-width: 16ch; }
   .pnd__hub-sub { font-size: var(--text-sm); color: color-mix(in srgb, var(--on-accent) 82%, transparent); }
+
+  .pnd__fork, .pnd__drop, .pnd__hub-icon { display: none; }
+
+  /* ── Mobile/tablet: horquilla de flujo ── */
+  @media (max-width: 1023px) {
+    .pnd__head { margin-bottom: var(--space-lg); }
+    .pnd__diagram { gap: 0; padding-block: 0; }
+    .pnd__col--in { grid-template-columns: 1fr 1fr; gap: var(--space-sm); }
+    .pnd__card { padding: var(--space-sm) var(--space-sm) calc(var(--space-sm) + 2px); border-radius: 18px; box-shadow: 0 14px 30px -22px color-mix(in srgb, var(--navy) 40%, transparent); }
+    .pnd__col--in .pnd__card { position: relative; align-content: start; }
+    /* nodos donde nace/llega cada rama */
+    .pnd__col--in .pnd__card::after,
+    .pnd__col--out .pnd__card::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      width: 9px;
+      height: 9px;
+      margin-left: -4.5px;
+      border-radius: var(--radius-full);
+      background-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+    .pnd__col--in .pnd__card::after { bottom: -5px; }
+    .pnd__col--out .pnd__card { position: relative; text-align: center; justify-items: center; }
+    .pnd__col--out .pnd__card::before { top: -5px; }
+    .pnd__card-label { font-size: 0.98rem; line-height: 1.25; }
+    .pnd__card-sub { font-size: 0.8rem; line-height: 1.45; }
+
+    .pnd__fork { display: block; height: 72px; }
+    .pnd__fork svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .pnd__fork-line { fill: none; stroke: color-mix(in srgb, var(--accent) 25%, transparent); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+    /* pulsos de datos que bajan por cada rama */
+    .pnd__fork-flow {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      vector-effect: non-scaling-stroke;
+      stroke-dasharray: 2 26;
+      animation: pnd-flow 1.6s linear infinite;
+      filter: drop-shadow(0 0 3px color-mix(in srgb, var(--accent) 70%, transparent));
+    }
+    .pnd__fork-flow--b { animation-delay: -0.8s; }
+    @keyframes pnd-flow { to { stroke-dashoffset: -28; } }
+
+    /* hub como banda horizontal */
+    .pnd__hub {
+      max-width: none;
+      min-height: 0;
+      grid-template-columns: auto 1fr;
+      justify-items: start;
+      text-align: left;
+      column-gap: var(--space-sm);
+      row-gap: 2px;
+      padding: var(--space-md);
+      border-radius: 22px;
+    }
+    .pnd__hub-icon {
+      display: grid;
+      place-items: center;
+      grid-row: 1 / 3;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      background: color-mix(in srgb, var(--on-accent) 16%, transparent);
+    }
+    .pnd__hub-icon svg { width: 22px; height: 22px; animation: pnd-spin 6s linear infinite; }
+    @keyframes pnd-spin { to { transform: rotate(360deg); } }
+    .pnd__hub-label { max-width: none; font-size: 1.15rem; }
+
+    .pnd__drop { display: block; position: relative; height: 56px; }
+    .pnd__drop::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      margin-left: -1px;
+      background: color-mix(in srgb, var(--accent) 25%, transparent);
+    }
+    .pnd__drop span {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 6px;
+      height: 6px;
+      margin-left: -3px;
+      border-radius: var(--radius-full);
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pnd-drop 1.6s ease-in infinite;
+    }
+    @keyframes pnd-drop { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(50px); opacity: 0; } }
+  }
+  @media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
+    .pnd__fork-flow, .pnd__drop span { display: none; }
+    .pnd__hub-icon svg { animation: none; }
+  }
 
   @media (min-width: 1024px) {
     .pnd__diagram { grid-template-columns: 1fr 240px 1fr; align-items: center; gap: var(--space-2xl); }

@@ -129,6 +129,15 @@ const ICONS = {
   .pch[data-variant="pos"] .pch__icon { width: 56px; height: 56px; }
   .pch[data-variant="pos"] .pch__icon svg { width: 28px; height: 28px; }
 
+  /* Mobile/tablet: todos los capítulos centrados (número, título, íconos y
+     textos). En photo-callout la regla lateral pasa a ser superior. */
+  @media (max-width: 899px) {
+    .pch__copy, .pch__items { justify-items: center; text-align: center; }
+    .pch__item { justify-items: center; }
+    .pch__item-text { margin-inline: auto; }
+    .pch[data-variant="photo-callout"] .pch__item { border-left: 0; padding-left: 0; border-top: 1px solid var(--border); padding-top: var(--space-sm); }
+  }
+
   @media (min-width: 900px) {
     /* El rail de capítulos (ProductoChapterNav) es fixed en x 32–155px: en
        'pos', 'duo' y 'photo-callout' (foto a la izquierda) el contenido arranca a ≥200px para que el rail nunca pise

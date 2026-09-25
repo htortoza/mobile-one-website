@@ -109,4 +109,11 @@ const list = features ?? [];
   @media (min-width: 900px) and (max-width: 1279px) {
     .pfs__grid { grid-template-columns: 260px 1fr; gap: var(--space-lg); }
   }
+  /* Mobile/tablet: centrado, igual que los capítulos 01–03 y 06 */
+  @media (max-width: 899px) {
+    .pfs__rail { justify-items: center; text-align: center; }
+    .pfs__title { margin-inline: auto; }
+    .pfs__copy { text-align: center; }
+    .pfs__text { margin-inline: auto; }
+  }
 </style>
