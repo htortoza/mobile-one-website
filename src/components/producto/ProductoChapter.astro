@@ -163,8 +163,14 @@ const ICONS = {
     }
     .pch[data-variant="duo"] .pch__items { grid-template-columns: 1fr 1fr; }
 
-    /* photo-callout: la foto va primero, más protagonismo visual */
-    .pch[data-variant="photo-callout"] .pch__frame { order: -1; }
+    /* photo-callout: la foto va primero, más protagonismo visual. Cerca del
+       copy y con su mismo alto (bordes superior e inferior alineados con el
+       texto), en vez de una foto chica flotando a media altura. */
+    .pch[data-variant="photo-callout"] .pch__grid { gap: var(--space-lg); align-items: stretch; }
+    .pch[data-variant="photo-callout"] .pch__frame { order: -1; align-self: stretch; position: relative; min-height: 340px; }
+    /* absoluta: la foto no aporta alto a la fila, el alto lo define el copy */
+    .pch[data-variant="photo-callout"] .pch__img { position: absolute; inset: 0; aspect-ratio: auto; }
+    .pch[data-variant="photo-callout"] .pch__copy { align-content: center; }
   }
   /* 900–1279: con el margen del rail, el gap de 12rem dejaba el copy de 'duo'
      en columnas muy angostas. */
