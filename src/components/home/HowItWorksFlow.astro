@@ -102,39 +102,10 @@ const headingList = headings ?? [];
 <script>
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { mountPosScreen } from '../../utils/pos-screen.js';
 
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.config({ ignoreMobileResize: true });
-
-  // Esquinas reales del vidrio en la foto (px del archivo 1958×1722),
-  // medidas ajustando rectas a cada borde de la pantalla: TL, TR, BR, BL.
-  const IMG_W = 1958;
-  const QUAD = [[766.4, 358.3], [1295.5, 323.6], [1021.1, 1502.9], [485.8, 1449.4]];
-
-  // Homografía rect(w×h) → cuadrilátero, como matrix3d de CSS.
-  function quadMatrix(w, h, q) {
-    const src = [[0, 0], [w, 0], [w, h], [0, h]];
-    const A = [], b = [];
-    src.forEach(([x, y], i) => {
-      const [u, v] = q[i];
-      A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]); b.push(u);
-      A.push([0, 0, 0, x, y, 1, -v * x, -v * y]); b.push(v);
-    });
-    // eliminación gaussiana 8×8
-    for (let c = 0; c < 8; c++) {
-      let p = c;
-      for (let r = c + 1; r < 8; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
-      [A[c], A[p]] = [A[p], A[c]]; [b[c], b[p]] = [b[p], b[c]];
-      for (let r = 0; r < 8; r++) {
-        if (r === c) continue;
-        const f = A[r][c] / A[c][c];
-        for (let k = c; k < 8; k++) A[r][k] -= f * A[c][k];
-        b[r] -= f * b[c];
-      }
-    }
-    const [a, bb, c, d, e, f, g, hh] = b.map((v, i) => v / A[i][i]);
-    return `matrix3d(${a},${d},0,${g},${bb},${e},0,${hh},0,0,1,0,${c},${f},0,1)`;
-  }
 
   function initFlow() {
     const section = document.querySelector('[data-gsap-section="flow"]');
@@ -149,19 +120,8 @@ const headingList = headings ?? [];
     if (!pinEl || !pos || !screen || !scrs.length) return;
 
     // Proyectar la pantalla sobre el vidrio (y re-proyectar en resize).
-    const device = pos.parentElement;
-    const SCREEN_CX = 0.455; // centro del vidrio en x, fracción del ancho de la foto
-    const project = () => {
-      pos.style.marginLeft = device.offsetWidth / 2 - pos.offsetWidth * SCREEN_CX + 'px';
-      const s = pos.offsetWidth / IMG_W;
-      const q = QUAD.map(([x, y]) => [x * s, y * s]);
-      screen.style.transform = quadMatrix(screen.offsetWidth, screen.offsetHeight, q);
-    };
-    project();
-    const ro = new ResizeObserver(project);
-    ro.observe(pos);
-    ro.observe(device);
-    document.addEventListener('astro:before-swap', () => ro.disconnect(), { once: true });
+    const unmount = mountPosScreen(pos, screen);
+    document.addEventListener('astro:before-swap', unmount, { once: true });
 
     gsap.from(section.querySelectorAll('.flow__head [data-gsap-animate="fade-up"]'), {
       opacity: 0, y: 16, duration: 0.8, ease: 'power3.out',

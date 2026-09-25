@@ -1,0 +1,170 @@
+---
+// src/components/producto/ProductoPosQR.astro
+// /producto cap. 01 "Abrir turno" — el POS real con la pantalla de login
+// (pantalla1) proyectada en su vidrio (utils/pos-screen.js). Con el scroll
+// el POS entra y el recuadro "Ingresar con código QR" crece y se eleva sobre
+// la pantalla atenuada; al quedar en foco, un pulso lo señala. La foto va en
+// espejo (el POS a la izquierda mira hacia la derecha). Sin pin: la
+// animación va atada al paso de la sección por el viewport.
+import { withBase } from '../../utils/base.js';
+---
+
+<figure class="ppq" data-ppq>
+  <div class="ppq__halo" aria-hidden="true"></div>
+  <div class="ppq__pos" data-ppq-pos>
+    <img
+      class="ppq__pos-img"
+      src={withBase('/images/hero-mobile-pos-v2-final.webp')}
+      alt="Terminal de pago con Mobile One: inicio de sesión del vendedor con código QR"
+      width="1958"
+      height="1722"
+      loading="lazy"
+    />
+    <div class="ppq__screen" data-ppq-screen aria-hidden="true">
+      <!-- geometría "cover" de la captura 736×1456 sobre el lienzo 300×630 -->
+      <div class="ppq__shotbox" data-ppq-shot>
+        <img class="ppq__shot" src={withBase('/images/pantalla1.webp')} alt="" loading="lazy" />
+        <span class="ppq__dim" data-ppq-dim></span>
+        <span class="ppq__qr" data-ppq-qr>
+          <img src={withBase('/images/pantalla1-qr.webp')} alt="" loading="lazy" />
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="ppq__floor" aria-hidden="true"></div>
+</figure>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { mountPosScreen } from '../../utils/pos-screen.js';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initPosQR() {
+    const root = document.querySelector('[data-ppq]');
+    if (!root || root.dataset.ppqInit) return;
+    root.dataset.ppqInit = '1';
+    const pos = root.querySelector('[data-ppq-pos]');
+    const screen = root.querySelector('[data-ppq-screen]');
+    // Desktop: la foto (tarjeta y check incluidos, que en espejo quedan a la
+    // izquierda) no invade la franja del rail de capítulos.
+    const desktop = window.matchMedia('(min-width: 900px)').matches;
+    const unmount = mountPosScreen(pos, screen, { mirror: true, minLeft: desktop ? 0 : -Infinity });
+    document.addEventListener('astro:before-swap', unmount, { once: true });
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root.classList.add('is-focused'); // estado final estático: QR destacado
+      return;
+    }
+
+    const qr = root.querySelector('[data-ppq-qr]');
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: root,
+        start: 'top 85%',
+        end: 'center 45%',
+        scrub: 1,
+        // el pulso solo corre con el QR ya en foco
+        onUpdate: (self) => root.classList.toggle('is-focused', self.progress > 0.96),
+      },
+    });
+    tl.fromTo(pos, { y: 70, rotate: 4, opacity: 0 }, { y: 0, rotate: 0, opacity: 1, duration: 0.5, ease: 'power3.out' }, 0)
+      .fromTo(root.querySelector('[data-ppq-shot]'), { scale: 1.08 }, { scale: 1, duration: 0.5, ease: 'power2.out' }, 0)
+      .to(root.querySelector('[data-ppq-dim]'), { opacity: 1, duration: 0.45, ease: 'power2.inOut' }, 0.5)
+      .to(qr, {
+        scale: 1.2, // máx. sin salirse del vidrio (card 247px → ~297px de 300)
+        y: -8,
+        boxShadow: '0 26px 44px -10px rgba(0, 12, 60, 0.55), 0 0 0 3px rgba(255, 255, 255, 0.9)',
+        duration: 0.5,
+        ease: 'back.out(1.4)',
+      }, 0.5);
+  }
+
+  document.addEventListener('astro:page-load', initPosQR);
+</script>
+
+<style>
+  .ppq { position: relative; margin: 0; display: grid; justify-items: start; min-width: 0; }
+  .ppq__halo {
+    position: absolute;
+    inset: 6% 12% 14%;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 20%, transparent), transparent 68%);
+    filter: blur(20px);
+  }
+  /* El POS se dimensiona por su vidrio; margin-left lo fija mountPosScreen()
+     para que el vidrio quede centrado en la columna. */
+  .ppq__pos { position: relative; width: min(118%, 680px); aspect-ratio: 1958 / 1722; }
+  /* Espejo: el POS mira a la derecha (solo la foto; la pantalla se proyecta
+     aparte con las esquinas reflejadas, así su contenido se lee normal). */
+  .ppq__pos-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transform: scaleX(-1); filter: drop-shadow(0 30px 40px color-mix(in srgb, var(--navy) 22%, transparent)); }
+  .ppq__floor {
+    justify-self: center;
+    width: 44%;
+    height: 22px;
+    margin-top: -16px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--navy) 20%, transparent), transparent);
+  }
+
+  /* Lienzo 300×630 (proporción del vidrio) → matrix3d */
+  .ppq__screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 630px;
+    transform-origin: 0 0;
+    border-radius: 18px;
+    overflow: hidden;
+    clip-path: inset(0 round 18px);
+    background-color: var(--bg-primary);
+    backface-visibility: hidden;
+  }
+  .ppq__shotbox { position: absolute; top: 0; left: -9.23px; width: 318.46px; height: 100%; }
+  .ppq__shot { width: 100%; height: 100%; display: block; }
+  .ppq__dim { position: absolute; inset: 0; background: color-mix(in srgb, var(--navy) 58%, transparent); opacity: 0; }
+  /* recorte (82,416)–(654,587) de pantalla1 sobre 736×1456 */
+  .ppq__qr {
+    position: absolute;
+    left: 11.141%;
+    top: 28.571%;
+    width: 77.717%;
+    aspect-ratio: 572 / 171;
+    border-radius: 13px;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  .ppq__qr img { width: 100%; height: 100%; display: block; }
+  /* Pulso: anillo que se expande desde el recuadro mientras está en foco */
+  .ppq__qr::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 15px;
+    border: 2px solid color-mix(in srgb, var(--on-accent) 90%, transparent);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .ppq.is-focused .ppq__qr::after { animation: ppq-pulse 1.8s var(--ease-out, ease-out) infinite; }
+  @keyframes ppq-pulse {
+    0% { opacity: 0.9; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.12, 1.35); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ppq__dim { opacity: 1; }
+    .ppq__qr { transform: scale(1.2) translateY(-6px); box-shadow: 0 26px 44px -10px rgba(0, 12, 60, 0.55), 0 0 0 3px rgba(255, 255, 255, 0.9); }
+    .ppq.is-focused .ppq__qr::after { animation: none; }
+  }
+
+  /* Desktop: el POS no desborda su columna (en espejo, el ícono flotante de
+     la foto queda a la derecha y se cruzaba con el título). */
+  @media (min-width: 900px) { .ppq__pos { width: min(100%, 640px); } }
+
+  @media (max-width: 899px) {
+    .ppq__pos { width: min(165%, 560px); }
+    .ppq__floor { display: none; }
+  }
+</style>

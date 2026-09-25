@@ -221,4 +221,10 @@ const TILES = Array.from({ length: GRID_COLS * GRID_ROWS });
     .psb__grid { grid-template-columns: 1.1fr 0.9fr; align-items: center; }
     .psb__scene { display: block; max-width: 320px; margin-inline: auto; }
   }
+
+  /* El rail de capítulos (ProductoChapterNav) es fixed en x 32–155px: el
+     contenido arranca a ≥200px para dejar un margen prudente. */
+  @media (min-width: 900px) {
+    .psb__grid { padding-inline-start: max(var(--container-pad), calc(200px - max(0px, (100vw - var(--container-max)) / 2))); }
+  }
 </style>

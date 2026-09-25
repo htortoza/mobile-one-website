@@ -204,4 +204,16 @@ const hubNode = hub ?? { label: 'Red sincronizada' };
     .pnd__col--out { justify-items: end; }
     .pnd__col--out .pnd__card { text-align: right; justify-items: end; }
   }
+
+  /* El rail de capítulos (ProductoChapterNav) es fixed en x 32–155px: el
+     contenido arranca a ≥200px para dejar un margen prudente. */
+  @media (min-width: 900px) {
+    .pnd__head,
+    .pnd__diagram { padding-inline-start: max(var(--container-pad), calc(200px - max(0px, (100vw - var(--container-max)) / 2))); }
+  }
+  /* 1024–1279: con el margen del rail, el gap de 12rem sacaba la columna de
+     salidas por el borde derecho. */
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .pnd__diagram { grid-template-columns: 1fr 200px 1fr; gap: var(--space-lg); }
+  }
 </style>

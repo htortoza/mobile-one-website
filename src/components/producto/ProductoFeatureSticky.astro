@@ -4,13 +4,14 @@
 // anti-repetición): título fijo (sticky) a la izquierda + ledger de
 // funcionalidades con reglas que se dibujan a la derecha (§16.3).
 import { withBase } from '../../utils/base.js';
-const { id, eyebrow, title, image, imageAlt, features } = Astro.props;
+const { id, num, eyebrow, title, image, imageAlt, features } = Astro.props;
 const list = features ?? [];
 ---
 
 <section id={id} class="pfs" data-gsap-section={`pfs-${id}`}>
   <div class="container pfs__grid">
     <div class="pfs__rail" data-pfs-rail>
+      {num && <span class="pfs__step" aria-hidden="true">{num}</span>}
       {eyebrow && <span class="pfs__eyebrow" data-gsap-animate="fade-up">{eyebrow}</span>}
       <h2 class="pfs__title" data-gsap-animate="fade-up">{title}</h2>
       {image && (
@@ -23,7 +24,6 @@ const list = features ?? [];
     <div class="pfs__ledger">
       {list.map((f, i) => (
         <article class="pfs__row" data-pfs-row>
-          <span class="pfs__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
           <div class="pfs__copy">
             <h3 class="pfs__heading">{f.title}</h3>
             <p class="pfs__text">{f.text}</p>
@@ -67,6 +67,8 @@ const list = features ?? [];
   .pfs__grid { display: grid; gap: var(--space-lg); }
 
   .pfs__rail { display: grid; gap: var(--space-md); align-self: start; }
+  /* número del capítulo (mismo estilo que .pch__num de ProductoChapter) */
+  .pfs__step { font-family: var(--font-heading); font-weight: 600; font-size: var(--text-sm); color: var(--accent-hover); margin-bottom: 4px; }
   .pfs__eyebrow {
     display: inline-flex;
     align-items: center;
@@ -92,7 +94,19 @@ const list = features ?? [];
   .pfs__rule { position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background-color: var(--border); }
 
   @media (min-width: 900px) {
-    .pfs__grid { grid-template-columns: 320px 1fr; gap: var(--space-2xl); }
-    .pfs__rail { position: sticky; top: var(--space-xl); }
+    /* El rail de capítulos (ProductoChapterNav) es fixed en x 32–155px: el
+       contenido arranca a ≥200px para dejar un margen prudente, y el título
+       queda centrado en alto respecto al ledger (sin sticky: con pocas filas
+       el sticky lo dejaba arriba, bajo el rail, al scrollear). */
+    .pfs__grid {
+      grid-template-columns: 320px 1fr;
+      gap: var(--space-2xl);
+      align-items: center;
+      padding-inline-start: max(var(--container-pad), calc(200px - max(0px, (100vw - var(--container-max)) / 2)));
+    }
+    .pfs__rail { align-self: center; }
+  }
+  @media (min-width: 900px) and (max-width: 1279px) {
+    .pfs__grid { grid-template-columns: 260px 1fr; gap: var(--space-lg); }
   }
 </style>

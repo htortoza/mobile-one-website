@@ -47,9 +47,9 @@ const chapters = [
   <ProductoHero
     eyebrow="Producto"
     headline={[
-      { text: 'Un' }, { text: 'producto,' }, { text: 'dos' }, { text: 'superficies:' },
-      { text: 'el', accent: 'accent' }, { text: 'terminal', accent: 'accent' }, { text: 'de', accent: 'accent' }, { text: 'venta', accent: 'accent', break: true },
-      { text: 'y' }, { text: 'el', accent: 'navy' }, { text: 'panel', accent: 'navy' }, { text: 'de', accent: 'navy' }, { text: 'administración', accent: 'navy' },
+      { text: 'Un' }, { text: 'producto,' }, { text: 'dos' }, { text: 'superficies:', break: true },
+      { text: 'el', accent: 'accent' }, { text: 'terminal', accent: 'accent' }, { text: 'de', accent: 'accent' }, { text: 'venta', accent: 'accent' },
+      { text: 'y', break: true }, { text: 'el', accent: 'navy' }, { text: 'panel', accent: 'navy' }, { text: 'de', accent: 'navy' }, { text: 'administración', accent: 'navy' },
     ]}
     subheadline="Todo lo que necesitas para operar la venta directamente en tu terminal de cobro, y todo lo que necesitas para controlarla desde un panel web, en un solo sistema."
   />
@@ -58,7 +58,7 @@ const chapters = [
 
   <ProductoChapter
     id="abrir-turno"
-    variant="solo"
+    variant="pos"
     eyebrow="POS Mobile"
     num="01"
     title="Abrir turno"
@@ -106,6 +106,7 @@ const chapters = [
 
   <ProductoFeatureSticky
     id="despues-de-vender"
+    num="05"
     eyebrow="POS Mobile"
     title="Después de vender"
     features={[
@@ -180,7 +181,7 @@ const chapters = [
     body="Agenda una demo de 30 minutos y te mostramos Mobile One funcionando con tu catálogo."
     ctaText="Agendar demo"
     ctaHref="/contacto"
-    ctaSecondaryText="Hablar con un especialista"
+    ctaSecondaryText="Contactar un consultor"
     ctaSecondaryHref="/contacto"
   />
 </Layout>

@@ -91,4 +91,10 @@ const list = stats ?? [];
     .pss__stat { border-top: none; border-left: 1px solid var(--border); padding-inline-start: var(--space-md); padding-block: 0; }
     .pss__stat:first-child { border-left: none; padding-inline-start: 0; }
   }
+
+  /* El rail de capítulos (ProductoChapterNav) es fixed en x 32–155px: el
+     contenido arranca a ≥200px para dejar un margen prudente. */
+  @media (min-width: 900px) {
+    .pss__grid { padding-inline-start: max(var(--container-pad), calc(200px - max(0px, (100vw - var(--container-max)) / 2))); }
+  }
 </style>

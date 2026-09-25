@@ -111,7 +111,10 @@ const { eyebrow, headline, subheadline } = Astro.props;
   .phero2__word--navy { color: var(--accent-hover); }
   .phero2__sub { font-size: clamp(1.1rem, 1.6vw, 1.35rem); color: var(--text-secondary); line-height: 1.6; }
 
+  /* Desktop: el titular usa todo el ancho para que cada frase ("Un producto,
+     dos superficies:" / "el terminal de venta y" / "el panel de
+     administración") quede en una línea; la bajada conserva su ancho de lectura. */
   @media (min-width: 800px) {
-    .phero2__inner { width: 60%; }
+    .phero2__sub { max-width: 46rem; }
   }
 </style>
