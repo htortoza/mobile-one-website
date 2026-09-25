@@ -34,6 +34,17 @@ if (phraseWords.length) {
 const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart + phraseWords.length;
 ---
 
+<!-- Oculta las piezas del hero ANTES del primer paint (el módulo GSAP carga
+     después): evita que se vea completo, desaparezca y recién se anime.
+     Solo en carga real de documento (no en navegación con ClientRouter, donde
+     el módulo ya no se re-ejecuta). Respaldo: se libera a los 3s si el JS falla. -->
+<script is:inline>
+  if (!window.__heroIntroDone && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('hero-intro-pending');
+    setTimeout(() => document.documentElement.classList.remove('hero-intro-pending'), 3000);
+  }
+</script>
+
 <section class="hero-split" data-gsap-section="hero-split">
   <div class="hero-split__blue">
     <div class="hero-split__blue-inner">
@@ -100,13 +111,27 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     const logosRow = section.querySelector('[data-gsap-animate="fade-up-logos"]');
     const mockups = section.querySelector('[data-gsap-animate="mockup"]');
 
-    const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
-    if (eyebrow) tl.from(eyebrow, { y: 16, opacity: 0, duration: 0.7 });
-    tl.from(words, { y: 40, opacity: 0, stagger: 0.05, duration: 0.9 }, '-=0.3');
-    if (sub) tl.from(sub, { y: 20, opacity: 0, duration: 0.8 }, '-=0.4');
-    if (cta) tl.from(cta, { y: 20, opacity: 0, duration: 0.7 }, '-=0.5');
-    if (logosRow) tl.from(logosRow, { y: 16, opacity: 0, duration: 0.6 }, '-=0.4');
-    if (mockups) tl.from(mockups, { opacity: 0, scale: 0.96, duration: 0.9 }, '-=0.6');
+    // Intro pausada y orgánica: power3/power4 reparten el movimiento en toda
+    // la duración (expo.out resolvía casi todo en el primer 20% y se sentía
+    // de golpe). Solapes amplios para que cada parte entre como una ola.
+    // Estado inicial explícito (set + to): con from() en timeline GSAP
+    // difería el render inicial y las piezas se veían un instante antes de
+    // animarse. Así quedan ocultas desde el primer frame.
+    const pieces = [eyebrow, sub, cta, logosRow].filter(Boolean);
+    gsap.set(pieces, { opacity: 0, y: 22 });
+    gsap.set(words, { opacity: 0, y: 48 });
+    if (mockups) gsap.set(mockups, { opacity: 0, scale: 0.96 });
+    // Ya ocultas inline — se libera el ocultamiento CSS previo al paint.
+    document.documentElement.classList.remove('hero-intro-pending');
+    window.__heroIntroDone = true;
+
+    const tl = gsap.timeline({ delay: 0.1, defaults: { ease: 'power3.out', opacity: 1, y: 0 } });
+    if (eyebrow) tl.to(eyebrow, { duration: 1.1 });
+    tl.to(words, { stagger: 0.09, duration: 1.3, ease: 'power4.out' }, '-=0.6');
+    if (sub) tl.to(sub, { duration: 1.2 }, '-=0.8');
+    if (cta) tl.to(cta, { duration: 1.1 }, '-=0.85');
+    if (logosRow) tl.to(logosRow, { duration: 1.1 }, '-=0.8');
+    if (mockups) tl.to(mockups, { scale: 1, duration: 1.4 }, '-=1.0');
 
     // CTA magnético — desktop (pointer: fine) only
     const primaryBtn = section.querySelector('.hero-split__btn--primary');
@@ -268,6 +293,9 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     .hero-split__logo[data-logo-dupe] { display: none; }
   }
 
+  :global(html.hero-intro-pending) .hero-split [data-gsap-animate],
+  :global(html.hero-intro-pending) .hero-split__word { opacity: 0; }
+
   /* ── Panel claro / mockups ── */
   .hero-split__light {
     position: relative;
@@ -315,6 +343,9 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     .hero-split__logos { margin-top: var(--space-xs); }
     .hero-split__logos-track { gap: var(--space-md); }
     .hero-split__logo { height: 15px; }
+    /* Sin el bleed de desktop, el POS queda flotando solo bajo el panel azul
+       sin aportar: se oculta el panel completo (imagen + grid). */
+    .hero-split__light { display: none; }
   }
 
   @media (min-width: 1024px) {

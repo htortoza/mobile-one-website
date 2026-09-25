@@ -11,6 +11,7 @@ const list = panels ?? [];
 ---
 
 <section class="sslide" data-gsap-section="sslide">
+  <div class="sslide__stage" data-sslide-stage>
   <div class="container sslide__head">
     <img class="sslide__logo" src={withBase('/brand/Imagotipo-logo.svg')} alt="Mobile One" data-gsap-animate="fade-up" />
     {eyebrow && <p class="sslide__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
@@ -32,6 +33,7 @@ const list = panels ?? [];
         </article>
       ))}
     </div>
+  </div>
   </div>
 </section>
 
@@ -64,14 +66,25 @@ const list = panels ?? [];
 
     const mm = gsap.matchMedia();
 
-    // Mismo mecanismo en TODOS los tamaños (§15.6.1: la galería horizontal
-    // que avanza con el scroll se mantiene en mobile, no se apaga por
-    // viewport — solo se desactiva por prefers-reduced-motion). Lenis emite
-    // eventos de scroll también con gestos táctiles, así que el scrub
-    // reacciona igual al deslizar hacia abajo con el dedo.
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      const getDistance = () => track.scrollWidth - window.innerWidth;
+    const stage = section.querySelector('[data-sslide-stage]');
+    const head = section.querySelector('.sslide__head');
+    const logo = section.querySelector('.sslide__logo');
+    const getDistance = () => track.scrollWidth - window.innerWidth;
+    // El CTA sticky flotante tapa el copy del panel activo (pantalla completa,
+    // poco alto) — se oculta mientras dura el pin.
+    const stickyCtaToggles = {
+      onEnter: () => document.body.classList.add('hide-sticky-cta'),
+      onLeave: () => document.body.classList.remove('hide-sticky-cta'),
+      onEnterBack: () => document.body.classList.add('hide-sticky-cta'),
+      onLeaveBack: () => document.body.classList.remove('hide-sticky-cta'),
+    };
 
+    // La galería horizontal que avanza con el scroll se mantiene en mobile
+    // (§15.6.1) — solo se desactiva por prefers-reduced-motion. Lenis emite
+    // eventos de scroll también con gestos táctiles.
+
+    // Desktop: se pinnea solo la galería (el panel ocupa casi todo el alto).
+    mm.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => {
       gsap.to(track, {
         x: () => -getDistance(),
         ease: 'none',
@@ -83,15 +96,79 @@ const list = panels ?? [];
           pin: pinEl,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          // El CTA sticky flotante tapa el copy del panel activo en mobile
-          // (pantalla completa, poco alto) — se oculta mientras dura el pin.
-          onEnter: () => document.body.classList.add('hide-sticky-cta'),
-          onLeave: () => document.body.classList.remove('hide-sticky-cta'),
-          onEnterBack: () => document.body.classList.add('hide-sticky-cta'),
-          onLeaveBack: () => document.body.classList.remove('hide-sticky-cta'),
+          ...stickyCtaToggles,
         },
       });
+    });
 
+    // Mobile: se pinnea el stage completo (eyebrow + título + galería) centrado
+    // bajo el header, para no perder el contexto mientras pasan las cards.
+    mm.add('(max-width: 767px) and (prefers-reduced-motion: no-preference)', () => {
+      section.classList.add('is-stage-pin');
+
+      // Recorrido hasta que la ÚLTIMA card quede completa, con el mismo margen
+      // lateral de entrada (scrollWidth incluye margin + padding final y la
+      // empujaba fuera de pantalla antes de soltar el pin).
+      const panels = track.querySelectorAll('[data-sslide-panel]');
+      const getDistance = () => {
+        const last = panels[panels.length - 1];
+        const padStart = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+        // borde derecho de la card relativo al track (el translate se cancela)
+        const lastRight = last.getBoundingClientRect().right - track.getBoundingClientRect().left;
+        return Math.max(0, lastRight - (window.innerWidth - padStart));
+      };
+
+      // Al fijarse, el stage llega CON logo (logo → eyebrow → título → cards).
+      // El primer tramo del scroll pinneado pliega el logo (redunda con el del
+      // header) y el flex recentra el bloque; luego pasan las cards.
+      const LOGO_SHARE = 0.15; // fracción extra de scroll dedicada al logo
+      const pinLength = () => getDistance() * (1 + LOGO_SHARE);
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: stage,
+          start: 'top top',
+          end: () => '+=' + pinLength(),
+          scrub: 1,
+          pin: stage,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+      if (logo) {
+        // fromTo con estado inicial explícito: el fade-up de entrada deja el
+        // logo en opacity 0 al cargar y un to() lo tomaba como punto de partida.
+        const logoH = logo.offsetHeight;
+        const logoMb = parseFloat(getComputedStyle(logo).marginBottom) || 0;
+        tl.fromTo(logo, { autoAlpha: 1, height: logoH, marginBottom: logoMb }, {
+          autoAlpha: 0,
+          height: 0,
+          // compensa también el gap del grid para que no quede un hueco
+          marginBottom: () => -parseFloat(getComputedStyle(head).rowGap || '0'),
+          ease: 'power1.inOut',
+          duration: LOGO_SHARE,
+          immediateRender: false,
+        });
+      }
+      tl.to(track, { x: () => -getDistance(), ease: 'none', duration: 1 });
+
+      // CTA sticky: se oculta desde que el stage viene subiendo (antes del pin)
+      // hasta que la última card ya salió por arriba al soltar el pin — así
+      // nunca tapa el copy de la card activa.
+      ScrollTrigger.create({
+        trigger: stage,
+        start: 'top 45%',
+        end: () => 'top top-=' + (pinLength() + window.innerHeight * 0.7),
+        invalidateOnRefresh: true,
+        onToggle: (self) => document.body.classList.toggle('hide-sticky-cta', self.isActive),
+      });
+
+      return () => {
+        section.classList.remove('is-stage-pin');
+        document.body.classList.remove('hide-sticky-cta');
+      };
+    });
+
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
       gsap.from(track.querySelectorAll('[data-sslide-panel]'), {
         opacity: 0,
         y: 20,
@@ -167,12 +244,32 @@ const list = panels ?? [];
      achica todo (panel más angosto, imagen menos alta, tipografía y
      espaciados menores) para que el conjunto quepa cómodo. */
   @media (max-width: 767px) {
+    .sslide__head { margin-bottom: 0; }
+    .sslide__pin { align-items: flex-start; padding-top: var(--space-sm); }
     .sslide__panel { width: 78vw; gap: var(--space-xs); }
     .sslide__frame { aspect-ratio: 3 / 2; }
     .sslide__copy { gap: 6px; }
     .sslide__num { font-size: var(--text-lg); }
     .sslide__heading { font-size: clamp(1.3rem, 5.5vw, 1.6rem); line-height: 1.15; }
     .sslide__text { font-size: var(--text-sm); line-height: 1.45; }
+
+    /* Stage pinneado (clase la pone el JS): 100vh, contenido centrado en el
+       espacio bajo el header (53px ≈ 3.3rem); la galería mide su alto natural. */
+    .sslide.is-stage-pin .sslide__stage {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-block: 3.3rem var(--space-sm);
+    }
+    .sslide.is-stage-pin .sslide__pin { height: auto; }
+  }
+  /* Pantallas bajas: con el logo visible al fijarse el bloque no cabía bajo
+     el header — imagen más panorámica, título y aire algo menores. */
+  @media (max-width: 767px) and (max-height: 700px) {
+    .sslide.is-stage-pin .sslide__frame { aspect-ratio: 16 / 9; }
+    .sslide.is-stage-pin .sslide__title { font-size: 1.9rem; }
+    .sslide.is-stage-pin .sslide__pin { padding-top: var(--space-xs); }
   }
 
   /* Sin motion: sin pin ni desplazamiento lateral — panels en columna. */

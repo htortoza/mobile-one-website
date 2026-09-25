@@ -1,0 +1,241 @@
+---
+// src/components/home/CompatContactless.astro
+// Variante MOBILE (<900px) de BrandCompat — escena "onda contactless".
+// Desktop conserva la stage original de BrandCompat (mitades que se cruzan);
+// esta escena solo se activa por JS en '(max-width: 899px)' con motion.
+// 1) entra como card redondeada que se expande a pantalla completa;
+// 2) pinneada, cada cambio de marca nace del terminal: anillos NFC desde la
+//    foto y el color de la marca siguiente inunda la pantalla en un círculo
+//    (clip-path) desde ese punto — el gesto de pagar;
+// 3) el capítulo anterior se hunde y el nuevo entra con zoom de foto y copy
+//    en cascada. Pin "bueno" (§15.6.1): el contenido avanza.
+import { withBase } from '../../utils/base.js';
+const { chapters } = Astro.props;
+const list = chapters ?? [];
+const logoStyle = (ch) => `${ch.logoHeight ? `--logo-h:${ch.logoHeight};` : ''}${ch.noShadow ? 'filter:none;' : ''}`;
+---
+
+<div class="cc" data-cc-scene aria-hidden="true">
+  <div class="cc__stage" data-cc-stage>
+    {list.map((ch, i) => (
+      <div class={`cc__layer ${ch.onDark ? 'is-on-dark' : ''}`} data-cc-layer={i} style={`--tone:${ch.tone}`}>
+        <div class="container cc__inner" data-cc-inner>
+          <figure class="cc__media" data-cc-media>
+            <img class="cc__img" src={withBase(ch.image)} alt="" data-cc-img />
+          </figure>
+          <div class="cc__copy">
+            <p class="cc__kicker" data-cc-reveal>{ch.kicker}</p>
+            <img class="cc__brand-logo" src={withBase(ch.logo)} alt="" style={logoStyle(ch)} data-cc-reveal />
+            <p class="cc__claim" data-cc-reveal>{ch.claim}</p>
+            <p class="cc__detail" data-cc-reveal>{ch.detail}</p>
+          </div>
+        </div>
+      </div>
+    ))}
+
+    <!-- Anillos NFC: se posicionan en el centro de la foto (JS) -->
+    <div class="cc__rings" data-cc-rings>
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ ignoreMobileResize: true });
+
+  function initContactless() {
+    const scene = document.querySelector('[data-cc-scene]');
+    if (!scene) return;
+    const section = scene.closest('section');
+    const stage = scene.querySelector('[data-cc-stage]');
+    const layers = [...scene.querySelectorAll('[data-cc-layer]')];
+    const rings = scene.querySelector('[data-cc-rings]');
+    if (!stage || layers.length < 2 || !rings) return;
+
+    const mm = gsap.matchMedia();
+
+    mm.add('(max-width: 899px) and (prefers-reduced-motion: no-preference)', () => {
+      scene.classList.add('is-on');
+      section?.classList.add('cc-active'); // BrandCompat oculta sus cards estáticas
+
+      // El contenido real (con alt/texto) queda en las cards estáticas para
+      // lectores de pantalla; la escena es decorativa (aria-hidden).
+      const headerH = () => document.querySelector('header')?.offsetHeight ?? 0;
+
+      // Origen de la onda = centro de la foto del capítulo, relativo al stage.
+      const origin = (i) => {
+        const m = layers[i].querySelector('[data-cc-media]').getBoundingClientRect();
+        const s = stage.getBoundingClientRect();
+        return { x: m.left - s.left + m.width / 2, y: m.top - s.top + m.height / 2 };
+      };
+      const coverR = (o) => {
+        const w = stage.offsetWidth, h = stage.offsetHeight;
+        return Math.hypot(Math.max(o.x, w - o.x), Math.max(o.y, h - o.y)) + 2;
+      };
+      const circle = (i, grow) => () => {
+        const o = origin(i);
+        return `circle(${grow ? coverR(o) : 0}px at ${o.x}px ${o.y}px)`;
+      };
+      const reveals = (i) => layers[i].querySelectorAll('[data-cc-reveal]');
+      const img = (i) => layers[i].querySelector('[data-cc-img]');
+      const inner = (i) => layers[i].querySelector('[data-cc-inner]');
+
+      const syncPad = () => stage.style.setProperty('--header-h', headerH() + 'px');
+      syncPad();
+      ScrollTrigger.addEventListener('refreshInit', syncPad);
+
+      layers.forEach((l, i) => { if (i > 0) gsap.set(l, { clipPath: circle(i, false)() }); });
+      gsap.set(reveals(0), { opacity: 0, y: 28 });
+
+      // 1) Entrada: card redondeada → pantalla completa.
+      const intro = gsap.timeline({
+        scrollTrigger: { trigger: scene, start: 'top 85%', end: 'top top', scrub: 1, invalidateOnRefresh: true },
+      });
+      intro
+        .fromTo(stage, { clipPath: 'inset(3% 4% round 24px)' }, { clipPath: 'inset(0% 0% round 0px)', ease: 'power2.inOut', duration: 1 }, 0)
+        .fromTo(img(0), { scale: 1.25 }, { scale: 1, ease: 'power2.out', duration: 1 }, 0)
+        .to(reveals(0), { opacity: 1, y: 0, stagger: 0.08, ease: 'power3.out', duration: 0.45 }, 0.5);
+
+      // 2) Pin: cada cambio de marca nace del terminal.
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: scene,
+          start: 'top top',
+          end: () => '+=' + window.innerHeight * (layers.length - 1) * 1.25,
+          scrub: 1,
+          pin: scene,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onToggle: (self) => document.body.classList.toggle('hide-sticky-cta', self.isActive),
+        },
+      });
+
+      const ringEls = rings.querySelectorAll('span');
+      layers.forEach((layer, i) => {
+        if (i === 0) return;
+        const from = i - 1;
+        tl.to({}, { duration: 0.35 }); // hold de lectura
+
+        tl.set(rings, { x: () => origin(from).x, y: () => origin(from).y, opacity: 1 });
+        tl.fromTo(ringEls, { scale: 0.25, opacity: 1 }, { scale: 4.2, opacity: 0, stagger: 0.09, duration: 0.5, ease: 'power2.out' });
+        tl.to(img(from), { scale: 0.96, duration: 0.2, ease: 'power2.inOut', yoyo: true, repeat: 1 }, '<'); // "tap"
+
+        tl.fromTo(layer, { clipPath: circle(i, false) }, { clipPath: circle(i, true), duration: 0.75, ease: 'power3.inOut' }, '<+=0.18');
+        tl.to(inner(from), { scale: 0.9, opacity: 0.25, duration: 0.75, ease: 'power2.inOut' }, '<');
+        tl.fromTo(img(i), { scale: 1.3 }, { scale: 1, duration: 0.9, ease: 'power3.out' }, '<');
+        tl.fromTo(reveals(i), { opacity: 0, y: 28 }, { opacity: 1, y: 0, stagger: 0.07, duration: 0.45, ease: 'power3.out' }, '<+=0.4');
+      });
+      tl.to({}, { duration: 0.35 });
+
+      return () => {
+        scene.classList.remove('is-on');
+        section?.classList.remove('cc-active');
+        document.body.classList.remove('hide-sticky-cta');
+        ScrollTrigger.removeEventListener('refreshInit', syncPad);
+      };
+    });
+  }
+
+  document.addEventListener('astro:page-load', initContactless);
+</script>
+
+<style>
+  .cc { display: none; }
+  .cc.is-on { display: block; }
+
+  .cc__stage {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--bg-primary);
+    will-change: clip-path;
+  }
+  .cc__layer {
+    position: absolute;
+    inset: 0;
+    background-color: var(--tone);
+    background-image: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--on-accent) 14%, transparent), transparent 65%);
+  }
+  .cc__inner {
+    position: relative;
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: var(--space-md);
+    padding-top: var(--header-h, 0px);
+    padding-bottom: var(--space-md);
+    transform-origin: 50% 30%;
+  }
+  .cc__media {
+    margin: 0;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px -20px color-mix(in srgb, var(--navy) 55%, transparent);
+  }
+  .cc__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cc__copy { display: grid; gap: var(--space-sm); align-content: center; min-width: 0; }
+
+  .cc__kicker { font-size: var(--text-sm); letter-spacing: 0.04em; color: color-mix(in srgb, var(--navy) 70%, transparent); }
+  .cc__brand-logo {
+    height: calc(var(--logo-h, 38px) * 0.8);
+    width: auto;
+    justify-self: start;
+    margin-block: 2px 6px;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+  }
+  .cc__claim {
+    font-family: var(--font-heading);
+    font-size: clamp(1.35rem, 5.6vw, 1.7rem);
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    line-height: 1.18;
+    text-wrap: balance;
+  }
+  .cc__detail {
+    font-size: var(--text-base);
+    color: color-mix(in srgb, var(--navy) 72%, transparent);
+    line-height: 1.5;
+  }
+  .is-on-dark .cc__kicker { color: color-mix(in srgb, var(--on-accent) 75%, transparent); }
+  .is-on-dark .cc__claim { color: var(--on-accent); }
+  .is-on-dark .cc__detail { color: color-mix(in srgb, var(--on-accent) 82%, transparent); }
+
+  .cc__rings {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: var(--z-above);
+  }
+  .cc__rings span {
+    position: absolute;
+    left: -80px;
+    top: -80px;
+    width: 160px;
+    height: 160px;
+    border-radius: var(--radius-full);
+    border: 3px solid var(--on-accent);
+    background: radial-gradient(circle, color-mix(in srgb, var(--on-accent) 22%, transparent), transparent 70%);
+    box-shadow:
+      0 0 28px color-mix(in srgb, var(--on-accent) 55%, transparent),
+      inset 0 0 18px color-mix(in srgb, var(--on-accent) 40%, transparent);
+    mix-blend-mode: screen;
+    opacity: 0;
+  }
+
+  @media (max-height: 700px) {
+    .cc__media { aspect-ratio: 16 / 8; }
+    .cc__detail { font-size: var(--text-sm); }
+    .cc__inner { gap: var(--space-sm); }
+  }
+</style>

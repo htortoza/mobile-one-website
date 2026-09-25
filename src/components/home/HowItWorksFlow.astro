@@ -1,14 +1,16 @@
 ---
 // src/components/home/HowItWorksFlow.astro
-// Home §4.6 — Cómo funciona. Mismo lenguaje visual que el resto del sitio:
-// mockup de pantalla real de terminal (como el screenshot del Hero y el
-// device de ProductoHero/ProductoTour), NO íconos vectoriales sueltos sobre
-// un blob — eso desentonaba con el resto de secciones basadas en fotos/UI
-// real. Un solo device pinneado cuya pantalla cambia de contenido con el
-// scroll, contando una sola venta de punta a punta: QR+credencial → escaneo
-// de producto → promoción aplicada → boleta emitida. Rail lateral (número +
-// texto) + dots + barra de progreso, mismo mecanismo que BrandCompat/
-// ProductoGallery.
+// Home §4.6 — Cómo funciona. "POS en su pedestal": el terminal real
+// (hero-mobile-pos-v2-final) queda FIJO mientras el scroll recorre una sola
+// venta de punta a punta. La UI de la app se proyecta sobre el vidrio del
+// terminal con matrix3d (homografía calculada desde las 4 esquinas reales de
+// la pantalla en la foto), así hereda su perspectiva. Cada paso entra con
+// navegación nativa (slide): pasos 1–3 son capturas reales de la app
+// (pantalla1–3: login QR → buscar producto → cobro) y el 4 es UI animada
+// (boleta emitida + sincronización con SAP B1).
+// Texto del paso + odómetro 01–04 + progreso al lado (desktop) o debajo
+// (mobile). Pin "bueno" (§15.6.1): el contenido avanza, corre en mobile.
+import { withBase } from '../../utils/base.js';
 const { title, steps, headings } = Astro.props;
 const list = steps ?? [];
 const headingList = headings ?? [];
@@ -19,118 +21,81 @@ const headingList = headings ?? [];
     <h2 class="flow__title" data-gsap-animate="fade-up">{title}</h2>
   </div>
 
-  <div class="flow__pin flow__desktop-only" data-flow-pin>
+  <div class="flow__pin" data-flow-pin>
     <div class="container flow__stage">
+      <!-- Texto del paso -->
       <div class="flow__rail">
-        <div class="flow__dots" role="list">
-          {list.map((_, i) => (
-            <span class={`flow__dot ${i === 0 ? 'is-active' : ''}`} data-flow-dot={i} role="listitem" aria-hidden="true"></span>
+        <div class="flow__odo" aria-hidden="true">
+          <span class="flow__odo-zero">0</span>
+          <span class="flow__odo-window">
+            <span class="flow__odo-strip" data-flow-odo>
+              {list.map((_, i) => <span>{i + 1}</span>)}
+            </span>
+          </span>
+        </div>
+
+        <div class="flow__texts">
+          {list.map((step, i) => (
+            <div class="flow__text" data-flow-text={i}>
+              {headingList[i] && <h3 class="flow__heading">{headingList[i]}</h3>}
+              <p class="flow__step-text">{step}</p>
+            </div>
           ))}
         </div>
 
-        {list.map((step, i) => (
-          <div class="flow__rail-text" data-rail-text={i} style={i > 0 ? 'opacity:0' : ''}>
-            <span class="flow__num"><span class="flow__num-fig" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><span class="flow__num-bar" aria-hidden="true"></span></span>
-            {headingList[i] && <h3 class="flow__heading">{headingList[i]}</h3>}
-            <p class="flow__step-text">{step}</p>
-          </div>
-        ))}
-
-        <div class="flow__progress"><span class="flow__progress-fill" data-flow-progress></span></div>
+        <div class="flow__progress" aria-hidden="true">
+          {list.map((_, i) => (
+            <span class="flow__seg"><span class="flow__seg-fill" data-flow-seg={i}></span></span>
+          ))}
+        </div>
       </div>
 
-      <div class="flow__device-wrap">
-        <div class="flow__glow" aria-hidden="true"></div>
-        <div class="flow__device">
-          <div class="flow__notch"></div>
-          <div class="flow__screen">
-            <div class="flow__scr" data-flow-icon="0" aria-hidden="true">
-              <div class="flow__scr-head"><span class="flow__live"><span class="flow__live-dot"></span>En vivo</span><span class="flow__scr-id">Terminal 04</span></div>
-              <div class="flow__qr" aria-hidden="true">
-                <span></span><span></span><span></span>
-                <span></span><span class="is-off"></span><span></span>
-                <span></span><span></span><span></span>
+      <!-- POS estático + pantalla proyectada -->
+      <div class="flow__device">
+        <div class="flow__halo" aria-hidden="true"></div>
+        <div class="flow__pos" data-flow-pos>
+          <img
+            class="flow__pos-img"
+            src={withBase('/images/hero-mobile-pos-v2-final.webp')}
+            alt="Terminal de pago con la app Mobile One en pantalla"
+            width="1958"
+            height="1722"
+          />
+
+          <div class="flow__screen" data-flow-screen aria-hidden="true">
+            <!-- 1–3 · capturas reales de la app -->
+            <div class="scr scr--shot" data-flow-scr="0">
+              <!-- caja con la geometría "cover" de la captura: el recorte del
+                   recuadro QR se posiciona en % exactos de la imagen original -->
+              <div class="scr__shotbox" data-scr-shot>
+                <img class="scr__shot" src={withBase('/images/pantalla1.webp')} alt="" />
+                <span class="scr__dim" data-scr-dim></span>
+                <img class="scr__qrcard" src={withBase('/images/pantalla1-qr.webp')} alt="" data-scr-qr />
               </div>
-              <p class="flow__scr-row"><span>Vendedor</span><strong>María P.</strong></p>
-              <span class="flow__scr-badge">Credencial validada</span>
             </div>
+            <div class="scr scr--shot" data-flow-scr="1"><img class="scr__shot" src={withBase('/images/pantalla2.webp')} alt="" data-scr-shot loading="lazy" /></div>
+            <div class="scr scr--shot" data-flow-scr="2"><img class="scr__shot" src={withBase('/images/pantalla3.webp')} alt="" data-scr-shot loading="lazy" /></div>
 
-            <div class="flow__scr" data-flow-icon="1" style="opacity:0" aria-hidden="true">
-              <p class="flow__scr-label">Escaneando producto</p>
-              <p class="flow__scr-row flow__scr-row--lg"><span>Zapatilla Urbana 42</span><strong>$42.990</strong></p>
-              <p class="flow__scr-row"><span>SKU</span><strong>048-221-B</strong></p>
-              <p class="flow__scr-row"><span>Stock en red</span><strong class="flow__ok">14 disponibles</strong></p>
-            </div>
-
-            <div class="flow__scr" data-flow-icon="2" style="opacity:0" aria-hidden="true">
-              <p class="flow__scr-label">Carrito</p>
-              <p class="flow__scr-row"><span>Zapatilla Urbana 42</span><strong>$42.990</strong></p>
-              <p class="flow__scr-row"><span>Descuento CloudPromo</span><strong class="flow__ok">-15%</strong></p>
-              <div class="flow__scr-total"><span>Total</span><strong>$36.541</strong></div>
-            </div>
-
-            <div class="flow__scr" data-flow-icon="3" style="opacity:0" aria-hidden="true">
-              <p class="flow__scr-label">Boleta electrónica</p>
-              <p class="flow__scr-row"><span>Zapatilla Urbana 42</span><strong>$36.541</strong></p>
-              <p class="flow__scr-row"><span>Método de pago</span><strong>Débito</strong></p>
-              <span class="flow__scr-badge flow__scr-badge--check">✓ Emitida y sincronizada con SAP B1</span>
+            <!-- 4 · Todo queda sincronizado -->
+            <div class="scr scr--done" data-flow-scr="3">
+              <div class="scr__bar"><span class="scr__menu"></span><span class="scr__title">Venta completada</span></div>
+              <svg class="scr__check" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="52" pathLength="100" data-scr-draw />
+                <path d="M38 62 L54 77 L84 45" pathLength="100" data-scr-draw />
+              </svg>
+              <p class="scr__done-title">Boleta emitida</p>
+              <p class="scr__done-sub">N° 004812 · $36.541 · Débito</p>
+              <ul class="scr__sync">
+                <li data-scr-row><span>Documento tributario</span><em>Emitido</em></li>
+                <li data-scr-row><span>Stock de la red</span><em>Actualizado</em></li>
+                <li data-scr-row><span>SAP Business One</span><em>Sincronizado</em></li>
+              </ul>
             </div>
           </div>
         </div>
+        <div class="flow__floor" aria-hidden="true"></div>
       </div>
     </div>
-  </div>
-
-  <div class="container flow__mobile-only">
-    {list.map((step, i) => (
-      <div class="flow__mcard" data-flow-mcard>
-        <div class="flow__device-wrap flow__device-wrap--sm">
-          <div class="flow__glow" aria-hidden="true"></div>
-          <div class="flow__device flow__device--sm">
-            <div class="flow__notch"></div>
-            <div class="flow__screen">
-              {i === 0 && (
-                <div class="flow__scr">
-                  <div class="flow__scr-head"><span class="flow__live"><span class="flow__live-dot"></span>En vivo</span><span class="flow__scr-id">Terminal 04</span></div>
-                  <div class="flow__qr" aria-hidden="true">
-                    <span></span><span></span><span></span>
-                    <span></span><span class="is-off"></span><span></span>
-                    <span></span><span></span><span></span>
-                  </div>
-                  <span class="flow__scr-badge">Credencial validada</span>
-                </div>
-              )}
-              {i === 1 && (
-                <div class="flow__scr">
-                  <p class="flow__scr-label">Escaneando producto</p>
-                  <p class="flow__scr-row flow__scr-row--lg"><span>Zapatilla Urbana 42</span><strong>$42.990</strong></p>
-                  <p class="flow__scr-row"><span>Stock en red</span><strong class="flow__ok">14 disponibles</strong></p>
-                </div>
-              )}
-              {i === 2 && (
-                <div class="flow__scr">
-                  <p class="flow__scr-label">Carrito</p>
-                  <p class="flow__scr-row"><span>Descuento CloudPromo</span><strong class="flow__ok">-15%</strong></p>
-                  <div class="flow__scr-total"><span>Total</span><strong>$36.541</strong></div>
-                </div>
-              )}
-              {i === 3 && (
-                <div class="flow__scr">
-                  <p class="flow__scr-label">Boleta electrónica</p>
-                  <p class="flow__scr-row"><span>Método de pago</span><strong>Débito</strong></p>
-                  <span class="flow__scr-badge flow__scr-badge--check">✓ Emitida y sincronizada</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        <div class="flow__rail-text">
-          <span class="flow__num"><span class="flow__num-fig" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><span class="flow__num-bar" aria-hidden="true"></span></span>
-          {headingList[i] && <h3 class="flow__heading">{headingList[i]}</h3>}
-          <p class="flow__step-text">{step}</p>
-        </div>
-      </div>
-    ))}
   </div>
 </section>
 
@@ -141,64 +106,162 @@ const headingList = headings ?? [];
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.config({ ignoreMobileResize: true });
 
+  // Esquinas reales del vidrio en la foto (px del archivo 1958×1722),
+  // medidas ajustando rectas a cada borde de la pantalla: TL, TR, BR, BL.
+  const IMG_W = 1958;
+  const QUAD = [[766.4, 358.3], [1295.5, 323.6], [1021.1, 1502.9], [485.8, 1449.4]];
+
+  // Homografía rect(w×h) → cuadrilátero, como matrix3d de CSS.
+  function quadMatrix(w, h, q) {
+    const src = [[0, 0], [w, 0], [w, h], [0, h]];
+    const A = [], b = [];
+    src.forEach(([x, y], i) => {
+      const [u, v] = q[i];
+      A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]); b.push(u);
+      A.push([0, 0, 0, x, y, 1, -v * x, -v * y]); b.push(v);
+    });
+    // eliminación gaussiana 8×8
+    for (let c = 0; c < 8; c++) {
+      let p = c;
+      for (let r = c + 1; r < 8; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+      [A[c], A[p]] = [A[p], A[c]]; [b[c], b[p]] = [b[p], b[c]];
+      for (let r = 0; r < 8; r++) {
+        if (r === c) continue;
+        const f = A[r][c] / A[c][c];
+        for (let k = c; k < 8; k++) A[r][k] -= f * A[c][k];
+        b[r] -= f * b[c];
+      }
+    }
+    const [a, bb, c, d, e, f, g, hh] = b.map((v, i) => v / A[i][i]);
+    return `matrix3d(${a},${d},0,${g},${bb},${e},0,${hh},0,0,1,0,${c},${f},0,1)`;
+  }
+
   function initFlow() {
     const section = document.querySelector('[data-gsap-section="flow"]');
     if (!section) return;
-
     const pinEl = section.querySelector('[data-flow-pin]');
-    const stage = section.querySelector('.flow__stage');
-    const railTexts = section.querySelectorAll('[data-rail-text]');
-    const screens = section.querySelectorAll('.flow__device [data-flow-icon]');
-    const dots = section.querySelectorAll('[data-flow-dot]');
-    const progressFill = section.querySelector('[data-flow-progress]');
-    if (!pinEl || !stage || !railTexts.length) return;
+    const pos = section.querySelector('[data-flow-pos]');
+    const screen = section.querySelector('[data-flow-screen]');
+    const scrs = [...section.querySelectorAll('[data-flow-scr]')];
+    const texts = [...section.querySelectorAll('[data-flow-text]')];
+    const segs = [...section.querySelectorAll('[data-flow-seg]')];
+    const odo = section.querySelector('[data-flow-odo]');
+    if (!pinEl || !pos || !screen || !scrs.length) return;
+
+    // Proyectar la pantalla sobre el vidrio (y re-proyectar en resize).
+    const device = pos.parentElement;
+    const SCREEN_CX = 0.455; // centro del vidrio en x, fracción del ancho de la foto
+    const project = () => {
+      pos.style.marginLeft = device.offsetWidth / 2 - pos.offsetWidth * SCREEN_CX + 'px';
+      const s = pos.offsetWidth / IMG_W;
+      const q = QUAD.map(([x, y]) => [x * s, y * s]);
+      screen.style.transform = quadMatrix(screen.offsetWidth, screen.offsetHeight, q);
+    };
+    project();
+    const ro = new ResizeObserver(project);
+    ro.observe(pos);
+    ro.observe(device);
+    document.addEventListener('astro:before-swap', () => ro.disconnect(), { once: true });
+
+    gsap.from(section.querySelectorAll('.flow__head [data-gsap-animate="fade-up"]'), {
+      opacity: 0, y: 16, duration: 0.8, ease: 'power3.out',
+      scrollTrigger: { trigger: section, start: 'top 82%' },
+    });
 
     const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      section.classList.add('is-animated');
+      const N = scrs.length;
 
-    mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
-      gsap.from(stage, {
-        opacity: 0, y: 24, scale: 0.97, duration: 1, ease: 'power2.out',
-        scrollTrigger: { trigger: pinEl, start: 'top 80%' },
+      // estados iniciales
+      // Pantallas fuera de uso quedan invisibles (no solo desplazadas): con el
+      // matrix3d del vidrio el recorte no es exacto y la siguiente se asomaba
+      // como una tira en el borde derecho.
+      scrs.forEach((s, i) => gsap.set(s, { xPercent: i === 0 ? 0 : 100, opacity: 1, visibility: i === 0 ? 'visible' : 'hidden' }));
+      texts.forEach((t, i) => gsap.set(t, { autoAlpha: i === 0 ? 1 : 0, y: i === 0 ? 0 : 24 }));
+      gsap.set(section.querySelectorAll('[data-scr-row]'), { autoAlpha: 0, x: 14 });
+      gsap.set(section.querySelectorAll('[data-scr-draw]'), { attr: { 'stroke-dasharray': '100 100', 'stroke-dashoffset': 100 } });
+      gsap.set(segs, { scaleX: 0 });
+
+      // Entrada del POS al acercarse: sube desde abajo con leve giro.
+      gsap.fromTo(pos, { y: 80, rotate: -4, opacity: 0 }, {
+        y: 0, rotate: 0, opacity: 1, ease: 'power3.out',
+        scrollTrigger: { trigger: pinEl, start: 'top 90%', end: 'top 20%', scrub: 1 },
       });
 
-      const n = railTexts.length;
       const tl = gsap.timeline({
+        defaults: { ease: 'power2.out' },
         scrollTrigger: {
           trigger: pinEl,
           start: 'top top',
-          end: '+=' + (n * 100) + '%',
+          end: () => '+=' + window.innerHeight * (N - 1) * 1.1,
           scrub: 1,
           pin: pinEl,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          onUpdate: (self) => { if (progressFill) progressFill.style.transform = `scaleX(${self.progress})`; },
+          onToggle: (self) => document.body.classList.toggle('hide-sticky-cta', self.isActive),
         },
       });
 
-      function transition(toIndex) {
-        const seg = gsap.timeline();
-        seg.to(railTexts[toIndex - 1], { opacity: 0, y: -10, duration: 0.18, ease: 'power1.in' }, 0);
-        seg.to(screens[toIndex - 1], { opacity: 0, y: -8, duration: 0.25, ease: 'power1.inOut' }, 0.02);
-        seg.add(() => { dots[toIndex - 1].classList.remove('is-active'); dots[toIndex].classList.add('is-active'); }, 0.16);
-        seg.fromTo(screens[toIndex], { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, 0.2);
-        seg.to(railTexts[toIndex], { opacity: 1, y: 0, duration: 0.32, ease: 'power2.out' }, 0.34);
-        return seg;
+      // Micro-animación propia de cada pantalla (se reproduce con el scroll).
+      // Pasos 1–3 (capturas): la imagen "asienta" con un leve zoom-out.
+      const shotSettle = (s) => gsap.timeline().fromTo(
+        s.querySelector('[data-scr-shot]'),
+        { scale: 1.08 },
+        { scale: 1, duration: 0.8, ease: 'power2.out' }
+      );
+      // Paso 1: tras asentarse la captura, el recuadro "Ingresar con código
+      // QR" crece y se eleva sobre la pantalla (el resto se atenúa) para darle
+      // protagonismo al acceso por QR.
+      const qrFocus = (s) => {
+        const g = shotSettle(s);
+        g.to(s.querySelector('[data-scr-dim]'), { opacity: 1, duration: 0.6, ease: 'power2.inOut' }, 0.35);
+        g.to(s.querySelector('[data-scr-qr]'), {
+          scale: 1.2, // máx. sin salirse del vidrio (card 247px → ~297px de 300)
+          y: -8,
+          boxShadow: '0 26px 44px -10px rgba(0, 12, 60, 0.55), 0 0 0 3px rgba(255, 255, 255, 0.9)',
+          duration: 0.6,
+          ease: 'back.out(1.4)',
+        }, 0.35);
+        return g;
+      };
+      const micro = [
+        qrFocus,
+        shotSettle,
+        shotSettle,
+        (s) => {
+          const g = gsap.timeline();
+          g.to(s.querySelectorAll('[data-scr-draw]'), { attr: { 'stroke-dashoffset': 0 }, stagger: 0.18, duration: 0.4, ease: 'power2.inOut' });
+          g.to(s.querySelectorAll('[data-scr-row]'), { autoAlpha: 1, x: 0, stagger: 0.1, duration: 0.3 }, '-=0.1');
+          return g;
+        },
+      ];
+
+      tl.add(micro[0](scrs[0]), 0);
+      tl.to(segs[0], { scaleX: 1, duration: 0.8, ease: 'none' }, 0);
+      tl.to({}, { duration: 0.25 }); // lectura
+
+      for (let i = 1; i < N; i++) {
+        const at = tl.duration();
+        // navegación nativa: la pantalla nueva empuja a la anterior
+        tl.set(scrs[i], { visibility: 'visible' }, at);
+        tl.to(scrs[i - 1], { xPercent: -35, opacity: 0.4, duration: 0.45, ease: 'power3.inOut' }, at);
+        tl.to(scrs[i], { xPercent: 0, duration: 0.45, ease: 'power3.inOut' }, at);
+        tl.set(scrs[i - 1], { visibility: 'hidden' }, at + 0.45);
+        // texto + odómetro
+        tl.to(texts[i - 1], { autoAlpha: 0, y: -24, duration: 0.26, ease: 'power2.in' }, at);
+        tl.to(texts[i], { autoAlpha: 1, y: 0, duration: 0.4 }, at + 0.32);
+        tl.to(odo, { yPercent: (-100 / N) * i, duration: 0.45, ease: 'power3.inOut' }, at);
+        // micro del paso + progreso
+        tl.add(micro[i](scrs[i]), at + 0.4);
+        tl.to(segs[i], { scaleX: 1, duration: 0.8, ease: 'none' }, at);
+        tl.to({}, { duration: 0.25 });
       }
 
-      for (let i = 1; i < n; i++) {
-        tl.to({}, { duration: 0.5 });
-        tl.add(transition(i), '+=0');
-      }
-      tl.to({}, { duration: 0.6 });
-    });
-
-    mm.add('(max-width: 1023px), (prefers-reduced-motion: reduce)', () => {
-      section.querySelectorAll('[data-flow-mcard]').forEach((card) => {
-        gsap.from(card, {
-          opacity: 0, y: 24, duration: 0.7, ease: 'power2.out',
-          scrollTrigger: { trigger: card, start: 'top 82%' },
-        });
-      });
+      return () => {
+        section.classList.remove('is-animated');
+        document.body.classList.remove('hide-sticky-cta');
+      };
     });
   }
 
@@ -206,110 +269,179 @@ const headingList = headings ?? [];
 </script>
 
 <style>
-  .flow { padding-block: var(--space-2xl); background-color: var(--bg-primary); overflow: hidden; }
-  .flow__head { margin-bottom: var(--space-lg); }
+  .flow { padding-block: var(--space-2xl) 0; background-color: var(--bg-secondary); overflow-x: clip; }
+  .flow__head { margin-bottom: var(--space-md); }
   .flow__title {
     font-family: var(--font-heading);
     font-size: clamp(2.2rem, 5.4vw, 3.6rem);
     line-height: 1.1;
     letter-spacing: -0.02em;
-    max-width: 24ch;
+    text-wrap: balance;
+    max-width: 16ch;
   }
 
-  .flow__pin { min-height: 100vh; display: flex; align-items: center; }
-  .flow__stage { width: 100%; display: grid; grid-template-columns: 1fr; gap: var(--space-xl); align-items: center; }
+  /* ── Stage pinneado ── */
+  .flow__pin { position: relative; }
+  .flow__stage {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: center;
+    gap: var(--space-lg);
+    padding-block: var(--space-lg);
+  }
+  /* svh = alto VISIBLE (en iOS 100vh incluye lo que tapa la barra de Safari) */
+  .flow.is-animated .flow__pin { height: 100vh; height: 100svh; }
+  .flow.is-animated .flow__stage { height: 100%; padding-top: calc(69px + var(--space-sm)); padding-bottom: var(--space-md); }
 
-  .flow__rail { display: grid; gap: var(--space-md); max-width: 46ch; }
-  .flow__dots { display: flex; gap: var(--space-xs); }
-  .flow__dot { width: 8px; height: 8px; border-radius: var(--radius-full); background-color: var(--border); transition: background-color var(--transition-fast), transform var(--transition-fast); }
-  .flow__dot.is-active { background-color: var(--accent); transform: scale(1.3); }
-
-  .flow__rail-text { position: relative; display: grid; gap: var(--space-sm); grid-row: 2; grid-column: 1; }
-  .flow__num { display: inline-flex; align-items: baseline; gap: var(--space-sm); }
-  .flow__num-fig {
+  /* Texto del paso */
+  .flow__rail { display: grid; gap: var(--space-md); align-content: center; min-width: 0; }
+  .flow__odo {
+    display: flex;
     font-family: var(--font-heading);
-    font-size: clamp(3.6rem, 8vw, 6.2rem);
-    font-weight: 500;
-    letter-spacing: -0.03em;
-    line-height: 0.9;
+    font-size: clamp(4.5rem, 9vw, 8rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
     color: transparent;
-    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--accent) 45%, transparent);
-    background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%);
-    background-clip: text;
-    -webkit-background-clip: text;
+    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--accent) 55%, transparent);
   }
-  .flow__num-bar { display: block; width: 40px; height: 3px; border-radius: var(--radius-full); background-color: var(--accent); transform: translateY(-0.3em); }
+  .flow__odo-window { display: block; height: 1em; overflow: hidden; }
+  .flow__odo-strip { display: flex; flex-direction: column; }
+  .flow__odo-strip span { display: block; height: 1em; color: var(--accent); -webkit-text-stroke: 0; }
+
+  .flow__texts { display: grid; gap: var(--space-md); }
+  .flow__text { display: grid; gap: var(--space-sm); align-content: start; }
+  .flow.is-animated .flow__text { grid-area: 1 / 1; }
+  .flow:not(.is-animated) .flow__odo,
+  .flow:not(.is-animated) .flow__progress { display: none; }
   .flow__heading {
     font-family: var(--font-heading);
-    font-size: clamp(1.6rem, 3vw, 2.1rem);
-    font-weight: 500;
-    letter-spacing: -0.01em;
+    font-size: clamp(1.6rem, 2.8vw, 2.3rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
     color: var(--text-primary);
+    text-wrap: balance;
   }
-  .flow__step-text { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.5; max-width: 26ch; }
+  .flow__step-text { font-size: var(--text-lg); line-height: 1.55; color: var(--text-secondary); max-width: 34ch; }
 
-  .flow__progress { height: 3px; background-color: var(--border); border-radius: var(--radius-full); overflow: hidden; }
-  .flow__progress-fill { display: block; height: 100%; width: 100%; background-color: var(--accent); transform: scaleX(0); transform-origin: left; }
+  .flow__progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-width: 280px; margin-top: var(--space-sm); }
+  .flow__seg { height: 3px; border-radius: var(--radius-full); background-color: color-mix(in srgb, var(--navy) 12%, transparent); overflow: hidden; }
+  .flow__seg-fill { display: block; height: 100%; background-color: var(--accent); transform-origin: left center; }
 
-  .flow__device-wrap { position: relative; justify-self: center; }
-  .flow__glow {
-    position: absolute; inset: 8% 14%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 30%, transparent), transparent 70%);
-    filter: blur(36px); z-index: -1;
+  /* POS */
+  .flow__device { position: relative; display: grid; justify-items: center; min-width: 0; }
+  .flow__halo {
+    position: absolute;
+    inset: 8% 10% 12%;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 22%, transparent), transparent 68%);
+    filter: blur(20px);
   }
-  .flow__device {
+  /* El POS se dimensiona por su PANTALLA, no por la foto: la foto trae aire
+     (tarjeta, íconos flotantes) que puede desbordar la columna. El vidrio
+     está centrado en x≈45.5% de la foto → ese punto va al centro de la
+     columna (margin-left lo fija el JS en project()). */
+  .flow__device { justify-items: start; }
+  .flow__pos {
+    --pw: min(125%, calc((100vh - 69px - var(--space-md)) * 1958 / 1722));
     position: relative;
-    width: min(60vw, 320px);
-    aspect-ratio: 3 / 4;
-    background-color: var(--navy);
-    border-radius: 28px;
-    padding: 12px;
-    box-shadow: var(--shadow-lg);
+    width: var(--pw);
+    aspect-ratio: 1958 / 1722;
   }
-  .flow__device--sm { width: 100%; max-width: 220px; margin-inline: auto; }
-  .flow__notch { width: 60px; height: 6px; border-radius: var(--radius-full); background-color: color-mix(in srgb, var(--on-accent) 22%, transparent); margin-inline: auto; margin-block-end: 10px; }
-  .flow__screen { position: relative; height: calc(100% - 22px); background-color: var(--bg-primary); border-radius: 20px; overflow: hidden; }
-
-  .flow__scr { position: absolute; inset: 0; padding: var(--space-md); display: grid; align-content: start; gap: var(--space-sm); }
-  .flow__scr-head { display: flex; align-items: center; justify-content: space-between; }
-  .flow__live { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-hover); }
-  .flow__live-dot { width: 6px; height: 6px; border-radius: var(--radius-full); background-color: var(--accent-hover); }
-  .flow__scr-id { font-size: var(--text-xs); color: var(--text-secondary); }
-
-  .flow__qr { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 84px; margin-block: var(--space-xs); }
-  .flow__qr span { aspect-ratio: 1; border-radius: 3px; background-color: var(--navy); }
-  .flow__qr span.is-off { background-color: transparent; }
-
-  .flow__scr-label { font-size: var(--text-xs); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); }
-  .flow__scr-row { display: flex; justify-content: space-between; gap: var(--space-sm); font-size: var(--text-sm); color: var(--text-secondary); padding-block: 6px; border-bottom: 1px solid var(--border); }
-  .flow__scr-row strong { color: var(--text-primary); font-weight: 500; }
-  .flow__scr-row--lg { font-size: var(--text-base); }
-  .flow__ok { color: var(--accent-hover) !important; }
-  .flow__scr-total { display: flex; justify-content: space-between; margin-block-start: var(--space-xs); font-family: var(--font-heading); font-size: var(--text-lg); color: var(--text-primary); }
-
-  .flow__scr-badge {
-    justify-self: start;
-    font-size: var(--text-xs);
-    font-weight: 500;
-    color: var(--accent-hover);
-    background-color: color-mix(in srgb, var(--accent) 12%, transparent);
-    padding: 6px 12px;
-    border-radius: var(--radius-full);
-  }
-  .flow__scr-badge--check { color: var(--accent-hover); }
-
-  .flow__mobile-only { display: none; }
-  @media (max-width: 1023px), (prefers-reduced-motion: reduce) {
-    .flow__desktop-only { display: none; }
-    .flow__mobile-only { display: grid; gap: var(--space-2xl); }
-    .flow__mcard { display: grid; gap: var(--space-lg); justify-items: center; text-align: center; }
-    .flow__mcard .flow__rail-text { justify-items: center; }
-    .flow__mcard .flow__num { justify-content: center; }
-    .flow__mcard .flow__step-text { max-width: 30ch; }
-    .flow__device-wrap--sm .flow__device { aspect-ratio: 3 / 4; }
+  .flow__pos-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; filter: drop-shadow(0 30px 40px color-mix(in srgb, var(--navy) 22%, transparent)); }
+  .flow__floor {
+    justify-self: center;
+    width: 46%;
+    height: 22px;
+    margin-top: -18px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--navy) 22%, transparent), transparent);
   }
 
-  @media (min-width: 1024px) {
-    .flow__stage { grid-template-columns: 0.9fr 1.1fr; }
+  /* Pantalla proyectada (lienzo 300×630, misma proporción del vidrio → matrix3d) */
+  .flow__screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 630px;
+    transform-origin: 0 0;
+    border-radius: 18px;
+    overflow: hidden;
+    clip-path: inset(0 round 18px); /* recorte fiable también para hijos compuestos */
+    background-color: var(--bg-primary);
+    font-family: var(--font-body);
+    color: var(--navy);
+    backface-visibility: hidden;
   }
+
+  /* ── UI de la app ── */
+  .scr {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px 18px;
+    background-color: var(--bg-primary);
+    font-size: 16px;
+  }
+  .flow:not(.is-animated) .scr:not([data-flow-scr="0"]) { display: none; }
+  .scr__bar { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .scr__menu { width: 20px; height: 14px; background: linear-gradient(var(--navy) 0 2px, transparent 2px 6px, var(--navy) 6px 8px, transparent 8px 12px, var(--navy) 12px 14px); }
+  .scr__title { flex: 1; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+  /* 1–3 · capturas reales (proporción 0.505 vs 0.476 del vidrio → cover recorta ~9px por lado) */
+  .scr--shot { padding: 0; gap: 0; }
+  .scr__shot { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+  /* Paso 1: misma geometría que el cover (alto 630 → ancho 630·736/1456) */
+  .scr__shotbox { position: absolute; top: 0; left: -9.23px; width: 318.46px; height: 100%; }
+  .scr__shotbox .scr__shot { object-fit: fill; }
+  .scr__dim { position: absolute; inset: 0; background: color-mix(in srgb, var(--navy) 58%, transparent); opacity: 0; }
+  /* recorte (82,416)–(654,587) de pantalla1 sobre 736×1456 */
+  .scr__qrcard {
+    position: absolute;
+    left: 11.141%;
+    top: 28.571%;
+    width: 77.717%;
+    height: auto;
+    border-radius: 13px;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+
+  /* 4 · Listo */
+  .scr__sync { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .scr__sync li { display: flex; justify-content: space-between; padding: 12px 14px; border-radius: 12px; background: var(--bg-secondary); font-size: 15px; }
+  .scr__sync em { font-style: normal; font-weight: 600; color: var(--accent); }
+  .scr--done { text-align: center; }
+  .scr__check { width: 132px; height: 132px; align-self: center; margin-top: 20px; }
+  .scr__check circle, .scr__check path { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+  .scr__done-title { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+  .scr__done-sub { font-size: 15px; color: var(--text-secondary); margin-top: -8px; }
+  .scr__sync { margin-top: 8px; text-align: left; }
+
+  /* ── Mobile / tablet: POS arriba, texto abajo, todo en 100vh ── */
+  @media (max-width: 899px) {
+    .flow__stage { grid-template-columns: minmax(0, 1fr); gap: var(--space-sm); }
+    /* Bloque POS + texto centrado en el espacio bajo el header; el POS se
+       dimensiona dejando reservado el alto del texto más largo, así el rail
+       nunca queda contra el borde inferior. */
+    .flow.is-animated .flow__stage {
+      grid-template-rows: auto auto;
+      align-content: center;
+      gap: var(--space-md);
+      padding-top: 53px;
+      padding-bottom: var(--space-sm);
+    }
+    .flow__device { order: -1; align-self: center; }
+    .flow__pos { --pw: min(190%, calc((100svh - 53px - 300px) * 1958 / 1722)); }
+    .flow__floor { display: none; }
+    .flow__rail { gap: var(--space-xs); grid-template-columns: auto minmax(0, 1fr); align-items: start; column-gap: var(--space-sm); }
+    .flow__odo { font-size: 3.6rem; grid-row: 1 / 3; }
+    .flow__heading { font-size: clamp(1.3rem, 5.4vw, 1.6rem); }
+    .flow__step-text { font-size: var(--text-base); line-height: 1.5; }
+    .flow__progress { grid-column: 1 / -1; max-width: none; margin-top: var(--space-xs); }
+  }
+
+  /* Sin motion / sin JS: stage estático con la pantalla 1 y los 4 pasos listados */
 </style>

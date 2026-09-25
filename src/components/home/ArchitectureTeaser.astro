@@ -102,31 +102,78 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
   function layoutCables(diagram) {
     const svg = diagram.querySelector('.arch__cables');
     const hub = diagram.querySelector('[data-arch-hub]');
-    if (!svg || !hub || window.innerWidth < 1024) return;
+    if (!svg || !hub) return;
 
-    const box = diagram.getBoundingClientRect();
-    const toPct = (x, y) => ({ x: ((x - box.left) / box.width) * 100, y: ((y - box.top) / box.height) * 100 });
+    // Posiciones de layout (offset*), no getBoundingClientRect: las cards
+    // entran con transform (x/scale de GSAP) y el cable debe apuntar a su
+    // posición final, no a la del frame en que se mide.
+    const rectOf = (el) => {
+      let x = 0, y = 0, e = el;
+      while (e && e !== diagram) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; }
+      return { left: x, top: y, right: x + el.offsetWidth, bottom: y + el.offsetHeight, width: el.offsetWidth, height: el.offsetHeight };
+    };
+    const box = { left: 0, top: 0, width: diagram.offsetWidth, height: diagram.offsetHeight };
+    if (!box.width || !box.height) return;
+    const px = (x) => ((x - box.left) / box.width) * 100;
+    const py = (y) => ((y - box.top) / box.height) * 100;
+    const pt = (x, y) => `${px(x)} ${py(y)}`;
+    const setPath = (side, i, d) =>
+      svg.querySelectorAll(`[data-side="${side}"][data-index="${i}"]`).forEach((p) => p.setAttribute('d', d));
 
-    const hubBox = hub.getBoundingClientRect();
-    const hubLeft = toPct(hubBox.left, hubBox.top + hubBox.height / 2);
-    const hubRight = toPct(hubBox.right, hubBox.top + hubBox.height / 2);
+    const hubBox = rectOf(hub);
+
+    // Desktop: entradas a la izquierda → hub → salidas a la derecha.
+    if (window.innerWidth >= 1024) {
+      const hubL = { x: hubBox.left, y: hubBox.top + hubBox.height / 2 };
+      const hubR = { x: hubBox.right, y: hubL.y };
+      diagram.querySelectorAll('[data-arch-card="in"]').forEach((card) => {
+        const c = rectOf(card);
+        const s0 = { x: c.right, y: c.top + c.height / 2 };
+        const mx = (s0.x + hubL.x) / 2;
+        setPath('in', card.dataset.archIndex, `M ${pt(s0.x, s0.y)} C ${pt(mx, s0.y)}, ${pt(mx, hubL.y)}, ${pt(hubL.x, hubL.y)}`);
+      });
+      diagram.querySelectorAll('[data-arch-card="out"]').forEach((card) => {
+        const c = rectOf(card);
+        const e = { x: c.left, y: c.top + c.height / 2 };
+        const mx = (hubR.x + e.x) / 2;
+        setPath('out', card.dataset.archIndex, `M ${pt(hubR.x, hubR.y)} C ${pt(mx, hubR.y)}, ${pt(mx, e.y)}, ${pt(e.x, e.y)}`);
+      });
+      return;
+    }
+
+    // Mobile/tablet — "línea de metro": un riel vertical a la izquierda. Cada
+    // entrada se engancha al riel, el riel baja y entra al hub por arriba
+    // (todas se unen); del hub sale por abajo, vuelve al riel y reparte a
+    // cada salida. Los trazos siguen el sentido del flujo para los rayos.
+    const firstCard = diagram.querySelector('[data-arch-card]');
+    const railX = rectOf(firstCard).left - 22;
+    const r = 12; // radio de las curvas de enganche
+    const hubCx = hubBox.left + hubBox.width / 2;
+    const hubTop = hubBox.top;
+    const hubBottom = hubBox.bottom;
+    const bend = Math.min(56, (hubTop - box.top) / 4);
 
     diagram.querySelectorAll('[data-arch-card="in"]').forEach((card) => {
-      const i = card.dataset.archIndex;
-      const cardBox = card.getBoundingClientRect();
-      const start = toPct(cardBox.right, cardBox.top + cardBox.height / 2);
-      const midX = (start.x + hubLeft.x) / 2;
-      const d = `M ${start.x} ${start.y} C ${midX} ${start.y}, ${midX} ${hubLeft.y}, ${hubLeft.x} ${hubLeft.y}`;
-      svg.querySelectorAll(`[data-side="in"][data-index="${i}"]`).forEach((p) => p.setAttribute('d', d));
+      const c = rectOf(card);
+      const y = c.top + c.height / 2;
+      setPath('in', card.dataset.archIndex, [
+        `M ${pt(c.left, y)}`,
+        `L ${pt(railX + r, y)}`,
+        `Q ${pt(railX, y)} ${pt(railX, y + r)}`,
+        `L ${pt(railX, hubTop - bend)}`,
+        `C ${pt(railX, hubTop - bend / 3)}, ${pt(hubCx, hubTop - bend)}, ${pt(hubCx, hubTop)}`,
+      ].join(' '));
     });
-
     diagram.querySelectorAll('[data-arch-card="out"]').forEach((card) => {
-      const i = card.dataset.archIndex;
-      const cardBox = card.getBoundingClientRect();
-      const end = toPct(cardBox.left, cardBox.top + cardBox.height / 2);
-      const midX = (hubRight.x + end.x) / 2;
-      const d = `M ${hubRight.x} ${hubRight.y} C ${midX} ${hubRight.y}, ${midX} ${end.y}, ${end.x} ${end.y}`;
-      svg.querySelectorAll(`[data-side="out"][data-index="${i}"]`).forEach((p) => p.setAttribute('d', d));
+      const c = rectOf(card);
+      const y = c.top + c.height / 2;
+      setPath('out', card.dataset.archIndex, [
+        `M ${pt(hubCx, hubBottom)}`,
+        `C ${pt(hubCx, hubBottom + bend)}, ${pt(railX, hubBottom + bend / 3)}, ${pt(railX, hubBottom + bend)}`,
+        `L ${pt(railX, y - r)}`,
+        `Q ${pt(railX, y)} ${pt(railX + r, y)}`,
+        `L ${pt(c.left, y)}`,
+      ].join(' '));
     });
   }
 
@@ -153,13 +200,31 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
 
     if (reduced) return;
 
-    gsap.from(section.querySelectorAll('[data-arch-card]'), {
-      opacity: 0, y: 16, duration: 0.5, stagger: 0.07, ease: 'expo.out',
-      scrollTrigger: { trigger: diagram, start: 'top 75%' },
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 1024px)', () => {
+      gsap.from(section.querySelectorAll('[data-arch-card]'), {
+        opacity: 0, y: 16, duration: 0.5, stagger: 0.07, ease: 'expo.out',
+        scrollTrigger: { trigger: diagram, start: 'top 75%' },
+      });
+      gsap.from(section.querySelector('[data-arch-hub]'), {
+        opacity: 0, scale: 0.85, duration: 0.6, ease: 'back.out(1.6)',
+        scrollTrigger: { trigger: diagram, start: 'top 72%' },
+      });
     });
-    gsap.from(section.querySelector('[data-arch-hub]'), {
-      opacity: 0, scale: 0.85, duration: 0.6, ease: 'back.out(1.6)',
-      scrollTrigger: { trigger: diagram, start: 'top 72%' },
+    // Mobile: el flujo se arma en orden al bajar — cada entrada se engancha
+    // desde el riel, el hub aparece, y luego cada salida.
+    mm.add('(max-width: 1023px)', () => {
+      section.querySelectorAll('[data-arch-card], [data-arch-hub]').forEach((el) => {
+        const isHub = el.hasAttribute('data-arch-hub');
+        gsap.from(el, {
+          opacity: 0,
+          x: isHub ? 0 : -18,
+          scale: isHub ? 0.88 : 1,
+          duration: isHub ? 0.8 : 0.7,
+          ease: isHub ? 'back.out(1.5)' : 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top 85%' },
+        });
+      });
     });
 
     ScrollTrigger.addEventListener('refresh', () => layoutCables(diagram));
@@ -219,7 +284,7 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
     gap: var(--space-xl);
     padding-block: var(--space-lg);
   }
-  .arch__cables { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; display: none; overflow: visible; }
+  .arch__cables { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; overflow: visible; pointer-events: none; }
   .arch__cable { stroke: var(--border); stroke-width: 1.4; fill: none; opacity: 0; vector-effect: non-scaling-stroke; }
   .arch__beam {
     stroke: var(--accent-hover);
@@ -230,7 +295,7 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
     filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 75%, transparent));
   }
 
-  .arch__col { position: relative; z-index: 1; display: grid; gap: var(--space-md); }
+  .arch__col { position: relative; z-index: 1; display: grid; gap: var(--space-md); min-width: 0; }
 
   .arch__card {
     background-color: var(--bg-primary);
@@ -243,7 +308,7 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
   .arch__card-label { font-family: var(--font-heading); font-size: var(--text-base); color: var(--text-primary); }
   .arch__card-sub { font-size: var(--text-sm); color: var(--text-secondary); }
 
-  .arch__logos { display: flex; gap: var(--space-xs); margin-bottom: var(--space-xs); }
+  .arch__logos { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-bottom: var(--space-xs); }
   .arch__logo-chip {
     display: inline-flex;
     align-items: center;
@@ -282,9 +347,45 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
   .arch__hub-label { font-family: var(--font-heading); font-size: var(--text-lg); line-height: 1.3; max-width: 18ch; }
   .arch__hub-sub { font-size: var(--text-sm); color: color-mix(in srgb, var(--on-accent) 82%, transparent); }
 
+  /* Mobile/tablet — "línea de metro": cards indentadas para dejar el riel a
+     la izquierda, con un nodo donde cada card se engancha; el hub recibe el
+     riel arriba y lo devuelve abajo (nodos en sus bordes). */
+  @media (max-width: 1023px) {
+    .arch__diagram { gap: var(--space-lg); }
+    .arch__col { padding-left: 1.75rem; gap: var(--space-sm); }
+    .arch__card { position: relative; z-index: 1; }
+    .arch__card::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: 50%;
+      width: 9px;
+      height: 9px;
+      margin-top: -4.5px;
+      border-radius: var(--radius-full);
+      background-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+    .arch__hub { min-height: 168px; }
+    .arch__hub::before,
+    .arch__hub::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      width: 11px;
+      height: 11px;
+      margin-left: -5.5px;
+      border-radius: var(--radius-full);
+      background-color: var(--bg-primary);
+      border: 3px solid var(--accent);
+    }
+    .arch__hub::before { top: -5.5px; }
+    .arch__hub::after { bottom: -5.5px; }
+    .arch__cable { stroke: color-mix(in srgb, var(--accent) 28%, transparent); stroke-width: 1.6; }
+  }
+
   @media (min-width: 1024px) {
     .arch__diagram { grid-template-columns: 1fr 260px 1fr; align-items: center; gap: var(--space-2xl); }
-    .arch__cables { display: block; }
     .arch__col--out { justify-items: end; }
     .arch__col--out .arch__card { text-align: right; justify-items: end; }
   }

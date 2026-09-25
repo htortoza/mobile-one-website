@@ -5,6 +5,7 @@
 // Fondo (foto + color) hace crossfade entre 3 capítulos — Transbank (azul) → Getnet (naranja) →
 // Mercado Pago (amarillo).
 import { withBase } from '../../utils/base.js';
+import CompatContactless from './CompatContactless.astro';
 const { title, eyebrow } = Astro.props;
 
 const chapters = [
@@ -78,6 +79,9 @@ const chapters = [
       </div>
     </div>
   </div>
+
+  <!-- Mobile con motion: escena "onda contactless" (reemplaza las cards) -->
+  <CompatContactless chapters={chapters} />
 
   <div class="container compat__mobile-only">
     {chapters.map((ch) => (
@@ -271,7 +275,9 @@ const chapters = [
     .compat__desktop-only { display: none; }
     .compat__mobile-only { display: grid; gap: var(--space-lg); }
 
-    .compat__card { display: grid; gap: var(--space-md); }
+    .compat__card { display: grid; gap: var(--space-md); min-width: 0; }
+    /* La escena contactless está activa (mobile + motion) → sin cards */
+    .compat.cc-active .compat__mobile-only { display: none; }
     .compat__card-image {
       width: 100%;
       aspect-ratio: 4 / 3;
