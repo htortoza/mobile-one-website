@@ -17,6 +17,7 @@ import ProductoNetworkDiagram from '../components/producto/ProductoNetworkDiagra
 import ProductoSystemStat from '../components/producto/ProductoSystemStat.astro';
 import ProductoScaleBand from '../components/producto/ProductoScaleBand.astro';
 import CtaClose from '../components/home/CtaClose.astro';
+import { whiteClientLogos } from '../utils/client-logos.js';
 
 const schemaData = {
   '@context': 'https://schema.org',
@@ -183,5 +184,7 @@ const chapters = [
     ctaHref="/contacto"
     ctaSecondaryText="Contactar un consultor"
     ctaSecondaryHref="/contacto"
+    logosLabel="Súmate a las marcas que ya trabajan con nosotros"
+    logos={whiteClientLogos()}
   />
 </Layout>
