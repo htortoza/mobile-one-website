@@ -20,7 +20,15 @@ import { withBase } from '../../utils/base.js';
       height="1722"
       loading="lazy"
     />
+    <!-- El check de la foto también queda en espejo: se tapa con el disco
+         original (sin espejo) recortado de la misma foto, en su posición
+         reflejada. -->
+    <img class="ppq__check" src={withBase('/images/pos-check.webp')} alt="" aria-hidden="true" loading="lazy" />
     <div class="ppq__screen" data-ppq-screen aria-hidden="true">
+      <!-- El layout vive en 300×630 pero se pinta a 3× (lienzo 900×1890): el
+           matrix3d siempre REDUCE la capa → texto e imagen nítidos en vez de
+           una capa de 300px agrandada (se veía pixelado). -->
+      <div class="ppq__canvas">
       <!-- geometría "cover" de la captura 736×1456 sobre el lienzo 300×630 -->
       <div class="ppq__shotbox" data-ppq-shot>
         <img class="ppq__shot" src={withBase('/images/pantalla1.webp')} alt="" loading="lazy" />
@@ -28,6 +36,7 @@ import { withBase } from '../../utils/base.js';
         <span class="ppq__qr" data-ppq-qr>
           <img src={withBase('/images/pantalla1-qr.webp')} alt="" loading="lazy" />
         </span>
+      </div>
       </div>
     </div>
   </div>
@@ -99,6 +108,16 @@ import { withBase } from '../../utils/base.js';
   /* Espejo: el POS mira a la derecha (solo la foto; la pantalla se proyecta
      aparte con las esquinas reflejadas, así su contenido se lee normal). */
   .ppq__pos-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transform: scaleX(-1); filter: drop-shadow(0 30px 40px color-mix(in srgb, var(--navy) 22%, transparent)); }
+  /* disco (1541,1369)–(1739,1567) de la foto 1958×1722, reflejado en x:
+     left = 1958 − 1739 = 219 */
+  .ppq__check {
+    position: absolute;
+    left: 11.185%;
+    top: 79.500%;
+    width: 10.112%;
+    height: auto;
+    pointer-events: none;
+  }
   .ppq__floor {
     justify-self: center;
     width: 44%;
@@ -108,20 +127,21 @@ import { withBase } from '../../utils/base.js';
     background: radial-gradient(closest-side, color-mix(in srgb, var(--navy) 20%, transparent), transparent);
   }
 
-  /* Lienzo 300×630 (proporción del vidrio) → matrix3d */
+  /* Lienzo 900×1890 (3× de 300×630, proporción del vidrio) → matrix3d */
   .ppq__screen {
     position: absolute;
     top: 0;
     left: 0;
-    width: 300px;
-    height: 630px;
+    width: 900px;
+    height: 1890px;
     transform-origin: 0 0;
-    border-radius: 18px;
+    border-radius: 30px;
     overflow: hidden;
-    clip-path: inset(0 round 18px);
+    clip-path: inset(0 round 30px);
     background-color: var(--bg-primary);
     backface-visibility: hidden;
   }
+  .ppq__canvas { position: absolute; top: 0; left: 0; width: 300px; height: 630px; transform: scale(3); transform-origin: 0 0; }
   .ppq__shotbox { position: absolute; top: 0; left: -9.23px; width: 318.46px; height: 100%; }
   .ppq__shot { width: 100%; height: 100%; display: block; }
   .ppq__dim { position: absolute; inset: 0; background: color-mix(in srgb, var(--navy) 58%, transparent); opacity: 0; }

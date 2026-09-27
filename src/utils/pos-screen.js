@@ -46,9 +46,21 @@ export const POS_QUAD_MIRROR = [flip(TR), flip(TL), flip(BL), flip(BR)];
 // él. `mirror`: POS mirando a la derecha. `minLeft`: la foto nunca empieza
 // antes de esa x (px) de su columna — el vidrio se descentra hacia la derecha
 // si hace falta. Se re-ejecuta en resize; devuelve la función de limpieza.
-export function mountPosScreen(pos, screen, { mirror = false, minLeft = -Infinity } = {}) {
+// Expande el cuadrilátero `px` (px de la foto) hacia afuera desde su centro:
+// la pantalla proyectada tapa por completo el vidrio blanco original de la
+// foto (sin él asomaba un filo blanco entre la UI y el marco negro).
+function bleedQuad(q, px) {
+  const cx = q.reduce((a, [x]) => a + x, 0) / 4;
+  const cy = q.reduce((a, [, y]) => a + y, 0) / 4;
+  return q.map(([x, y]) => {
+    const dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy);
+    return [x + (dx / d) * px, y + (dy / d) * px];
+  });
+}
+
+export function mountPosScreen(pos, screen, { mirror = false, minLeft = -Infinity, bleed = 7 } = {}) {
   const device = pos.parentElement;
-  const quad = mirror ? POS_QUAD_MIRROR : POS_QUAD;
+  const quad = bleedQuad(mirror ? POS_QUAD_MIRROR : POS_QUAD, bleed);
   const cx = mirror ? 1 - POS_SCREEN_CX : POS_SCREEN_CX;
   const project = () => {
     pos.style.marginLeft = Math.max(minLeft, device.offsetWidth / 2 - pos.offsetWidth * cx) + 'px';
