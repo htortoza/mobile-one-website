@@ -139,8 +139,10 @@ const chapters = [
         scrollTrigger: {
           trigger: pinEl,
           start: 'top top',
-          end: '+=200%',
-          scrub: 1,
+          // Recorrido largo (≈ 1,8 pantallas por cambio de marca) para que el
+          // cruce de foto/color se aprecie con el scroll en vez de pasar de golpe.
+          end: '+=360%',
+          scrub: 1.4,
           pin: pinEl,
           anticipatePin: 1,
           invalidateOnRefresh: true,

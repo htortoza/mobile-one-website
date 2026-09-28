@@ -83,27 +83,68 @@ const list = panels ?? [];
     // (§15.6.1) — solo se desactiva por prefers-reduced-motion. Lenis emite
     // eventos de scroll también con gestos táctiles.
 
+    // Ritmo de la galería: cuánto scroll (en altos de pantalla) cuesta pasar
+    // de una card a la siguiente, y cómo se asienta el snap.
+    const STEP_VH = 0.9;
+    const SNAP = { directional: true, delay: 0.04, duration: { min: 0.35, max: 0.7 }, ease: 'power2.inOut', inertia: false };
+
+    // Snap con Lenis (desktop): con rueda/trackpad el scroll lo mueve Lenis y
+    // el snap nativo de ScrollTrigger se pelea con él (lo devolvía a la misma
+    // card). Al detenerse el scroll dentro del pin, Lenis lleva a la card
+    // siguiente/anterior según la dirección del gesto.
+    function lenisSnap(st, points) {
+      // Lenis se crea en Layout (astro:page-load) y puede no existir aún al
+      // iniciar este componente: se lee recién al momento de hacer el snap.
+      let timer = null, snapping = false;
+      const onScroll = () => {
+        if (snapping || !st.isActive) return;
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          if (!st.isActive) return;
+          const p = st.progress, dir = st.direction, eps = 0.02;
+          const near = points.find((q) => Math.abs(q - p) < eps);
+          if (near !== undefined) return;
+          const target = dir > 0 ? points.find((q) => q > p) : [...points].reverse().find((q) => q < p);
+          if (target === undefined) return;
+          snapping = true;
+          const y = st.start + target * (st.end - st.start);
+          const lenis = window.__lenis;
+          if (lenis) {
+            lenis.scrollTo(y, { duration: 0.7, easing: (t) => 1 - Math.pow(1 - t, 3), onComplete: () => { snapping = false; } });
+          } else {
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+          setTimeout(() => { snapping = false; }, 900);
+        }, 110);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      return () => { clearTimeout(timer); window.removeEventListener('scroll', onScroll); };
+    }
+
     // Desktop: se pinnea solo la galería (el panel ocupa casi todo el alto).
     mm.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => {
       const panelCount = track.querySelectorAll('[data-sslide-panel]').length;
-      const snapTo = panelCount > 1 ? 1 / (panelCount - 1) : 1;
-      gsap.to(track, {
+      const steps = Math.max(1, panelCount - 1);
+      const tween = gsap.to(track, {
         x: () => -getDistance(),
         ease: 'none',
         scrollTrigger: {
           trigger: pinEl,
           start: 'top top',
-          end: () => '+=' + getDistance(),
+          // Recorrido holgado (≈ una pantalla por card) para que no pasen de golpe.
+          end: () => '+=' + Math.max(getDistance(), window.innerHeight * STEP_VH * steps),
           scrub: 1,
-          // Al soltar el scroll, en vez de quedar a mitad de camino entre
-          // paneles, anima hasta el panel más cercano (commit e8d121f).
-          snap: { snapTo, duration: { min: 0.25, max: 0.5 }, ease: 'power2.inOut' },
+          // Snap "mandatory": al detenerse, siempre aterriza en una card
+          // completa y avanza de a una según la dirección (base: e8d121f).
+          // Lo resuelve lenisSnap (el snap nativo choca con Lenis en desktop).
           pin: pinEl,
           anticipatePin: 1,
           invalidateOnRefresh: true,
           ...stickyCtaToggles,
         },
       });
+      const points = Array.from({ length: steps + 1 }, (_, k) => k / steps);
+      return lenisSnap(tween.scrollTrigger, points);
     });
 
     // Mobile: se pinnea el stage completo (eyebrow + título + galería) centrado
@@ -126,14 +167,22 @@ const list = panels ?? [];
       // Al fijarse, el stage llega CON logo (logo → eyebrow → título → cards).
       // El primer tramo del scroll pinneado pliega el logo (redunda con el del
       // header) y el flex recentra el bloque; luego pasan las cards.
-      const LOGO_SHARE = 0.15; // fracción extra de scroll dedicada al logo
-      const pinLength = () => getDistance() * (1 + LOGO_SHARE);
+      // Duraciones en "altos de pantalla" de scroll: el logo se pliega en un
+      // tramo corto y luego cada card cuesta STEP_VH de scroll.
+      const LOGO_VH = 0.35;
+      const steps = Math.max(1, panels.length - 1);
+      const CARDS_VH = STEP_VH * steps;
+      const TOTAL_VH = LOGO_VH + CARDS_VH;
+      const pinLength = () => window.innerHeight * TOTAL_VH;
+      // Puntos de snap: inicio (con logo), primera card sin logo y cada card siguiente.
+      const snapPoints = [0, ...Array.from({ length: steps + 1 }, (_, k) => (LOGO_VH + STEP_VH * k) / TOTAL_VH)];
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: stage,
           start: 'top top',
           end: () => '+=' + pinLength(),
           scrub: 1,
+          snap: { snapTo: snapPoints, ...SNAP },
           pin: stage,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -150,11 +199,11 @@ const list = panels ?? [];
           // compensa también el gap del grid para que no quede un hueco
           marginBottom: () => -parseFloat(getComputedStyle(head).rowGap || '0'),
           ease: 'power1.inOut',
-          duration: LOGO_SHARE,
+          duration: LOGO_VH,
           immediateRender: false,
         });
       }
-      tl.to(track, { x: () => -getDistance(), ease: 'none', duration: 1 });
+      tl.to(track, { x: () => -getDistance(), ease: 'none', duration: CARDS_VH }, LOGO_VH);
 
       // CTA sticky: se oculta desde que el stage viene subiendo (antes del pin)
       // hasta que la última card ya salió por arriba al soltar el pin — así
