@@ -1,10 +1,10 @@
 {
   "contract_type": "site",
   "site": {
-    "domain": "https://mobileone.dotsolutions.io",
+    "domain": "https://mobile-one.io",
     "siteName": "Mobile One",
     "language": "es",
-    "defaultOgImage": "/images/og-default.png"
+    "defaultOgImage": "/images/og-default.jpg"
   },
   "company": {
     "legalName": "DOT Solutions",

@@ -18,7 +18,6 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
   <div class="container arch__head">
     <h2 class="arch__title" data-gsap-animate="fade-up">{title}</h2>
     <p class="arch__text">{text}</p>
-    <a href={withBase('/integraciones')} class="arch__link">Ver arquitectura completa →</a>
 
     {badgeList.length > 0 && (
       <div class="arch__badges">
@@ -264,7 +263,6 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
     letter-spacing: -0.02em;
   }
   .arch__text { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; }
-  .arch__link { color: var(--accent); font-weight: 600; text-decoration: none; }
 
   .arch__badges { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-sm); margin-top: var(--space-sm); }
   .arch__badge {

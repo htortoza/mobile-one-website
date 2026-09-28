@@ -7,6 +7,10 @@ import { withBase } from '../utils/base.js';
 const { siteName } = site.site;
 const orderUrl = withBase(site.orderUrl ?? '#');
 const loginUrl = site.loginUrl ?? '#';
+// Enlace principal de navegación (por ahora solo Producto, la única página
+// del menú planificado que existe). aria-current marca la página activa.
+const productoUrl = withBase('/producto');
+const isProducto = Astro.url.pathname.replace(/\/$/, '') === productoUrl.replace(/\/$/, '');
 
 const ICON_USER = 'M12 8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z|M5 20c0-3.5 3-6 7-6s7 2.5 7 6';
 const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17.5V13Z|M21 13h-4v6h2.5a1.5 1.5 0 0 0 1.5-1.5V13Z|M19 19v1a3 3 0 0 1-3 3h-3';
@@ -19,6 +23,10 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
     </a>
 
     <div class="header-actions">
+      <nav class="header-nav" aria-label="Menú principal">
+        <a href={productoUrl} class="header-link" aria-current={isProducto ? 'page' : undefined}>Producto</a>
+      </nav>
+      <span class="header-sep" aria-hidden="true"></span>
       <a href={loginUrl} class="header-login">
         <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           {ICON_USER.split('|').map((d) => <path d={d} />)}
@@ -72,6 +80,8 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
     </div>
 
     <nav class="overlay-actions" aria-label="Menú principal">
+      <a href={productoUrl} class="overlay-link" data-overlay-link aria-current={isProducto ? 'page' : undefined}>Producto</a>
+      <span class="overlay-sep" aria-hidden="true"></span>
       <a href={loginUrl} class="overlay-login" data-overlay-link>
         <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           {ICON_USER.split('|').map((d) => <path d={d} />)}
@@ -212,6 +222,37 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
   }
   .header-icon { width: 16px; height: 16px; flex-shrink: 0; }
 
+  /* Enlace de navegación: subrayado que se dibuja al hover; fijo en la página activa */
+  .header-nav { display: flex; align-items: center; }
+  .header-link {
+    position: relative;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--text-primary);
+    text-decoration: none;
+    white-space: nowrap;
+    padding: var(--space-xs) var(--space-sm);
+  }
+  .header-link::after {
+    content: '';
+    position: absolute;
+    left: var(--space-sm);
+    right: var(--space-sm);
+    bottom: 2px;
+    height: 1.5px;
+    border-radius: 2px;
+    background-color: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--transition-fast);
+  }
+  .header-link:hover::after,
+  .header-link[aria-current='page']::after { transform: scaleX(1); }
+  .header-link[aria-current='page'] { color: var(--accent); }
+  .header-sep { width: 1px; height: 18px; background-color: var(--border); }
+
   .header-login {
     display: inline-flex;
     align-items: center;
@@ -351,6 +392,25 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
      importar cuánto mida el panel — si cambia el alto de pantalla, el CTA
      sigue pegado al fondo en vez de quedar flotando a mitad de camino. */
   .overlay-actions { display: flex; flex-direction: column; flex: 1; gap: var(--space-sm); }
+  .overlay-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    text-decoration: none;
+    padding: var(--space-sm) var(--space-xs);
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+  }
+  .overlay-link::after { content: '→'; font-size: var(--text-base); color: var(--text-secondary); transition: transform var(--transition-fast); }
+  .overlay-link:hover { background-color: var(--bg-secondary); }
+  .overlay-link:hover::after { transform: translateX(3px); }
+  .overlay-link[aria-current='page'] { color: var(--accent); }
+  .overlay-sep { height: 1px; background-color: var(--border); margin-block: var(--space-xs); }
   .overlay-login {
     display: flex;
     align-items: center;
