@@ -2,6 +2,8 @@
 // src/components/StickyCTA.astro
 // CTA de conversión persistente (Pilar 3). Aparece tras el hero, se oculta cerca del footer.
 // Lee el destino de pedido desde contracts/site.json.
+// Incluye el botón "volver arriba": aparece tras ~1 pantalla de scroll, se
+// apila sobre el CTA y baja a su lugar cuando el CTA se oculta.
 import site from '../../contracts/site.json';
 import { withBase } from '../utils/base.js';
 const orderUrl = withBase(site.orderUrl ?? '#');
@@ -16,6 +18,12 @@ const orderUrl = withBase(site.orderUrl ?? '#');
   <span class="sticky-cta__dot" aria-hidden="true"></span>
   Agendar demo
 </a>
+
+<button class="back-top" type="button" data-back-top aria-label="Volver arriba">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 19V5" /><path d="M6 11l6-6 6 6" />
+  </svg>
+</button>
 
 <script>
   const cta = document.querySelector('[data-sticky-cta]');
@@ -45,7 +53,81 @@ const orderUrl = withBase(site.orderUrl ?? '#');
   }
 </script>
 
+<script>
+  // Volver arriba — init en astro:page-load (sobrevive a la navegación con
+  // View Transitions, que reemplaza el body).
+  function initBackTop() {
+    const btn = document.querySelector('[data-back-top]');
+    if (!btn || btn.dataset.init) return;
+    btn.dataset.init = '1';
+    const cta = document.querySelector('[data-sticky-cta]');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const update = () => {
+      btn.classList.toggle('is-visible', window.scrollY > window.innerHeight * 1.2);
+      const ctaShown = cta && cta.classList.contains('is-visible') && !document.body.classList.contains('hide-sticky-cta');
+      btn.classList.toggle('is-low', !ctaShown); // sin CTA debajo, baja a su lugar
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    // el CTA cambia de estado también por clases (secciones fijas, footer)
+    const mo = new MutationObserver(update);
+    if (cta) mo.observe(cta, { attributes: true, attributeFilter: ['class'] });
+    mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    document.addEventListener('astro:before-swap', () => {
+      mo.disconnect();
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    }, { once: true });
+
+    btn.addEventListener('click', () => {
+      const lenis = window.__lenis;
+      if (lenis) lenis.scrollTo(0, { duration: reduced ? 0 : 1.4, force: true });
+      else window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+    });
+  }
+  document.addEventListener('astro:page-load', initBackTop);
+</script>
+
 <style>
+  /* ── Volver arriba ── */
+  .back-top {
+    --cta-h: 54px;
+    position: fixed;
+    right: var(--space-md);
+    bottom: calc(var(--space-md) + var(--cta-h) + var(--space-sm));
+    z-index: var(--z-modal);
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: var(--radius-full);
+    border: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+    background-color: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--navy);
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
+    pointer-events: none;
+    transition: opacity var(--transition-smooth), transform var(--transition-smooth), bottom var(--transition-smooth), background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    touch-action: manipulation;
+  }
+  .back-top svg { width: 20px; height: 20px; transition: transform var(--transition-fast); }
+  .back-top.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+  .back-top.is-low { bottom: var(--space-md); }
+  .back-top:hover { background-color: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .back-top:hover svg { transform: translateY(-2px); }
+  .back-top:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-top { transition: opacity var(--transition-fast); transform: none; }
+  }
+
   .sticky-cta {
     position: fixed;
     right: var(--space-md);

@@ -1,0 +1,14 @@
+name: Changelog draft
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+    branches: [production]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  draft:
+    uses: DOTSolutions-io/github-actions-workflows/.github/workflows/changelog-draft.yml@production
+    secrets: inherit

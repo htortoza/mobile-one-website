@@ -1,0 +1,16 @@
+name: Changelog release
+on:
+  pull_request:
+    types: [closed]
+    branches: [production]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: >
+      github.event.pull_request.merged == true &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-changelog')
+    uses: DOTSolutions-io/github-actions-workflows/.github/workflows/changelog-dispatch.yml@production
+    secrets: inherit

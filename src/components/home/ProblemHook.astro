@@ -72,12 +72,32 @@ const imgs = images ?? [];
         scrollTrigger: { trigger: pinEl, start: 'top 80%' },
       });
 
+      // Cambio de lado ORGÁNICO: en vez de reordenar el DOM (la card saltaba
+      // de un lado a otro en un solo frame), el layout queda fijo y la card y
+      // el texto se DESLIZAN hacia el lado opuesto. Se miden ambos layouts
+      // (offsetLeft ignora transforms) y se animan solo con x.
+      const textEl = section.querySelector('.hook__text');
+      const measure = () => {
+        const read = () => ({ card: card.offsetLeft, text: textEl.offsetLeft + (parseFloat(getComputedStyle(textEl).paddingLeft) || 0) });
+        stage.setAttribute('data-side', 'right'); const r = read();
+        stage.setAttribute('data-side', 'left'); const l = read();
+        return { card: r.card - l.card, text: r.text - l.text };
+      };
+      let delta = measure();
+      const onRefreshInit = () => { gsap.set([card, textEl], { x: 0 }); delta = measure(); };
+      ScrollTrigger.addEventListener('refreshInit', onRefreshInit);
+      const sideX = (i, key) => () => (i % 2 === 1 ? delta[key] : 0);
+
+      const letters = (el) => el.querySelectorAll('.hook__letter');
+      const words = (el) => el.querySelectorAll('.hook__word');
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: pinEl,
           start: 'top top',
-          end: '+=' + (lines.length * 90) + '%',
-          scrub: 1,
+          // más recorrido por pregunta: transiciones lentas + tiempo de lectura
+          end: '+=' + (lines.length * 150) + '%',
+          scrub: 1.2,
           pin: pinEl,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -86,27 +106,32 @@ const imgs = images ?? [];
 
       lines.forEach((line, i) => {
         if (i === 0) return;
-        tl.to({}, { duration: 0.35 }); // hold la línea anterior (lectura, no pausa muerta)
-        tl.to(lines[i - 1], { opacity: 0, y: -16, duration: 0.35, ease: 'power1.in' });
-        tl.set(line, { opacity: 1 }, '<');
-        tl.set(stage, { attr: { 'data-side': i % 2 === 0 ? 'left' : 'right' } }, '<');
-        tl.fromTo(
-          line.querySelectorAll('.hook__letter'),
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0, duration: 0.5, stagger: 0.018, ease: 'power2.out' },
-          '<'
-        );
-        if (cardImgs[i - 1]) tl.to(cardImgs[i - 1], { opacity: 0, duration: 0.35 }, '<');
-        if (cardImgs[i]) tl.to(cardImgs[i], { opacity: 1, duration: 0.35 }, '<');
-      });
-      tl.to({}, { duration: 0.2 }); // breve respiro final, no muro muerto
+        const prevLine = lines[i - 1];
+        tl.to({}, { duration: 0.6 }); // lectura de la pregunta anterior
+        const at = tl.duration();
 
-      // Ken Burns continuo sobre toda la duración del pin: la card nunca
-      // queda "congelada" durante los holds de lectura, siempre hay
-      // movimiento atado al scroll aunque el texto no esté cambiando.
-      if (card) {
-        tl.fromTo(card, { scale: 1 }, { scale: 1.06, ease: 'none', duration: tl.duration() }, 0);
-      }
+        // 1) la pregunta anterior se disuelve palabra a palabra, hacia arriba
+        tl.to(words(prevLine), { opacity: 0, y: -18, duration: 0.45, stagger: 0.03, ease: 'power2.in' }, at);
+        tl.set(prevLine, { opacity: 0 }, at + 0.7);
+
+        // 2) card y texto se deslizan al lado opuesto con una curva suave;
+        //    la card "respira" (baja un poco su escala a mitad del viaje)
+        tl.to(card, { x: sideX(i, 'card'), duration: 1.6, ease: 'power3.inOut' }, at + 0.15);
+        tl.to(card, { scale: 0.94, duration: 0.8, ease: 'sine.inOut', yoyo: true, repeat: 1 }, at + 0.15);
+        tl.to(textEl, { x: sideX(i, 'text'), duration: 1.6, ease: 'power3.inOut' }, at + 0.15);
+
+        // 3) la foto cambia durante el viaje, con un leve zoom de asentamiento
+        if (cardImgs[i - 1]) tl.to(cardImgs[i - 1], { opacity: 0, duration: 1, ease: 'sine.inOut' }, at + 0.45);
+        if (cardImgs[i]) tl.fromTo(cardImgs[i], { opacity: 0, scale: 1.1 }, { opacity: 1, scale: 1, duration: 1.2, ease: 'power2.out' }, at + 0.45);
+
+        // 4) la nueva pregunta se escribe cuando la card ya está llegando
+        tl.set(line, { opacity: 1 }, at + 1.15);
+        gsap.set(words(line), { opacity: 1, y: 0 });
+        tl.fromTo(letters(line), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.014, ease: 'power3.out' }, at + 1.15);
+      });
+      tl.to({}, { duration: 0.5 }); // respiro final antes de soltar el pin
+
+      return () => ScrollTrigger.removeEventListener('refreshInit', onRefreshInit);
     });
 
     // Mobile: pin "bueno" (§15.6.1) — el contenido avanza con el scroll.
@@ -128,8 +153,8 @@ const imgs = images ?? [];
         scrollTrigger: {
           trigger: pinEl,
           start: 'top top',
-          end: '+=' + (lines.length * 100) + '%',
-          scrub: 1,
+          end: '+=' + (lines.length * 130) + '%',
+          scrub: 1.2,
           pin: pinEl,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -143,22 +168,30 @@ const imgs = images ?? [];
       const centerOffset = (i) => (textBox.offsetHeight - lines[i].offsetHeight) / 2;
       tl.set(stage, { y: () => centerOffset(0) }, 0);
 
+      // Transición en capas (no todo a la vez): la pregunta se disuelve
+      // palabra a palabra → la foto cambia con un crossfade largo y zoom de
+      // asentamiento → la nueva pregunta se escribe cuando la foto ya llegó.
+      const words = (el) => el.querySelectorAll('.hook__word');
       lines.forEach((line, i) => {
+        let at = tl.duration();
         if (i > 0) {
-          tl.to(lines[i - 1], { opacity: 0, y: -16, duration: 0.3, ease: 'power1.in' });
-          tl.to(stage, { y: () => centerOffset(i), duration: 0.4, ease: 'power2.inOut' }, '<');
-          if (cardImgs[i - 1]) tl.to(cardImgs[i - 1], { opacity: 0, duration: 0.4 }, '<');
-          if (cardImgs[i]) {
-            tl.fromTo(cardImgs[i], { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, '<');
-          }
+          tl.to(words(lines[i - 1]), { opacity: 0, y: -14, duration: 0.45, stagger: 0.03, ease: 'power2.in' }, at);
+          tl.set(lines[i - 1], { opacity: 0 }, at + 0.7);
+          tl.to(stage, { y: () => centerOffset(i), duration: 0.9, ease: 'power3.inOut' }, at + 0.2);
+          if (cardImgs[i - 1]) tl.to(cardImgs[i - 1], { opacity: 0, duration: 0.8, ease: 'sine.inOut' }, at + 0.25);
+          if (cardImgs[i]) tl.fromTo(cardImgs[i], { opacity: 0, scale: 1.1 }, { opacity: 1, scale: 1, duration: 1, ease: 'power2.out' }, at + 0.25);
+          if (card) tl.to(card, { scale: 0.96, duration: 0.5, ease: 'sine.inOut', yoyo: true, repeat: 1 }, at + 0.25);
+          at += 0.85;
         }
-        tl.set(line, { opacity: 1, y: 0 });
+        tl.set(line, { opacity: 1, y: 0 }, at);
+        gsap.set(words(line), { opacity: 1, y: 0 });
         tl.fromTo(
           line.querySelectorAll('.hook__letter'),
           { opacity: 0, y: 14 },
-          { opacity: 1, y: 0, duration: 0.6, stagger: 0.012, ease: 'power2.out' }
+          { opacity: 1, y: 0, duration: 0.7, stagger: 0.012, ease: 'power3.out' },
+          at
         );
-        tl.to({}, { duration: 0.4 }); // hold de lectura
+        tl.to({}, { duration: 0.6 }); // lectura
       });
 
       return () => section.classList.remove('is-mobile-pin');
