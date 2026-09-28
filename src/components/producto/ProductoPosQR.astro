@@ -4,7 +4,7 @@
 // (pantalla1) proyectada en su vidrio (utils/pos-screen.js). Con el scroll
 // el POS entra y el recuadro "Ingresar con código QR" crece y se eleva sobre
 // la pantalla atenuada; al quedar en foco, un pulso lo señala. La foto va en
-// espejo (el POS a la izquierda mira hacia la derecha). Sin pin: la
+// espejo (archivo -mirror: el POS a la izquierda mira a la derecha). Sin pin: la
 // animación va atada al paso de la sección por el viewport.
 import { withBase } from '../../utils/base.js';
 ---
@@ -14,16 +14,12 @@ import { withBase } from '../../utils/base.js';
   <div class="ppq__pos" data-ppq-pos>
     <img
       class="ppq__pos-img"
-      src={withBase('/images/hero-mobile-pos-v2-final.webp')}
+      src={withBase('/images/hero-mobile-pos-mirror.webp')}
       alt="Terminal de pago con Mobile One: inicio de sesión del vendedor con código QR"
       width="1958"
       height="1722"
       loading="lazy"
     />
-    <!-- El check de la foto también queda en espejo: se tapa con el disco
-         original (sin espejo) recortado de la misma foto, en su posición
-         reflejada. -->
-    <img class="ppq__check" src={withBase('/images/pos-check.webp')} alt="" aria-hidden="true" loading="lazy" />
     <div class="ppq__screen" data-ppq-screen aria-hidden="true">
       <!-- El layout vive en 300×630 pero se pinta a 3× (lienzo 900×1890): el
            matrix3d siempre REDUCE la capa → texto e imagen nítidos en vez de
@@ -105,19 +101,10 @@ import { withBase } from '../../utils/base.js';
   /* El POS se dimensiona por su vidrio; margin-left lo fija mountPosScreen()
      para que el vidrio quede centrado en la columna. */
   .ppq__pos { position: relative; width: min(118%, 680px); aspect-ratio: 1958 / 1722; }
-  /* Espejo: el POS mira a la derecha (solo la foto; la pantalla se proyecta
-     aparte con las esquinas reflejadas, así su contenido se lee normal). */
-  .ppq__pos-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transform: scaleX(-1); filter: drop-shadow(0 30px 40px color-mix(in srgb, var(--navy) 22%, transparent)); }
-  /* disco (1541,1369)–(1739,1567) de la foto 1958×1722, reflejado en x:
-     left = 1958 − 1739 = 219 */
-  .ppq__check {
-    position: absolute;
-    left: 11.185%;
-    top: 79.500%;
-    width: 10.112%;
-    height: auto;
-    pointer-events: none;
-  }
+  /* Foto ya espejada en el archivo (hero-mobile-pos-mirror: POS mirando a la
+     derecha, con isotipo y check en su sentido correcto). La pantalla se
+     proyecta con las esquinas reflejadas (mountPosScreen mirror). */
+  .ppq__pos-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; filter: drop-shadow(0 30px 40px color-mix(in srgb, var(--navy) 22%, transparent)); }
   .ppq__floor {
     justify-self: center;
     width: 44%;

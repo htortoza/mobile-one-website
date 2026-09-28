@@ -20,7 +20,7 @@ const list = stats ?? [];
       {list.map((s, i) => (
         <div class="pss__stat" data-pss-stat data-numeric={s.isNumeric ? 'true' : 'false'} data-value={s.isNumeric ? s.value : undefined} data-index={i}>
           <p class="pss__stat-value">{s.value}</p>
-          <p class="pss__stat-label">{s.label}</p>
+          {s.label && <p class="pss__stat-label">{s.label}</p>}
         </div>
       ))}
     </div>
@@ -87,9 +87,12 @@ const list = stats ?? [];
 
   @media (min-width: 900px) {
     .pss__grid { grid-template-columns: 1fr 1fr; align-items: center; }
-    .pss__stats { grid-template-columns: repeat(3, 1fr); }
-    .pss__stat { border-top: none; border-left: 1px solid var(--border); padding-inline-start: var(--space-md); padding-block: 0; }
-    .pss__stat:first-child { border-left: none; padding-inline-start: 0; }
+    /* Datos apilados en filas (no 3 columnas): con valores de texto largo
+       ("Tiempo de implementación") las columnas se aplastaban y desbordaban. */
+    .pss__stats { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .pss__stat { display: grid; gap: 2px; padding-block: var(--space-md); min-width: 0; }
+    .pss__stat:last-child { border-bottom: 1px solid var(--border); }
+    .pss__stat-value { font-size: clamp(1.4rem, 2.1vw, 1.9rem); }
   }
 
   /* El rail de capítulos (ProductoChapterNav) es fixed en x 32–155px: el

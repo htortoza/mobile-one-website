@@ -51,7 +51,7 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
           {node.logos && (
             <div class="arch__logos">
               {node.logos.map((logo) => (
-                <span class={`arch__logo-chip ${logo.tone ? `arch__logo-chip--${logo.tone}` : ''}`}>
+                <span class={`arch__logo-chip ${logo.tone ? `arch__logo-chip--${logo.tone}` : ''}`} style={logo.scale ? `--logo-scale:${logo.scale}` : undefined}>
                   <img src={withBase(logo.src)} alt="" />
                 </span>
               ))}
@@ -75,7 +75,7 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
           {node.logos && (
             <div class="arch__logos">
               {node.logos.map((logo) => (
-                <span class={`arch__logo-chip ${logo.tone ? `arch__logo-chip--${logo.tone}` : ''}`}>
+                <span class={`arch__logo-chip ${logo.tone ? `arch__logo-chip--${logo.tone}` : ''}`} style={logo.scale ? `--logo-scale:${logo.scale}` : undefined}>
                   <img src={withBase(logo.src)} alt="" />
                 </span>
               ))}
@@ -322,7 +322,9 @@ const hubNode = hub ?? { label: 'Mobile One Core' };
   .arch__logo-chip--transbank { background-color: var(--tone-transbank); }
   .arch__logo-chip--getnet { background-color: var(--tone-getnet); }
   .arch__logo-chip--light { background-color: var(--bg-secondary); }
-  .arch__logo-chip--light img { height: 18px; }
+  .arch__logo-chip--light img { height: calc(18px * var(--logo-scale, 1)); }
+  /* logos escalados (prop `scale`): el chip crece con ellos */
+  .arch__logo-chip[style*="--logo-scale"] { height: auto; min-height: 28px; padding-block: 4px; }
 
   .arch__hub {
     position: relative;

@@ -40,7 +40,7 @@ const chapters = [
 ---
 
 <Layout
-  title="Producto — POS Mobile y Panel de control | Mobile One"
+  title="Producto: POS Mobile y Panel de control | Mobile One"
   description="Conoce las funcionalidades de Mobile One: venta móvil, omnicanalidad, promociones, recepción de mercadería y administración centralizada."
   image="/images/og-default.png"
   schemaData={schemaData}
@@ -77,7 +77,7 @@ const chapters = [
     image="/images/solucion-fila.webp"
     imageAlt="Vendedora cobrando con terminal Mobile One en la sala de venta"
     items={[
-      { icon: 'search', title: 'Catálogo con categorías y búsqueda', text: 'Navega el catálogo completo por categoría y subcategoría, o busca un producto directamente por nombre o código — con su detalle, variantes y el pasillo infinito de stock de toda la red al tiro.' },
+      { icon: 'search', title: 'Catálogo con categorías y búsqueda', text: 'Navega el catálogo completo por categoría y subcategoría, o busca un producto directamente por nombre o código, con su detalle, variantes y el pasillo infinito de stock de toda la red al tiro.' },
       { icon: 'cart', title: 'Carrito de venta flexible', text: 'Crear, modificar y eliminar líneas de producto libremente. Cantidad mínima de línea es 1; para retirar un producto se ejecuta la acción explícita de eliminar, evitando errores de digitación.' },
     ]}
   />
@@ -98,9 +98,9 @@ const chapters = [
 
   <ProductoPasilloMoment
     id="pasillo-infinito"
-    eyebrow="POS Mobile — 04"
+    eyebrow="POS Mobile · 04"
     title='El "sin stock" se vuelve un pasillo infinito'
-    text="Tres modalidades en la misma transacción: venta directa, retiro programado en otra tienda (con fecha) y despacho a domicilio — el pasillo infinito hace posible despachar multidirección cuando un mismo pedido va a más de un destino."
+    text="Tres modalidades en la misma transacción: venta directa, retiro programado en otra tienda (con fecha) y despacho a domicilio. El pasillo infinito hace posible despachar multidirección cuando un mismo pedido va a más de un destino."
     image="/images/solucion-stock.webp"
     imageAlt="Vendedor consultando stock de toda la red para despachar un pedido"
   />
@@ -154,7 +154,7 @@ const chapters = [
     ]}
     hub={{ label: 'Red sincronizada', sub: 'Una sola fuente de verdad' }}
     outputs={[
-      { label: 'Entregas y despachos', sub: 'Sigue cada despacho por separado — dirección, número de seguimiento y estado.' },
+      { label: 'Entregas y despachos', sub: 'Sigue cada despacho por separado: dirección, número de seguimiento y estado.' },
     ]}
   />
 
@@ -162,19 +162,18 @@ const chapters = [
     id="control-sistema"
     eyebrow="Panel de control"
     title="Control del sistema"
-    text="Gestión de usuarios (perfiles, credenciales QR, vigencia) y de releases (registro de versiones), con activación/desactivación de funcionalidades por cliente vía feature flags — sin tocar código ni afectar a otros clientes."
+    text="Gestión de usuarios (perfiles, credenciales QR, vigencia) y de releases (registro de versiones), con activación/desactivación de funcionalidades por cliente vía feature flags, sin tocar código ni afectar a otros clientes."
     stats={[
-      { value: 'F-00 → F-18', label: 'feature flags', isNumeric: false },
-      { value: 'multi-tenant', label: 'un solo código base', isNumeric: false },
-      { value: 'cloud', label: 'sin on-premise', isNumeric: false },
+      { value: 'Personaliza tu forma de vender', label: 'funcionalidades activables por cliente', isNumeric: false },
+      { value: 'Tiempo de implementación', label: 'menos de una semana', isNumeric: false },
     ]}
   />
 
   <ProductoScaleBand
     stat={1}
-    statLabel="Código base para toda la red"
-    title="Una funcionalidad, disponible para todos los clientes — activable donde se necesite"
-    text="Mobile One corre sobre un único código base. Las diferencias entre clientes se gestionan con feature flags, no con desarrollos a medida. Esto significa releases más rápidos, menos bugs exclusivos de un cliente y una plataforma que mejora para todos al mismo tiempo."
+    statLabel="Plataforma para toda tu red"
+    title="Activa lo que tu operación necesita, en todas tus tiendas a la vez"
+    text="Elige qué funcionalidades usar en cada tienda y súmalas cuando las necesites, sin desarrollos a medida. Todo corre sobre una misma plataforma: cada mejora llega a toda tu red al mismo tiempo y tu equipo siempre vende con la última versión."
   />
 
   <CtaClose
