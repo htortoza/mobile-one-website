@@ -104,13 +104,16 @@ const list = chapters ?? [];
       });
     });
 
-    // El rail no debe bajar hasta pisar el footer — se oculta un poco antes
-    // de que este entre al viewport.
+    // El rail se oculta apenas asoma el cierre (CTA "Quiero ver el producto
+    // con mi catálogo") — no compite con él ni pisa su texto. Sin CTA de
+    // cierre, se oculta un poco antes del footer.
+    const closing = document.querySelector('[data-gsap-section="cta-close"]');
     const footer = document.querySelector('.site-footer');
-    if (footer) {
+    const endEl = closing ?? footer;
+    if (endEl) {
       ScrollTrigger.create({
-        trigger: footer,
-        start: 'top bottom-=80',
+        trigger: endEl,
+        start: closing ? 'top bottom' : 'top bottom-=80',
         onEnter: () => nav.classList.add('is-near-footer'),
         onLeaveBack: () => nav.classList.remove('is-near-footer'),
       });

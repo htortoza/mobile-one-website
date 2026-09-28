@@ -25,6 +25,24 @@ const {
       googleFontsUrl={googleFontsUrl}
     />
 
+    <!-- Refresh (F5) siempre vuelve arriba: sin restauración de scroll del
+         navegador ni del ClientRouter (history.state), y sin salto a #ancla.
+         Corre antes que Lenis/ScrollTrigger midan nada. Solo aplica a reload;
+         atrás/adelante conserva su posición. -->
+    <script is:inline>
+      (() => {
+        const nav = performance.getEntriesByType('navigation')[0];
+        if (!nav || nav.type !== 'reload') return;
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        const state = history.state && typeof history.state === 'object'
+          ? { ...history.state, scrollX: 0, scrollY: 0 }
+          : history.state;
+        history.replaceState(state, '', location.pathname + location.search);
+        window.scrollTo(0, 0);
+        window.addEventListener('load', () => window.scrollTo(0, 0), { once: true });
+      })();
+    </script>
+
     <!-- View Transitions: fade suave entre páginas (Astro 5) -->
     <ClientRouter />
 

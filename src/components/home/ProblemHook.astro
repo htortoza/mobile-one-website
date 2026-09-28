@@ -109,7 +109,62 @@ const imgs = images ?? [];
       }
     });
 
-    mm.add('(max-width: 767px), (prefers-reduced-motion: reduce)', () => {
+    // Mobile: pin "bueno" (§15.6.1) — el contenido avanza con el scroll.
+    // Por cada línea: primero entra su imagen, luego se revela el texto.
+    mm.add('(max-width: 767px) and (prefers-reduced-motion: no-preference)', () => {
+      section.classList.add('is-mobile-pin');
+      gsap.set(lines, { opacity: 0 });
+      gsap.set(cardImgs, { opacity: 0 });
+
+      // Imagen 1 + card entran mientras la sección sube hasta fijarse,
+      // así el stage nunca llega vacío al pin.
+      const intro = gsap.timeline({
+        scrollTrigger: { trigger: pinEl, start: 'top 85%', end: 'top top', scrub: 1 },
+      });
+      if (card) intro.fromTo(card, { opacity: 0, y: 40 }, { opacity: 1, y: 0, ease: 'power2.out' });
+      if (cardImgs[0]) intro.fromTo(cardImgs[0], { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, ease: 'power2.out' }, '<');
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: pinEl,
+          start: 'top top',
+          end: '+=' + (lines.length * 100) + '%',
+          scrub: 1,
+          pin: pinEl,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      // La celda de texto mide lo que la línea más larga: cada línea más corta
+      // desplaza el stage la mitad de la diferencia para que card + texto
+      // queden con el mismo margen arriba y abajo.
+      const textBox = section.querySelector('.hook__text');
+      const centerOffset = (i) => (textBox.offsetHeight - lines[i].offsetHeight) / 2;
+      tl.set(stage, { y: () => centerOffset(0) }, 0);
+
+      lines.forEach((line, i) => {
+        if (i > 0) {
+          tl.to(lines[i - 1], { opacity: 0, y: -16, duration: 0.3, ease: 'power1.in' });
+          tl.to(stage, { y: () => centerOffset(i), duration: 0.4, ease: 'power2.inOut' }, '<');
+          if (cardImgs[i - 1]) tl.to(cardImgs[i - 1], { opacity: 0, duration: 0.4 }, '<');
+          if (cardImgs[i]) {
+            tl.fromTo(cardImgs[i], { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'power2.out' }, '<');
+          }
+        }
+        tl.set(line, { opacity: 1, y: 0 });
+        tl.fromTo(
+          line.querySelectorAll('.hook__letter'),
+          { opacity: 0, y: 14 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.012, ease: 'power2.out' }
+        );
+        tl.to({}, { duration: 0.4 }); // hold de lectura
+      });
+
+      return () => section.classList.remove('is-mobile-pin');
+    });
+
+    mm.add('(prefers-reduced-motion: reduce)', () => {
       gsap.utils.toArray(lines).forEach((line) => {
         gsap.from(line, {
           opacity: 0,
@@ -209,6 +264,23 @@ const imgs = images ?? [];
       min-height: 0;
     }
     .hook__line { grid-area: auto; opacity: 1; max-width: none; }
+
+    /* Pin con scroll (clase la pone el JS: sin JS queda la lista apilada) */
+    /* Padding = alto del header (53px) arriba y zona del StickyCTA (2rem + 54px)
+       abajo: el flex centra card + texto en el espacio realmente libre. */
+    .hook.is-mobile-pin .hook__pin { min-height: 100vh; padding-block: 3.3rem 5.4rem; }
+    .hook.is-mobile-pin .hook__stage { gap: var(--space-md); }
+    .hook.is-mobile-pin .hook__card { width: min(78vw, 340px, 38vh); }
+    .hook.is-mobile-pin .hook__cardimg { transition: none; }
+    .hook.is-mobile-pin .hook__text { gap: 0; width: 100%; }
+    .hook.is-mobile-pin .hook__line { grid-area: 1 / 1; opacity: 0; }
+  }
+  /* Pantallas bajas (iPhone SE): card y texto más compactos para que el
+     bloque respire dentro del espacio libre. */
+  @media (max-width: 767px) and (max-height: 700px) {
+    .hook.is-mobile-pin .hook__card { width: min(78vw, 30vh); }
+    .hook.is-mobile-pin .hook__stage { gap: var(--space-sm); }
+    .hook.is-mobile-pin .hook__line { font-size: 1.9rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {

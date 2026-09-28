@@ -1,8 +1,11 @@
 ---
 // src/components/home/CtaClose.astro
 // Home §4.9 — CTA de cierre. Bookend azul con Hero/4.3 (mismo bg-pattern-m).
+// Opcional: franja de logos de clientes bajo los botones (marquee sutil, con
+// fade en los bordes), eco del strip del hero.
 import { withBase } from '../../utils/base.js';
-const { title, body, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref } = Astro.props;
+const { title, body, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref, logos, logosLabel } = Astro.props;
+const logoList = logos ?? [];
 ---
 
 <section class="cta-close bg-pattern-m" data-gsap-section="cta-close">
@@ -13,6 +16,19 @@ const { title, body, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref } = As
       <a href={withBase(ctaHref)} class="cta-close__btn cta-close__btn--primary">{ctaText}</a>
       {ctaSecondaryText && <a href={withBase(ctaSecondaryHref)} class="cta-close__btn cta-close__btn--ghost">{ctaSecondaryText}</a>}
     </div>
+
+    {logoList.length > 0 && (
+      <div class="cta-close__logos" data-cta-logos>
+        {logosLabel && <p class="cta-close__logos-label">{logosLabel}</p>}
+        <div class="cta-close__marquee" aria-hidden="true">
+          <div class="cta-close__track">
+            {logoList.map((l) => <img src={withBase(l.src)} alt="" class="cta-close__logo" loading="lazy" />)}
+            {logoList.map((l) => <img src={withBase(l.src)} alt="" class="cta-close__logo" loading="lazy" data-logo-dupe />)}
+          </div>
+        </div>
+        <p class="cta-close__sr">{logoList.map((l) => l.alt).join(' · ')}</p>
+      </div>
+    )}
   </div>
 </section>
 
@@ -36,6 +52,14 @@ const { title, body, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref } = As
         ease: 'expo.out',
         scrollTrigger: { trigger: section, start: 'top 80%' },
       });
+
+      const logos = section.querySelector('[data-cta-logos]');
+      if (logos) {
+        gsap.from(logos, {
+          opacity: 0, y: 16, duration: 1, delay: 0.25, ease: 'power3.out',
+          scrollTrigger: { trigger: section, start: 'top 70%' },
+        });
+      }
 
       const btn = section.querySelector('.cta-close__btn--primary');
       if (btn) {
@@ -93,7 +117,48 @@ const { title, body, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref } = As
     border: 1px solid color-mix(in srgb, var(--on-accent) 45%, transparent);
   }
 
+  /* Franja de clientes: separada por una regla fina, marquee lento con fade
+     en los bordes; logos blancos atenuados (se encienden al pasar el cursor). */
+  .cta-close__logos {
+    width: 100%;
+    display: grid;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+    padding-top: var(--space-lg);
+    border-top: 1px solid color-mix(in srgb, var(--on-accent) 18%, transparent);
+  }
+  .cta-close__logos-label {
+    font-size: var(--text-sm);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--on-accent) 72%, transparent);
+  }
+  .cta-close__marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+  }
+  .cta-close__track {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+    width: max-content;
+    animation: cta-close-marquee 38s linear infinite;
+  }
+  .cta-close__marquee:hover .cta-close__track { animation-play-state: paused; }
+  .cta-close__logo { height: 22px; width: auto; opacity: 0.6; transition: opacity var(--transition-fast); }
+  .cta-close__logo:hover { opacity: 1; }
+  @keyframes cta-close-marquee { to { transform: translateX(-50%); } }
+  .cta-close__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) {
+    .cta-close__track { animation: none; flex-wrap: wrap; width: 100%; row-gap: var(--space-md); }
+    .cta-close__logo[data-logo-dupe] { display: none; }
+    .cta-close__marquee { -webkit-mask-image: none; mask-image: none; }
+  }
+
   @media (max-width: 640px) {
+    .cta-close__track { gap: var(--space-lg); }
+    .cta-close__logo { height: 18px; }
     .cta-close__actions { flex-direction: column; width: 100%; }
     .cta-close__btn { justify-content: center; }
   }
