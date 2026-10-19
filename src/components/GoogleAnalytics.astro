@@ -2,15 +2,18 @@
 // src/components/GoogleAnalytics.astro
 // Google Analytics 4 (gtag.js), medido SOLO en las rutas de TRACKED_PATHS.
 //
-// El sitio navega con <ClientRouter /> (sin recargar la página), así que
-// gtag.js queda vivo en memoria al pasar de una ruta medida a otra que no lo
-// es. Para que GA no registre esas otras rutas:
-//   - El tag se carga una vez en todo el sitio, sin page_view automático.
-//   - En cada página (carga inicial + navegación con View Transitions) se
-//     activa/desactiva la medición con el flag oficial `ga-disable-<ID>` y
-//     se envía el page_view a mano solo si la ruta está medida.
-//   - En GA4 hay que apagar "Cambios de página según eventos del historial"
-//     (Medición mejorada); si no, GA manda page_view por su cuenta.
+// El sitio navega con <ClientRouter /> (sin recargar la página), así que una
+// vez cargado, gtag.js queda vivo en memoria y seguiría midiendo (page_view,
+// scroll, formularios…) en rutas que no corresponden. El flag `ga-disable-<ID>`
+// no sirve: gtag encola esos eventos y los envía al reactivarse. Por eso:
+//   - gtag.js solo se carga estando en una ruta medida (carga inicial o al
+//     llegar a ella navegando con View Transitions).
+//   - Si gtag ya está cargado y se navega a una ruta NO medida (link o
+//     atrás/adelante), se fuerza una carga completa: la página nueva arranca
+//     limpia, sin gtag.
+//   - El page_view se envía a mano en cada astro:page-load de una ruta medida.
+//     En GA4 debe estar apagado "Cambios de página según eventos del historial"
+//     (Medición mejorada) para no duplicarlo.
 const GA_ID = 'G-2NHX587FLQ';
 
 // Rutas medidas, relativas a `base` y sin barras: '' = home, 'producto' = /producto/
@@ -19,37 +22,59 @@ const TRACKED_PATHS = ['', 'producto'];
 const base = import.meta.env.BASE_URL;
 ---
 
-<script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
 <script is:inline define:vars={{ GA_ID, TRACKED_PATHS, base }}>
   // El ClientRouter puede re-ejecutar este script al navegar: inicializar una sola vez.
   if (!window.__gaInit) {
     window.__gaInit = true;
 
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function () { dataLayer.push(arguments); };
-
-    const isTracked = () => {
-      const path = location.pathname.startsWith(base)
-        ? location.pathname.slice(base.length)
-        : location.pathname;
+    const isTracked = (url) => {
+      const path = url.pathname.startsWith(base)
+        ? url.pathname.slice(base.length)
+        : url.pathname;
       return TRACKED_PATHS.includes(path.replace(/^\/+|\/+$/g, ''));
     };
 
-    // Debe quedar seteado antes del config para la ruta de entrada.
-    window['ga-disable-' + GA_ID] = !isTracked();
+    let gaLoaded = false;
+    const loadGA = () => {
+      gaLoaded = true;
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { dataLayer.push(arguments); };
+      gtag('js', new Date());
+      gtag('config', GA_ID, { send_page_view: false });
 
-    gtag('js', new Date());
-    gtag('config', GA_ID, { send_page_view: false });
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+      document.head.appendChild(s);
+    };
+
+    // Salir hacia una ruta no medida con gtag vivo → carga completa.
+    document.addEventListener('astro:before-preparation', (event) => {
+      if (gaLoaded && !isTracked(event.to)) {
+        event.loader = () => {
+          if (event.navigationType === 'traverse') {
+            // Atrás/adelante: la URL ya cambió. Se restaura la de origen para que
+            // el ping de salida de gtag no quede atribuido a la ruta no medida, y
+            // se recarga reemplazando la entrada (el historial queda intacto).
+            history.replaceState(history.state, '', event.from.href);
+            location.replace(event.to.href);
+          } else if (event.navigationType === 'replace') {
+            location.replace(event.to.href);
+          } else {
+            location.assign(event.to.href);
+          }
+          return new Promise(() => {}); // la página se descarga; no seguir con el swap
+        };
+      }
+    });
 
     document.addEventListener('astro:page-load', () => {
-      const tracked = isTracked();
-      window['ga-disable-' + GA_ID] = !tracked;
-      if (tracked) {
-        gtag('event', 'page_view', {
-          page_location: location.href,
-          page_title: document.title,
-        });
-      }
+      if (!isTracked(location)) return;
+      if (!gaLoaded) loadGA();
+      gtag('event', 'page_view', {
+        page_location: location.href,
+        page_title: document.title,
+      });
     });
   }
 </script>
