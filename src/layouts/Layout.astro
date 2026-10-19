@@ -4,6 +4,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import StickyCTA from '../components/StickyCTA.astro';
+import GoogleAnalytics from '../components/GoogleAnalytics.astro';
 import { ClientRouter } from 'astro:transitions';
 
 const {
@@ -45,6 +46,9 @@ const {
 
     <!-- View Transitions: fade suave entre páginas (Astro 5) -->
     <ClientRouter />
+
+    <!-- Google Analytics 4: solo mide home y /producto/ (ver componente) -->
+    <GoogleAnalytics />
 
     <!-- JSON-LD inyectado por el Agente SEO -->
     {schemaData && (

@@ -1,0 +1,55 @@
+---
+// src/components/GoogleAnalytics.astro
+// Google Analytics 4 (gtag.js), medido SOLO en las rutas de TRACKED_PATHS.
+//
+// El sitio navega con <ClientRouter /> (sin recargar la página), así que
+// gtag.js queda vivo en memoria al pasar de una ruta medida a otra que no lo
+// es. Para que GA no registre esas otras rutas:
+//   - El tag se carga una vez en todo el sitio, sin page_view automático.
+//   - En cada página (carga inicial + navegación con View Transitions) se
+//     activa/desactiva la medición con el flag oficial `ga-disable-<ID>` y
+//     se envía el page_view a mano solo si la ruta está medida.
+//   - En GA4 hay que apagar "Cambios de página según eventos del historial"
+//     (Medición mejorada); si no, GA manda page_view por su cuenta.
+const GA_ID = 'G-2NHX587FLQ';
+
+// Rutas medidas, relativas a `base` y sin barras: '' = home, 'producto' = /producto/
+const TRACKED_PATHS = ['', 'producto'];
+
+const base = import.meta.env.BASE_URL;
+---
+
+<script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
+<script is:inline define:vars={{ GA_ID, TRACKED_PATHS, base }}>
+  // El ClientRouter puede re-ejecutar este script al navegar: inicializar una sola vez.
+  if (!window.__gaInit) {
+    window.__gaInit = true;
+
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { dataLayer.push(arguments); };
+
+    const isTracked = () => {
+      const path = location.pathname.startsWith(base)
+        ? location.pathname.slice(base.length)
+        : location.pathname;
+      return TRACKED_PATHS.includes(path.replace(/^\/+|\/+$/g, ''));
+    };
+
+    // Debe quedar seteado antes del config para la ruta de entrada.
+    window['ga-disable-' + GA_ID] = !isTracked();
+
+    gtag('js', new Date());
+    gtag('config', GA_ID, { send_page_view: false });
+
+    document.addEventListener('astro:page-load', () => {
+      const tracked = isTracked();
+      window['ga-disable-' + GA_ID] = !tracked;
+      if (tracked) {
+        gtag('event', 'page_view', {
+          page_location: location.href,
+          page_title: document.title,
+        });
+      }
+    });
+  }
+</script>
