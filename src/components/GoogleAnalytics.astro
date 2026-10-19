@@ -14,15 +14,36 @@
 //   - El page_view se envía a mano en cada astro:page-load de una ruta medida.
 //     En GA4 debe estar apagado "Cambios de página según eventos del historial"
 //     (Medición mejorada) para no duplicarlo.
+//   - Clics en los CTA (por destino del link, no por componente):
+//       clic_agendar_demo    → link a orderUrl con texto "Agendar demo"
+//       clic_contacto        → otro link a orderUrl (ej. "Contactar un consultor")
+//       clic_iniciar_sesion  → link a loginUrl
+//     con `ubicacion` (header, menu_movil, hero, cierre, boton_flotante) y `texto`.
+import site from '../../contracts/site.json';
+import { withBase } from '../utils/base.js';
+
 const GA_ID = 'G-2NHX587FLQ';
 
 // Rutas medidas, relativas a `base` y sin barras: '' = home, 'producto' = /producto/
 const TRACKED_PATHS = ['', 'producto'];
 
 const base = import.meta.env.BASE_URL;
+const orderPath = withBase(site.orderUrl ?? '/contacto');
+const loginUrl = site.loginUrl ?? '';
+
+// Clase del link → ubicación legible en GA
+const CTA_LOCATIONS = {
+  'header-cta': 'header',
+  'header-login': 'header',
+  'overlay-cta': 'menu_movil',
+  'overlay-login': 'menu_movil',
+  'hero-split__btn': 'hero',
+  'cta-close__btn': 'cierre',
+  'sticky-cta': 'boton_flotante',
+};
 ---
 
-<script is:inline define:vars={{ GA_ID, TRACKED_PATHS, base }}>
+<script is:inline define:vars={{ GA_ID, TRACKED_PATHS, base, orderPath, loginUrl, CTA_LOCATIONS }}>
   // El ClientRouter puede re-ejecutar este script al navegar: inicializar una sola vez.
   if (!window.__gaInit) {
     window.__gaInit = true;
@@ -67,6 +88,32 @@ const base = import.meta.env.BASE_URL;
         };
       }
     });
+
+    // Clics en CTA. Corre antes de que el ClientRouter navegue, así que si el
+    // destino fuerza carga completa (/contacto), gtag envía el evento al salir.
+    const normalize = (p) => p.replace(/\/+$/, '') || '/';
+    document.addEventListener('click', (e) => {
+      if (!gaLoaded || !isTracked(location)) return;
+      const a = e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+
+      const url = new URL(a.href, location.href);
+      let name;
+      if (loginUrl && url.href === new URL(loginUrl).href) {
+        name = 'clic_iniciar_sesion';
+      } else if (url.origin === location.origin && normalize(url.pathname) === normalize(orderPath)) {
+        name = /agendar demo/i.test(a.textContent) ? 'clic_agendar_demo' : 'clic_contacto';
+      } else {
+        return;
+      }
+
+      const cls = [...a.classList].find((c) => c in CTA_LOCATIONS);
+      gtag('event', name, {
+        ubicacion: cls ? CTA_LOCATIONS[cls] : 'otro',
+        texto: a.textContent.trim().replace(/\s+/g, ' ').slice(0, 100),
+        page_location: location.href,
+      });
+    }, true);
 
     document.addEventListener('astro:page-load', () => {
       if (!isTracked(location)) return;
