@@ -13,6 +13,7 @@ const {
   image,
   googleFontsUrl,
   schemaData,
+  noindex,
 } = Astro.props;
 ---
 
@@ -24,6 +25,7 @@ const {
       description={description}
       image={image}
       googleFontsUrl={googleFontsUrl}
+      noindex={noindex}
     />
 
     <!-- Refresh (F5) siempre vuelve arriba: sin restauración de scroll del

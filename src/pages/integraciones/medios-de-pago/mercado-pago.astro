@@ -1,0 +1,176 @@
+---
+// src/pages/integraciones/medios-de-pago/mercado-pago.astro — Mobile One con Mercado Pago. Generado por el frente A. Sin datos inventados: ver comentarios DATO PENDIENTE.
+import Layout from '../../../layouts/Layout.astro';
+import IntegrationHero from '../../../components/integraciones/IntegrationHero.astro';
+import Section from '../../../components/pages/Section.astro';
+import FaqList from '../../../components/pages/FaqList.astro';
+import CtaBand from '../../../components/pages/CtaBand.astro';
+import { withBase } from '../../../utils/base.js';
+import { graph, faqSchema, breadcrumbSchema, orgSchema } from '../../../utils/seo.js';
+// DATO PENDIENTE: confirmar tipos de comprobante soportados en Perú
+// DATO PENDIENTE: confirmar si la caja de pago cobra con el terminal Mercado Pago
+// DATO PENDIENTE: listar terminales Mercado Pago compatibles
+
+const crumbs = [
+  {
+    "label": "Integraciones",
+    "href": "/integraciones"
+  },
+  {
+    "label": "Medios de pago",
+    "href": "/integraciones/medios-de-pago"
+  },
+  {
+    "label": "Mercado Pago"
+  }
+];
+const trail = [
+  {
+    "label": "Inicio",
+    "href": "/"
+  },
+  {
+    "label": "Integraciones",
+    "href": "/integraciones"
+  },
+  {
+    "label": "Medios de pago",
+    "href": "/integraciones/medios-de-pago"
+  },
+  {
+    "label": "Mercado Pago",
+    "href": "/integraciones/medios-de-pago/mercado-pago"
+  }
+];
+const faqs = [
+  {
+    "q": "¿Funciona Mercado Pago en Chile y en Perú?",
+    "a": "Sí, Mobile One opera con Mercado Pago en ambos países. El documento electrónico cambia según la normativa de cada uno."
+  },
+  {
+    "q": "¿Necesito otro equipo para cobrar con Mercado Pago?",
+    "a": "No. Mobile One usa el terminal de pago Mercado Pago que tu tienda ya tiene."
+  },
+  {
+    "q": "¿Puedo usar Mercado Pago desde el POS móvil y desde la caja?",
+    "a": "El POS móvil cobra con tu terminal. En la caja de pago, pensada para el mostrador y el efectivo, revisamos contigo cómo se integra en la demo."
+  },
+  {
+    "q": "¿Qué pasa con las promociones y cupones?",
+    "a": "Mobile One aplica las promociones y cupones al armar la venta, antes de enviar el cobro."
+  },
+  {
+    "q": "¿Cuánto demora ponerlo en marcha?",
+    "a": "Menos de una semana de implementación. Agenda una demo de 30 minutos para verlo con tu catálogo."
+  }
+];
+const steps = [
+  {
+    "t": "El vendedor arma la venta",
+    "d": "Con el stock de toda la red y las promociones aplicadas solas."
+  },
+  {
+    "t": "Cobro con Mercado Pago",
+    "d": "El cobro se hace con el terminal de pago Mercado Pago de tu tienda."
+  },
+  {
+    "t": "Documento electrónico",
+    "d": "Se emite al cobrar, según la normativa del país donde vendes."
+  },
+  {
+    "t": "Registro y control",
+    "d": "La venta queda en el panel de control y en tu ERP."
+  }
+];
+const modules = [
+  {
+    "name": "POS móvil",
+    "text": "El vendedor cobra donde está el cliente, con el stock de toda tu red a la vista."
+  },
+  {
+    "name": "Caja de pago",
+    "text": "El equipo POS de mostrador, pensado para el manejo de efectivo, con cierres de caja, impresoras y lector de código de barras. "
+  }
+];
+const extra = {
+  "title": "Cómo cambia según el país",
+  "intro": "Mercado Pago opera en Chile y Perú. El cobro es el mismo, el documento y el vocabulario cambian.",
+  "points": [
+    "Chile: boleta o factura electrónica, regidas por el SII.",
+    "Perú: comprobante electrónico, regido por la SUNAT.",
+    "El panel y el stock de la red funcionan igual en ambos países.",
+    "La demo se hace con el catálogo de tu país."
+  ]
+};
+const related = [
+  {
+    "name": "Transbank",
+    "href": "/integraciones/medios-de-pago/transbank",
+    "text": "Terminal habitual en Chile."
+  },
+  {
+    "name": "Getnet",
+    "href": "/integraciones/medios-de-pago/getnet",
+    "text": "Terminal habitual en Chile."
+  },
+  {
+    "name": "Niubiz",
+    "href": "/integraciones/medios-de-pago/niubiz",
+    "text": "Medio de pago para tus tiendas en Perú."
+  },
+  {
+    "name": "Facturación electrónica",
+    "href": "/integraciones/facturacion",
+    "text": "Boleta, factura o comprobante."
+  }
+];
+const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(faqs));
+---
+
+<Layout title="Mobile One con Mercado Pago: POS móvil y caja" description="Cobra con tu terminal Mercado Pago desde el POS móvil y la caja de Mobile One, en Chile y Perú, con documento electrónico al instante. Demo de 30 minutos." image="/images/og-default.jpg" schemaData={schemaData}>
+  <IntegrationHero crumbs={crumbs} title="Mobile One con" accent="Mercado Pago" lead="Cobra con el terminal Mercado Pago que ya usas, en Chile y en Perú, y deja que Mobile One resuelva el stock, las promociones y el documento electrónico." ctaText="Agendar demo" ctaHref="/contacto" ctaSecondaryText="Ver el producto" ctaSecondaryHref="/producto"  focus="mp" />
+  <Section bg="light">
+    <div class="logo-strip">
+      <span class="logo-chip logo-chip--light"><img src={withBase("/images/logo-mercadopago-color.svg")} alt="Mercado Pago" loading="lazy" /></span>
+      <span class="tag">Chile y Perú</span>
+    </div>
+  </Section>
+  <Section title="Cómo se cobra con Mercado Pago" bg="white">
+    <ol class="steps">{steps.map((s) => (<li><h3>{s.t}</h3><p>{s.d}</p></li>))}</ol>
+  </Section>
+  <Section title="Dónde lo usas" bg="light">
+    <div class="mods">{modules.map((m) => (<div><h3>{m.name}</h3><p>{m.text}</p></div>))}</div>
+  </Section>
+  <Section title={extra.title} intro={extra.intro} bg={'white'}>
+    <ul class="points">{extra.points.map((t) => (<li set:html={t} />))}</ul>
+  </Section>
+  <Section title="Preguntas frecuentes" bg="light">
+    <FaqList items={faqs} />
+  </Section>
+  <Section title="Otras integraciones" bg="white">
+    <div class="rel">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
+  </Section>
+  <CtaBand title="¿Quieres verlo con tu operación?" text="Agenda una demo de 30 minutos con tu catálogo." />
+</Layout>
+
+<style>
+  .logo-strip { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-sm); }
+  .logo-chip { display:inline-flex; align-items:center; min-height:64px; padding:.9rem 1.4rem; border-radius:var(--radius-lg); border:1px solid var(--border); }
+  .logo-chip--dark { background:var(--accent-grad-start); border-color:var(--accent-grad-start); }
+  .logo-chip--light { background:var(--bg-primary); }
+  .logo-chip img { height:34px; width:auto; display:block; }
+  .logo-chip__text { font-family:var(--font-heading); font-size:var(--text-xl); color:var(--on-accent); letter-spacing:-0.01em; font-weight:500; }
+  .tag { display:inline-flex; padding:2px 12px; border-radius:var(--radius-full); border:1px solid var(--border); font-size:var(--text-sm); color:var(--text-secondary); background:var(--bg-primary); }
+  .steps { list-style:none; display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); counter-reset:s; }
+  .steps li { counter-increment:s; background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; }
+  .steps li::before { content:counter(s); font-size:var(--text-sm); font-weight:500; color:var(--accent); }
+  .steps h3, .cards h3, .mods h3, .rel h3 { font-family:var(--font-heading); font-size:var(--text-xl); letter-spacing:-0.01em; color:var(--navy); font-weight:500; }
+  .steps p, .cards p, .mods p, .rel p { color:var(--text-secondary); line-height:1.55; }
+  .mods, .cards, .rel { display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+  .mods > div, .cards > a, .rel > a { background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; text-decoration:none; transition:transform var(--transition-fast), border-color var(--transition-fast); min-width:0; }
+  .cards > a:hover, .rel > a:hover { transform:translateY(-3px); border-color:var(--accent); }
+  .cards .tag { justify-self:start; }
+  .points { list-style:none; display:grid; gap:.7rem; max-width:52rem; }
+  .points li { position:relative; padding-left:1.6rem; color:var(--text-primary); line-height:1.5; }
+  .points li::before { content:''; position:absolute; left:0; top:.5em; width:.7rem; height:.4rem; border-left:2px solid var(--accent); border-bottom:2px solid var(--accent); transform:rotate(-45deg); }
+</style>

@@ -1,0 +1,179 @@
+---
+// src/pages/integraciones/medios-de-pago/transbank.astro — Mobile One con Transbank. Generado por el frente A. Sin datos inventados: ver comentarios DATO PENDIENTE.
+import Layout from '../../../layouts/Layout.astro';
+import IntegrationHero from '../../../components/integraciones/IntegrationHero.astro';
+import Section from '../../../components/pages/Section.astro';
+import FaqList from '../../../components/pages/FaqList.astro';
+import CtaBand from '../../../components/pages/CtaBand.astro';
+import { withBase } from '../../../utils/base.js';
+import { graph, faqSchema, breadcrumbSchema, orgSchema } from '../../../utils/seo.js';
+// DATO PENDIENTE: listar modelos de terminal Transbank compatibles
+// DATO PENDIENTE: confirmar si la caja de pago cobra con el terminal Transbank
+
+const crumbs = [
+  {
+    "label": "Integraciones",
+    "href": "/integraciones"
+  },
+  {
+    "label": "Medios de pago",
+    "href": "/integraciones/medios-de-pago"
+  },
+  {
+    "label": "Transbank"
+  }
+];
+const trail = [
+  {
+    "label": "Inicio",
+    "href": "/"
+  },
+  {
+    "label": "Integraciones",
+    "href": "/integraciones"
+  },
+  {
+    "label": "Medios de pago",
+    "href": "/integraciones/medios-de-pago"
+  },
+  {
+    "label": "Transbank",
+    "href": "/integraciones/medios-de-pago/transbank"
+  }
+];
+const faqs = [
+  {
+    "q": "¿Tengo que cambiar mi terminal Transbank para usar Mobile One?",
+    "a": "No. Mobile One opera con el terminal de pago Transbank que tu tienda ya usa."
+  },
+  {
+    "q": "¿Se emite la boleta electrónica al cobrar?",
+    "a": "Sí. Al cobrar, Mobile One emite la boleta o factura electrónica y la venta queda registrada en el panel de control."
+  },
+  {
+    "q": "¿Puedo vender con el stock de otras tiendas?",
+    "a": "Sí. El vendedor ve el stock local y de toda tu red y puede cobrar la venta aunque el producto se retire en otra tienda."
+  },
+  {
+    "q": "¿Cuánto demora la implementación?",
+    "a": "Menos de una semana. En la demo de 30 minutos revisamos tu caso con tu catálogo."
+  },
+  {
+    "q": "¿Funciona también en la caja de mostrador?",
+    "a": "Mobile One tiene una caja de pago con equipo POS 15 pulgadas para el mostrador y el manejo de efectivo. Cómo se combina con tu terminal Transbank lo vemos en la demo."
+  }
+];
+const steps = [
+  {
+    "t": "El vendedor arma la venta",
+    "d": "Escanea o busca el producto y ve el stock real de la tienda y de toda tu red."
+  },
+  {
+    "t": "Se aplican las promociones",
+    "d": "Mobile One calcula los descuentos automáticos y muestra el total antes de cobrar."
+  },
+  {
+    "t": "Cobra con tu terminal Transbank",
+    "d": "El vendedor cobra con el terminal de pago Transbank que ya tienes, donde está el cliente."
+  },
+  {
+    "t": "Sale el documento",
+    "d": "Con el pago se emite la boleta o factura electrónica, sin pasar por la caja."
+  },
+  {
+    "t": "La venta se sincroniza",
+    "d": "La operación queda integrada a tu ERP, SAP Business One, Retail Pro o Retail Pro Prism, y visible en el panel de control."
+  }
+];
+const modules = [
+  {
+    "name": "POS móvil",
+    "text": "El vendedor cobra donde está el cliente, con el stock de toda tu red a la vista."
+  },
+  {
+    "name": "Caja de pago",
+    "text": "El equipo POS de mostrador, pensado para el manejo de efectivo, con cierres de caja, impresoras y lector de código de barras. "
+  }
+];
+const extra = {
+  "title": "Lo que no cambia en tu operación",
+  "intro": "Mobile One se suma a lo que ya funciona en tus tiendas, no lo reemplaza.",
+  "points": [
+    "Sigues con tu terminal y tu relación con Transbank.",
+    "El vendedor deja de depender de la fila de la caja para vender.",
+    "El mismo flujo de cobro sirve en todas tus tiendas.",
+    "La implementación toma menos de una semana."
+  ]
+};
+const related = [
+  {
+    "name": "Getnet",
+    "href": "/integraciones/medios-de-pago/getnet",
+    "text": "Otro terminal de pago para tus tiendas en Chile."
+  },
+  {
+    "name": "Mercado Pago",
+    "href": "/integraciones/medios-de-pago/mercado-pago",
+    "text": "Cobra con Mercado Pago en Chile y Perú."
+  },
+  {
+    "name": "Facturación electrónica",
+    "href": "/integraciones/facturacion",
+    "text": "Boleta y factura al cobrar."
+  },
+  {
+    "name": "Tu ERP: SAP, Retail Pro y Retail Pro Prism",
+    "href": "/integraciones/erp",
+    "text": "El stock y las ventas, sin digitar dos veces."
+  }
+];
+const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(faqs));
+---
+
+<Layout title="Mobile One con Transbank: POS móvil para retail" description="Cobra con el terminal de pago Transbank que ya usas desde el POS móvil de Mobile One y emite la boleta electrónica al instante. Demo de 30 minutos." image="/images/og-default.jpg" schemaData={schemaData}>
+  <IntegrationHero crumbs={crumbs} title="Mobile One con" accent="Transbank" lead="Tus vendedores cobran con el terminal Transbank que ya usa tu tienda, sin cambiar de adquirente y con la boleta o factura electrónica saliendo al mismo tiempo." ctaText="Agendar demo" ctaHref="/contacto" ctaSecondaryText="Ver el producto" ctaSecondaryHref="/producto"  focus="tbk" />
+  <Section bg="light">
+    <div class="logo-strip">
+      <span class="logo-chip logo-chip--dark"><img src={withBase("/images/logo-transbank-white.png")} alt="Transbank" loading="lazy" /></span>
+      <span class="tag">Chile</span>
+    </div>
+  </Section>
+  <Section title="Cómo se cobra con Transbank" bg="white">
+    <ol class="steps">{steps.map((s) => (<li><h3>{s.t}</h3><p>{s.d}</p></li>))}</ol>
+  </Section>
+  <Section title="Dónde lo usas" bg="light">
+    <div class="mods">{modules.map((m) => (<div><h3>{m.name}</h3><p>{m.text}</p></div>))}</div>
+  </Section>
+  <Section title={extra.title} intro={extra.intro} bg={'white'}>
+    <ul class="points">{extra.points.map((t) => (<li set:html={t} />))}</ul>
+  </Section>
+  <Section title="Preguntas frecuentes" bg="light">
+    <FaqList items={faqs} />
+  </Section>
+  <Section title="Otras integraciones" bg="white">
+    <div class="rel">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
+  </Section>
+  <CtaBand title="¿Quieres verlo con tu operación?" text="Agenda una demo de 30 minutos con tu catálogo." />
+</Layout>
+
+<style>
+  .logo-strip { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-sm); }
+  .logo-chip { display:inline-flex; align-items:center; min-height:64px; padding:.9rem 1.4rem; border-radius:var(--radius-lg); border:1px solid var(--border); }
+  .logo-chip--dark { background:var(--accent-grad-start); border-color:var(--accent-grad-start); }
+  .logo-chip--light { background:var(--bg-primary); }
+  .logo-chip img { height:34px; width:auto; display:block; }
+  .logo-chip__text { font-family:var(--font-heading); font-size:var(--text-xl); color:var(--on-accent); letter-spacing:-0.01em; font-weight:500; }
+  .tag { display:inline-flex; padding:2px 12px; border-radius:var(--radius-full); border:1px solid var(--border); font-size:var(--text-sm); color:var(--text-secondary); background:var(--bg-primary); }
+  .steps { list-style:none; display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); counter-reset:s; }
+  .steps li { counter-increment:s; background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; }
+  .steps li::before { content:counter(s); font-size:var(--text-sm); font-weight:500; color:var(--accent); }
+  .steps h3, .cards h3, .mods h3, .rel h3 { font-family:var(--font-heading); font-size:var(--text-xl); letter-spacing:-0.01em; color:var(--navy); font-weight:500; }
+  .steps p, .cards p, .mods p, .rel p { color:var(--text-secondary); line-height:1.55; }
+  .mods, .cards, .rel { display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+  .mods > div, .cards > a, .rel > a { background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; text-decoration:none; transition:transform var(--transition-fast), border-color var(--transition-fast); min-width:0; }
+  .cards > a:hover, .rel > a:hover { transform:translateY(-3px); border-color:var(--accent); }
+  .cards .tag { justify-self:start; }
+  .points { list-style:none; display:grid; gap:.7rem; max-width:52rem; }
+  .points li { position:relative; padding-left:1.6rem; color:var(--text-primary); line-height:1.5; }
+  .points li::before { content:''; position:absolute; left:0; top:.5em; width:.7rem; height:.4rem; border-left:2px solid var(--accent); border-bottom:2px solid var(--accent); transform:rotate(-45deg); }
+</style>

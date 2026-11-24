@@ -1,0 +1,44 @@
+---
+// src/components/showcase/ScreenCaja.astro
+// Pantalla de venta de la caja de pago (lienzo 1024×768, equipo POS 15") con datos ficticios.
+import { withBase } from '../../utils/base.js';
+---
+<div class="cj" data-screens="caja" aria-hidden="true">
+  <header class="cj__top"><img src={withBase('/brand/Isotipo-logo.svg')} alt="" /><div><b>Caja 2 · Tienda Providencia</b><small>Turno abierto 09:02 · Cajera: Marcela V.</small></div>
+    <span class="cj__st">Impresora lista</span><span class="cj__st">Lector conectado</span><span class="cj__st cj__st--w">Balanza 0,000 kg</span><span class="cj__close">Cierre de caja</span></header>
+  <div class="cj__body">
+    <section class="cj__cart">
+      <div class="cj__scan"><span>Escanea o busca un producto</span><i>Código de barras</i></div>
+      <table><thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Total</th></tr></thead><tbody>
+        <tr><td>Polera Básica Algodón<small>SKU-PBA-001</small></td><td>2</td><td>$12.990</td><td>$25.980</td></tr>
+        <tr><td>Jeans Slim Azul<small>SKU-JSA-044</small></td><td>1</td><td>$34.990</td><td>$34.990</td></tr>
+        <tr><td>Zapatilla Urban Run<small>SKU-ZUR-210</small></td><td>1</td><td>$64.990</td><td>$64.990</td></tr>
+        <tr><td>Cinturón de cuero<small>SKU-CIN-022</small></td><td>1</td><td>$19.990</td><td>$19.990</td></tr>
+        <tr class="cj__new"><td>Calcetines pack x3<small>SKU-CAL-310</small></td><td>1</td><td>$6.990</td><td>$6.990</td></tr>
+      </tbody></table>
+    </section>
+    <aside class="cj__pay">
+      <div class="cj__sum"><div><span>Subtotal</span><b>$152.940</b></div><div><span>Descuento</span><b>-$7.650</b></div><div class="cj__tot"><span>Total</span><b>$145.290</b></div></div>
+      <div class="cj__methods"><span class="on">Efectivo</span><span>Tarjeta</span><span>Mixto</span></div>
+      <div class="cj__cash"><small>Efectivo recibido</small><b>$150.000</b><small>Vuelto: <b>$4.710</b></small></div>
+      <span class="cj__go">Cobrar e imprimir boleta</span>
+      <div class="cj__tk">Ticket de cambio, comanda y boleta</div>
+    </aside>
+  </div>
+</div>
+<style>
+  .cj { position: absolute; inset: 0; background: var(--bg-secondary); color: var(--navy); font-family: var(--font-body); font-size: 17px; display: grid; grid-template-rows: 70px 1fr; }
+  .cj__top { display: flex; align-items: center; gap: 12px; padding: 0 20px; background: var(--bg-primary); border-bottom: 1px solid var(--border); } .cj__top img { width: 34px; height: 34px; } .cj__top b { display: block; font-size: 16px; } .cj__top small { color: var(--text-secondary); font-size: 12px; } .cj__top > div { margin-right: auto; }
+  .cj__st { font-size: 11px; padding: 5px 10px; border-radius: 99px; background: color-mix(in srgb, var(--accent) 10%, var(--bg-primary)); color: var(--accent-grad-start); } .cj__st--w { background: var(--bg-secondary); color: var(--text-secondary); } .cj__close { background: var(--navy); color: var(--on-accent); padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; }
+  .cj__body { display: grid; grid-template-columns: 1fr 320px; gap: 16px; padding: 16px; min-height: 0; }
+  .cj__cart { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 14px; padding: 14px; display: grid; align-content: start; gap: 12px; }
+  .cj__scan { display: flex; justify-content: space-between; border: 1.5px solid color-mix(in srgb, var(--accent) 40%, var(--border)); border-radius: 10px; padding: 12px 14px; color: var(--text-secondary); } .cj__scan i { font-style: normal; color: var(--accent-grad-start); font-size: 12px; }
+  .cj table { width: 100%; border-collapse: collapse; } .cj th { text-align: left; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-secondary); padding: 8px 6px; border-bottom: 1px solid var(--border); } .cj td { padding: 15px 8px; border-bottom: 1px solid var(--border); } .cj td small { display: block; color: var(--text-secondary); font-size: 11px; } .cj th:nth-child(n+2), .cj td:nth-child(n+2) { text-align: right; }
+  .cj__new { background: color-mix(in srgb, var(--accent) 7%, var(--bg-primary)); }
+  :global(.is-live) .cj__new { animation: cjnew .8s var(--ease-expo) 1.2s both; } @keyframes cjnew { from { opacity: 0; transform: translateX(14px); } }
+  .cj__pay { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 14px; padding: 14px; display: grid; align-content: start; gap: 12px; }
+  .cj__sum { display: grid; gap: 7px; } .cj__sum div { display: flex; justify-content: space-between; color: var(--text-secondary); } .cj__tot { font-size: 24px; color: var(--accent-grad-start) !important; font-weight: 600; padding-top: 8px; border-top: 1px solid var(--border); }
+  .cj__methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } .cj__methods span { text-align: center; padding: 12px 0; border-radius: 10px; background: var(--bg-secondary); border: 1.5px solid transparent; } .cj__methods .on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg-primary)); font-weight: 500; }
+  .cj__cash { background: var(--bg-secondary); border-radius: 10px; padding: 12px; display: grid; gap: 3px; } .cj__cash b { font-size: 22px; } .cj__cash small b { font-size: 14px; color: var(--accent-grad-start); }
+  .cj__go { text-align: center; background: var(--accent-gradient); color: var(--on-accent); padding: 15px; border-radius: 12px; font-weight: 500; font-size: 16px; } .cj__tk { text-align: center; font-size: 11px; color: var(--text-secondary); }
+</style>

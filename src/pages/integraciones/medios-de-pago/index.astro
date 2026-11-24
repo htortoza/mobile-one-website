@@ -1,0 +1,150 @@
+---
+// src/pages/integraciones/medios-de-pago/index.astro — Cobra con el terminal que ya tienes. Generado por el frente A. Sin datos inventados: ver comentarios DATO PENDIENTE.
+import Layout from '../../../layouts/Layout.astro';
+import IntegrationHero from '../../../components/integraciones/IntegrationHero.astro';
+import Section from '../../../components/pages/Section.astro';
+import FaqList from '../../../components/pages/FaqList.astro';
+import CtaBand from '../../../components/pages/CtaBand.astro';
+import { withBase } from '../../../utils/base.js';
+import { graph, faqSchema, breadcrumbSchema, orgSchema } from '../../../utils/seo.js';
+// DATO PENDIENTE: validar combinación de medios entre tiendas
+
+const crumbs = [
+  {
+    "label": "Integraciones",
+    "href": "/integraciones"
+  },
+  {
+    "label": "Medios de pago"
+  }
+];
+const trail = [
+  {
+    "label": "Inicio",
+    "href": "/"
+  },
+  {
+    "label": "Integraciones",
+    "href": "/integraciones"
+  },
+  {
+    "label": "Medios de pago",
+    "href": "/integraciones/medios-de-pago"
+  }
+];
+const faqs = [
+  {
+    "q": "¿Qué medios de pago soporta Mobile One?",
+    "a": "Transbank, Getnet y Mercado Pago en Chile, Mercado Pago y Niubiz en Perú."
+  },
+  {
+    "q": "¿Tengo que cambiar de adquirente?",
+    "a": "No. Mobile One usa el terminal de pago que tu tienda ya tiene."
+  },
+  {
+    "q": "¿Puedo combinar medios de pago entre tiendas?",
+    "a": "Lo definimos contigo en la demo según cómo opera cada tienda."
+  },
+  {
+    "q": "¿Se emite documento electrónico con todos?",
+    "a": "Sí. Al cobrar se emite la boleta o factura en Chile y el comprobante electrónico en Perú."
+  },
+  {
+    "q": "¿Cuánto demora la implementación?",
+    "a": "Menos de una semana."
+  }
+];
+const cards = [
+  {
+    "name": "Transbank",
+    "tag": "Chile",
+    "href": "/integraciones/medios-de-pago/transbank",
+    "text": "Cobra con el terminal Transbank y emite la boleta electrónica al instante."
+  },
+  {
+    "name": "Getnet",
+    "tag": "Chile",
+    "href": "/integraciones/medios-de-pago/getnet",
+    "text": "Suma stock de red y promociones automáticas a tu terminal Getnet."
+  },
+  {
+    "name": "Mercado Pago",
+    "tag": "Chile y Perú",
+    "href": "/integraciones/medios-de-pago/mercado-pago",
+    "text": "Un mismo cobro para tus tiendas en ambos países."
+  },
+  {
+    "name": "Niubiz",
+    "tag": "Perú",
+    "href": "/integraciones/medios-de-pago/niubiz",
+    "text": "Cobro con Niubiz y comprobante electrónico para tus tiendas en Perú."
+  }
+];
+const extra = {
+  "title": "Lo que tienen en común",
+  "intro": "Sea cual sea el medio, el flujo de venta es el mismo.",
+  "points": [
+    "El terminal de pago es el que tu tienda ya usa.",
+    "El vendedor ve el stock de toda la red al armar la venta.",
+    "Las promociones se aplican solas antes de cobrar.",
+    "Se emite el documento electrónico al terminar el cobro."
+  ]
+};
+const related = [
+  {
+    "name": "Facturación electrónica",
+    "href": "/integraciones/facturacion",
+    "text": "Boleta, factura y comprobante al cobrar."
+  },
+  {
+    "name": "Tu ERP: SAP, Retail Pro y Retail Pro Prism",
+    "href": "/integraciones/erp",
+    "text": "El stock y las ventas integrados a tu ERP."
+  },
+  {
+    "name": "Todas las integraciones",
+    "href": "/integraciones",
+    "text": "Pagos, ERP y facturación."
+  }
+];
+const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(faqs));
+---
+
+<Layout title="Medios de pago compatibles con Mobile One" description="Mobile One cobra con Transbank, Getnet, Mercado Pago y Niubiz, usando el terminal de pago que ya tienes. Compara cada medio y agenda una demo." image="/images/og-default.jpg" schemaData={schemaData}>
+  <IntegrationHero crumbs={crumbs} title="Cobra con" accent="el terminal que ya tienes" lead="Mobile One opera con cuatro medios de pago. Elige el tuyo para ver cómo funciona el cobro, el documento electrónico y los módulos que intervienen." ctaText="Agendar demo" ctaHref="/contacto" ctaSecondaryText="Ver el producto" ctaSecondaryHref="/producto"  focus="pay" />
+  <Section title="Medios de pago" intro="Una página por cada medio, con su flujo de cobro y sus preguntas frecuentes." bg="white">
+    <div class="cards">{cards.map((c) => (<a href={withBase(c.href)}><span class="tag">{c.tag}</span><h3>{c.name}</h3><p>{c.text}</p></a>))}</div>
+  </Section>
+  <Section title={extra.title} intro={extra.intro} bg={'white'}>
+    <ul class="points">{extra.points.map((t) => (<li set:html={t} />))}</ul>
+  </Section>
+  <Section title="Preguntas frecuentes" bg="light">
+    <FaqList items={faqs} />
+  </Section>
+  <Section title="También te puede interesar" bg="white">
+    <div class="rel">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
+  </Section>
+  <CtaBand title="¿Quieres verlo con tu operación?" text="Agenda una demo de 30 minutos con tu catálogo." />
+</Layout>
+
+<style>
+  .logo-strip { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-sm); }
+  .logo-chip { display:inline-flex; align-items:center; min-height:64px; padding:.9rem 1.4rem; border-radius:var(--radius-lg); border:1px solid var(--border); }
+  .logo-chip--dark { background:var(--accent-grad-start); border-color:var(--accent-grad-start); }
+  .logo-chip--light { background:var(--bg-primary); }
+  .logo-chip img { height:34px; width:auto; display:block; }
+  .logo-chip__text { font-family:var(--font-heading); font-size:var(--text-xl); color:var(--on-accent); letter-spacing:-0.01em; font-weight:500; }
+  .tag { display:inline-flex; padding:2px 12px; border-radius:var(--radius-full); border:1px solid var(--border); font-size:var(--text-sm); color:var(--text-secondary); background:var(--bg-primary); }
+  .steps { list-style:none; display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); counter-reset:s; }
+  .steps li { counter-increment:s; background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; }
+  .steps li::before { content:counter(s); font-size:var(--text-sm); font-weight:500; color:var(--accent); }
+  .steps h3, .cards h3, .mods h3, .rel h3 { font-family:var(--font-heading); font-size:var(--text-xl); letter-spacing:-0.01em; color:var(--navy); font-weight:500; }
+  .steps p, .cards p, .mods p, .rel p { color:var(--text-secondary); line-height:1.55; }
+  .mods, .cards, .rel { display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+  .mods > div, .cards > a, .rel > a { background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; text-decoration:none; transition:transform var(--transition-fast), border-color var(--transition-fast); min-width:0; }
+  .cards > a:hover, .rel > a:hover { transform:translateY(-3px); border-color:var(--accent); }
+  .cards .tag { justify-self:start; }
+  .points { list-style:none; display:grid; gap:.7rem; max-width:52rem; }
+  .points li { position:relative; padding-left:1.6rem; color:var(--text-primary); line-height:1.5; }
+  .points li::before { content:''; position:absolute; left:0; top:.5em; width:.7rem; height:.4rem; border-left:2px solid var(--accent); border-bottom:2px solid var(--accent); transform:rotate(-45deg); }
+</style>

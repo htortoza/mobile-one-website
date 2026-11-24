@@ -1,0 +1,180 @@
+---
+// src/pages/integraciones/medios-de-pago/niubiz.astro — Mobile One con Niubiz. Generado por el frente A. Sin datos inventados: ver comentarios DATO PENDIENTE.
+import Layout from '../../../layouts/Layout.astro';
+import IntegrationHero from '../../../components/integraciones/IntegrationHero.astro';
+import Section from '../../../components/pages/Section.astro';
+import FaqList from '../../../components/pages/FaqList.astro';
+import CtaBand from '../../../components/pages/CtaBand.astro';
+import { withBase } from '../../../utils/base.js';
+import { graph, faqSchema, breadcrumbSchema, orgSchema } from '../../../utils/seo.js';
+// DATO PENDIENTE: detalle técnico de la integración con Niubiz (terminal o app)
+// DATO PENDIENTE: tipos de comprobante y vínculo con SUNAT
+// DATO PENDIENTE: confirmar si la caja de pago opera con Niubiz
+
+const crumbs = [
+  {
+    "label": "Integraciones",
+    "href": "/integraciones"
+  },
+  {
+    "label": "Medios de pago",
+    "href": "/integraciones/medios-de-pago"
+  },
+  {
+    "label": "Niubiz"
+  }
+];
+const trail = [
+  {
+    "label": "Inicio",
+    "href": "/"
+  },
+  {
+    "label": "Integraciones",
+    "href": "/integraciones"
+  },
+  {
+    "label": "Medios de pago",
+    "href": "/integraciones/medios-de-pago"
+  },
+  {
+    "label": "Niubiz",
+    "href": "/integraciones/medios-de-pago/niubiz"
+  }
+];
+const faqs = [
+  {
+    "q": "¿Mobile One funciona con Niubiz?",
+    "a": "Sí. Niubiz es uno de los medios de pago con los que Mobile One opera, junto a Transbank, Getnet y Mercado Pago."
+  },
+  {
+    "q": "¿Qué documento se emite al cobrar en Perú?",
+    "a": "Mobile One emite el comprobante electrónico al cobrar. Los tipos de comprobante los revisamos en la demo."
+  },
+  {
+    "q": "¿Sirve para varias tiendas?",
+    "a": "Sí. El stock y las ventas de todas tus tiendas se ven en un mismo panel."
+  },
+  {
+    "q": "¿Se integra con mi ERP?",
+    "a": "Mobile One se integra con SAP Business One, Retail Pro y Retail Pro Prism. Si usas otro ERP, consúltanos."
+  },
+  {
+    "q": "¿Cómo empiezo?",
+    "a": "Agenda una demo de 30 minutos y revisamos tu operación en Perú con tu catálogo."
+  }
+];
+const steps = [
+  {
+    "t": "El vendedor arma la venta",
+    "d": "Busca o escanea el producto y ve el stock de la tienda y de las demás tiendas de la red."
+  },
+  {
+    "t": "Promociones automáticas",
+    "d": "Los descuentos se aplican solos y el total queda claro antes de cobrar."
+  },
+  {
+    "t": "Cobro con Niubiz",
+    "d": "El vendedor cobra con Niubiz desde el punto donde está el cliente."
+  },
+  {
+    "t": "Comprobante electrónico",
+    "d": "Se emite al cobrar."
+  },
+  {
+    "t": "Control desde el panel",
+    "d": "La venta queda registrada en el panel de control y en tu ERP."
+  }
+];
+const modules = [
+  {
+    "name": "POS móvil",
+    "text": "El vendedor cobra donde está el cliente, con el stock de toda tu red a la vista."
+  },
+  {
+    "name": "Caja de pago",
+    "text": "El equipo POS de mostrador, pensado para el manejo de efectivo, con cierres de caja, impresoras y lector de código de barras. "
+  }
+];
+const extra = {
+  "title": "Pensado para operar en Perú",
+  "intro": "El mismo producto que usan tus tiendas en Chile, con el vocabulario y los documentos de cada país.",
+  "points": [
+    "Comprobante electrónico en lugar de boleta.",
+    "Demo con el catálogo de tu operación en Perú.",
+    "Un solo panel para ver las ventas de todas tus tiendas.",
+    "Implementación en menos de una semana."
+  ]
+};
+const related = [
+  {
+    "name": "Mercado Pago",
+    "href": "/integraciones/medios-de-pago/mercado-pago",
+    "text": "También disponible en Perú."
+  },
+  {
+    "name": "Facturación electrónica",
+    "href": "/integraciones/facturacion",
+    "text": "Comprobante electrónico al cobrar."
+  },
+  {
+    "name": "Tu ERP: SAP, Retail Pro y Retail Pro Prism",
+    "href": "/integraciones/erp",
+    "text": "Integración con tu ERP."
+  },
+  {
+    "name": "Medios de pago",
+    "href": "/integraciones/medios-de-pago",
+    "text": "Compara todos los medios."
+  }
+];
+const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(faqs));
+---
+
+<Layout title="Mobile One con Niubiz: POS para retail en Perú" description="Vende con el stock de toda tu red y cobra con Niubiz desde el POS móvil de Mobile One en tus tiendas de Perú, con comprobante electrónico." image="/images/og-default.jpg" schemaData={schemaData}>
+  <IntegrationHero crumbs={crumbs} title="Mobile One con" accent="Niubiz" lead="Para retailers en Perú: Mobile One le da al vendedor el stock de toda tu red y el cobro con Niubiz en un mismo flujo, con el comprobante electrónico al terminar." ctaText="Agendar demo" ctaHref="/contacto" ctaSecondaryText="Ver el producto" ctaSecondaryHref="/producto"  focus="nbz" />
+  <Section bg="light">
+    <div class="logo-strip">
+      <span class="logo-chip logo-chip--dark"><span class="logo-chip__text">Niubiz</span></span>
+      <span class="tag">Perú</span>
+    </div>
+  </Section>
+  <Section title="Cómo se cobra con Niubiz" bg="white">
+    <ol class="steps">{steps.map((s) => (<li><h3>{s.t}</h3><p>{s.d}</p></li>))}</ol>
+  </Section>
+  <Section title="Dónde lo usas" bg="light">
+    <div class="mods">{modules.map((m) => (<div><h3>{m.name}</h3><p>{m.text}</p></div>))}</div>
+  </Section>
+  <Section title={extra.title} intro={extra.intro} bg={'white'}>
+    <ul class="points">{extra.points.map((t) => (<li set:html={t} />))}</ul>
+  </Section>
+  <Section title="Preguntas frecuentes" bg="light">
+    <FaqList items={faqs} />
+  </Section>
+  <Section title="Otras integraciones" bg="white">
+    <div class="rel">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
+  </Section>
+  <CtaBand title="¿Quieres verlo con tu operación?" text="Agenda una demo de 30 minutos con tu catálogo." />
+</Layout>
+
+<style>
+  .logo-strip { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-sm); }
+  .logo-chip { display:inline-flex; align-items:center; min-height:64px; padding:.9rem 1.4rem; border-radius:var(--radius-lg); border:1px solid var(--border); }
+  .logo-chip--dark { background:var(--accent-grad-start); border-color:var(--accent-grad-start); }
+  .logo-chip--light { background:var(--bg-primary); }
+  .logo-chip img { height:34px; width:auto; display:block; }
+  .logo-chip__text { font-family:var(--font-heading); font-size:var(--text-xl); color:var(--on-accent); letter-spacing:-0.01em; font-weight:500; }
+  .tag { display:inline-flex; padding:2px 12px; border-radius:var(--radius-full); border:1px solid var(--border); font-size:var(--text-sm); color:var(--text-secondary); background:var(--bg-primary); }
+  .steps { list-style:none; display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); counter-reset:s; }
+  .steps li { counter-increment:s; background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; }
+  .steps li::before { content:counter(s); font-size:var(--text-sm); font-weight:500; color:var(--accent); }
+  .steps h3, .cards h3, .mods h3, .rel h3 { font-family:var(--font-heading); font-size:var(--text-xl); letter-spacing:-0.01em; color:var(--navy); font-weight:500; }
+  .steps p, .cards p, .mods p, .rel p { color:var(--text-secondary); line-height:1.55; }
+  .mods, .cards, .rel { display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+  .mods > div, .cards > a, .rel > a { background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; text-decoration:none; transition:transform var(--transition-fast), border-color var(--transition-fast); min-width:0; }
+  .cards > a:hover, .rel > a:hover { transform:translateY(-3px); border-color:var(--accent); }
+  .cards .tag { justify-self:start; }
+  .points { list-style:none; display:grid; gap:.7rem; max-width:52rem; }
+  .points li { position:relative; padding-left:1.6rem; color:var(--text-primary); line-height:1.5; }
+  .points li::before { content:''; position:absolute; left:0; top:.5em; width:.7rem; height:.4rem; border-left:2px solid var(--accent); border-bottom:2px solid var(--accent); transform:rotate(-45deg); }
+</style>

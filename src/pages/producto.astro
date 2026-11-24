@@ -16,13 +16,17 @@ import ProductoFeatureBento from '../components/producto/ProductoFeatureBento.as
 import ProductoNetworkDiagram from '../components/producto/ProductoNetworkDiagram.astro';
 import ProductoSystemStat from '../components/producto/ProductoSystemStat.astro';
 import ProductoScaleBand from '../components/producto/ProductoScaleBand.astro';
+import ProductoBlockHead from '../components/producto/ProductoBlockHead.astro';
+import ProductoProblem from '../components/producto/ProductoProblem.astro';
+import ModuleShowcase from '../components/showcase/ModuleShowcase.astro';
+import { showcaseModules } from '../data/showcase-modules.js';
 import CtaClose from '../components/home/CtaClose.astro';
 import { whiteClientLogos } from '../utils/client-logos.js';
 
 const schemaData = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
-  name: 'Mobile One — Producto',
+  name: 'Mobile One - Producto',
   url: 'https://mobile-one.io/producto',
 };
 
@@ -41,12 +45,11 @@ const chapters = [
 
 <Layout
   title="Producto: POS Mobile y Panel de control | Mobile One"
-  description="Conoce las funcionalidades de Mobile One: venta móvil, omnicanalidad, promociones, recepción de mercadería y administración centralizada."
+  description="Conoce Mobile One: POS móvil, caja de pago, medición, facturación electrónica, recepción de mercadería y promociones en una sola plataforma para tu retail."
   image="/images/og-default.jpg"
   schemaData={schemaData}
 >
   <ProductoHero
-    eyebrow="Producto"
     headline={[
       { text: 'Un' }, { text: 'producto,' }, { text: 'dos' }, { text: 'superficies:', break: true },
       { text: 'el', accent: 'accent' }, { text: 'terminal', accent: 'accent' }, { text: 'de', accent: 'accent' }, { text: 'venta', accent: 'accent' },
@@ -55,12 +58,31 @@ const chapters = [
     subheadline="Todo lo que necesitas para operar la venta directamente en tu terminal de cobro, y todo lo que necesitas para controlarla desde un panel web, en un solo sistema."
   />
 
+  <!-- Bloque 1: Problema y dolor -->
+  <ProductoProblem
+    eyebrow="Lo que pasa hoy"
+    title="Tres pérdidas que se repiten cada día en tu tienda"
+    items={[
+      { label: 'Filas y espera', image: '/images/hook-frustracion.webp', alt: 'Clientes esperando en fila para pagar', question: '¿Cuántos clientes se fueron hoy solo por hacer fila?' },
+      { label: 'Falta de recomendación', image: '/images/hook-stock.webp', alt: 'Vendedor sin información de stock para recomendar', question: '¿Cuántas ventas se pierden por falta de una recomendación?' },
+      { label: 'Conteo manual', image: '/images/hook-bulto.webp', alt: 'Trabajador contando cajas una por una', question: '¿Cuántas horas se pierden contando cajas, una por una?' },
+    ]}
+  />
+
+  <!-- Bloque 2: Producto y solución -->
+  <ModuleShowcase
+    eyebrow="Lo que cambia"
+    title="Cinco módulos y la caja: un servicio integral"
+    intro="Del vendedor en sala a la caja de pago, todo con una misma plataforma. Elige un módulo y mira cómo funciona."
+    modules={showcaseModules}
+  />
+
   <ProductoChapterNav chapters={chapters} />
 
   <ProductoChapter
     id="abrir-turno"
     variant="pos"
-    eyebrow="POS Mobile"
+    eyebrow="09:00 · Abres turno"
     num="01"
     title="Abrir turno"
     items={[
@@ -71,7 +93,7 @@ const chapters = [
   <ProductoChapter
     id="armar-venta"
     variant="duo"
-    eyebrow="POS Mobile"
+    eyebrow="11:30 · Llega un cliente"
     num="02"
     title="Armar la venta"
     image="/images/solucion-fila.webp"
@@ -85,7 +107,7 @@ const chapters = [
   <ProductoChapter
     id="cerrar-venta"
     variant="photo-callout"
-    eyebrow="POS Mobile"
+    eyebrow="11:34 · Cobras"
     num="03"
     title="Cerrar la venta"
     image="/images/retail-payment-scene-mercadopago.webp"
@@ -98,9 +120,14 @@ const chapters = [
 
   <ProductoPasilloMoment
     id="pasillo-infinito"
-    eyebrow="POS Mobile · 04"
-    title='El "sin stock" se vuelve un pasillo infinito'
-    text="Tres modalidades en la misma transacción: venta directa, retiro programado en otra tienda (con fecha) y despacho a domicilio. El pasillo infinito hace posible despachar multidirección cuando un mismo pedido va a más de un destino."
+    eyebrow="Cuando falta stock"
+    title="Con el pasillo infinito, nunca te quedas sin stock"
+    text="Si el producto no está en tu tienda, está en otra sucursal, en una bodega o en el centro de distribución. El vendedor lo ve al instante desde el terminal y cierra la venta igual, sin decirle que no al cliente."
+    points={[
+      { title: 'Venta directa', text: 'El cliente se lleva el producto hoy, desde el stock de la tienda.' },
+      { title: 'Retiro en otra tienda', text: 'Lo retira donde le acomode, en la fecha que quede programada.' },
+      { title: 'Despacho a domicilio', text: 'Le llega a su casa, aunque un mismo pedido salga desde más de un lugar.' },
+    ]}
     image="/images/solucion-stock.webp"
     imageAlt="Vendedor consultando stock de toda la red para despachar un pedido"
   />
@@ -108,7 +135,7 @@ const chapters = [
   <ProductoFeatureSticky
     id="despues-de-vender"
     num="05"
-    eyebrow="POS Mobile"
+    eyebrow="Después de la venta"
     title="Después de vender"
     features={[
       { title: 'Búsqueda y postventa', text: 'Buscador de ventas por folio, RUT/cliente o fecha, con reimpresión de documentos y generación de tickets de cambio. También busca clientes existentes para asignarlos directo a la venta.' },
@@ -119,13 +146,13 @@ const chapters = [
   <ProductoChapter
     id="recepcion"
     variant="photo-callout"
-    eyebrow="POS Mobile"
+    eyebrow="16:00 · Llega mercadería"
     num="06"
     title="Recepción de mercadería"
-    image="/images/solucion-bulto.webp"
-    imageAlt="Trabajador escaneando un bulto sellado con el terminal"
+    image="/images/recepcion-camara.webp"
+    imageAlt="Trabajadora escaneando el código de barras de un bulto con la cámara del terminal Mobile One mientras revisa el documento de la recepción"
     items={[
-      { title: 'Recepción de mercadería', text: 'Ingreso vinculado a documentos de transferencia del ERP (almacenes en tránsito), escaneo de código de barras (reconoce EAN-13 y UPC-A automáticamente), cuadratura de cantidades y comprobante de recepción.' },
+      { title: 'Recepción de mercadería', text: 'Ingreso vinculado al documento de transferencia del ERP (almacenes en tránsito), que trae lo que debería venir en el paquete. Cada bulto se escanea con la cámara o el lector infrarrojo del mismo terminal (reconoce EAN-13 y UPC-A automáticamente) para ir cuadrando que llegue lo mismo que dice el documento, y al final se emite el comprobante de recepción.' },
     ]}
   />
 
@@ -133,7 +160,7 @@ const chapters = [
 
   <ProductoFeatureBento
     id="en-la-tienda"
-    eyebrow="Panel de control"
+    eyebrow="Mientras tanto, en la oficina"
     title="Todo lo que pasó en la tienda, en un solo lugar"
     image="/images/solucion-backoffice.webp"
     imageAlt="Encargada de tienda revisando ventas y stock en un panel web desde laptop y tablet"
@@ -146,7 +173,7 @@ const chapters = [
 
   <ProductoNetworkDiagram
     id="red-completa"
-    eyebrow="Panel de control"
+    eyebrow="Todas las tiendas, una sola vista"
     title="La red completa, siempre sincronizada"
     inputs={[
       { label: 'Stock por tienda y almacén', sub: 'Consulta y ajusta el stock de cada producto en cada tienda y almacén, sincronizado con tu ERP.' },
@@ -158,9 +185,16 @@ const chapters = [
     ]}
   />
 
+  <!-- Bloque 3: Confianza y métricas -->
+  <ProductoBlockHead
+    eyebrow="Y todo con respaldo"
+    title="Control del sistema y una implementación sin sorpresas"
+    text="Usuarios con perfiles, trazabilidad de cada transacción y funcionalidades que se activan por cliente, sobre una plataforma sincronizada con tu ERP."
+  />
+
   <ProductoSystemStat
     id="control-sistema"
-    eyebrow="Panel de control"
+    eyebrow="Quién puede qué"
     title="Control del sistema"
     text="Gestión de usuarios (perfiles, credenciales QR, vigencia) y de releases (registro de versiones), con activación/desactivación de funcionalidades por cliente vía feature flags, sin tocar código ni afectar a otros clientes."
     stats={[
@@ -176,6 +210,7 @@ const chapters = [
     text="Elige qué funcionalidades usar en cada tienda y súmalas cuando las necesites, sin desarrollos a medida. Todo corre sobre una misma plataforma: cada mejora llega a toda tu red al mismo tiempo y tu equipo siempre vende con la última versión."
   />
 
+  <!-- Bloque 4: Cierre -->
   <CtaClose
     title="Quiero ver el producto con mi catálogo"
     body="Agenda una demo de 30 minutos y te mostramos Mobile One funcionando con tu catálogo."
@@ -187,3 +222,18 @@ const chapters = [
     logos={whiteClientLogos()}
   />
 </Layout>
+
+<style is:global>
+  /* Rótulos de historia: píldora legible (texto más grande, fondo propio) en lugar de la etiqueta de categoría */
+  html .pch__eyebrow.pch__eyebrow, html .pbh__eyebrow.pbh__eyebrow, html .pfs__eyebrow.pfs__eyebrow, html .pnd__eyebrow.pnd__eyebrow, html .pfb__eyebrow.pfb__eyebrow, html .ppr__eyebrow.ppr__eyebrow, html .msh__eyebrow.msh__eyebrow, html .pss__eyebrow.pss__eyebrow, html .ppm__eyebrow.ppm__eyebrow {
+    display: inline-flex; align-items: center; gap: .6rem; width: fit-content;
+    text-transform: none; letter-spacing: 0; font-weight: 500; font-size: var(--text-base); line-height: 1.2;
+    color: var(--accent); background: var(--tint-strong); border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+    padding: .5rem 1rem .5rem .8rem; border-radius: var(--radius-full);
+  }
+  html .pch__eyebrow.pch__eyebrow::before, html .pbh__eyebrow.pbh__eyebrow::before, html .pfs__eyebrow.pfs__eyebrow::before, html .pnd__eyebrow.pnd__eyebrow::before, html .pfb__eyebrow.pfb__eyebrow::before, html .ppr__eyebrow.ppr__eyebrow::before, html .msh__eyebrow.msh__eyebrow::before, html .pss__eyebrow.pss__eyebrow::before, html .ppm__eyebrow.ppm__eyebrow::before {
+    content: ''; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--grad-brand);
+  }
+  html .ppm__eyebrow.ppm__eyebrow { color: var(--on-accent); background: color-mix(in srgb, var(--navy) 45%, transparent); border-color: color-mix(in srgb, var(--on-accent) 35%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  html .ppm__eyebrow.ppm__eyebrow::before { background: var(--on-accent); }
+</style>

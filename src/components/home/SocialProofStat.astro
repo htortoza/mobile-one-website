@@ -1,7 +1,7 @@
 ---
 // src/components/home/SocialProofStat.astro
 // Home §4.8 — Prueba social honesta. Sin testimonios/cifras inventadas (doc §9 / §12.4):
-// el único dato real disponible hoy es cualitativo ("horas, no semanas"), no una cifra —
+// el único dato disponible es el tiempo de implementación ("menos de una semana"), único en todo el sitio —
 // se muestra tipográficamente grande en vez de forzar un count-up de un número inventado.
 const { title, statLabel, statText, note } = Astro.props;
 ---
@@ -82,7 +82,7 @@ const { title, statLabel, statText, note } = Astro.props;
       { el: q('.proof__stat'), ms: 52, gap: 160, comma: 300, ink: false },
     ].filter((st) => st.el);
     // El resto (etiquetas "Próximamente" + nota) no se tipea: reveal simple
-    // apenas termina "Horas, no semanas."
+    // apenas termina "Menos de una semana."
     const rest = [...section.querySelectorAll('.proof__placeholder'), q('.proof__note')].filter(Boolean);
     gsap.set(rest, { opacity: 0, y: 16 });
 

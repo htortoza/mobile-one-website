@@ -1,0 +1,210 @@
+---
+// src/components/showcase/ModuleShowcase.astro
+// /producto bloque 2 "Producto y solución": los 5 módulos y la caja de pago en un explorador
+// dinámico. Un dispositivo por módulo con su pantalla proyectada (misma técnica que la escena del
+// POS): terminal móvil (cuatro pantallas), laptop (panel) y equipo POS 15" (caja de pago).
+// Avanza solo hasta que la persona interactúa. Todos los datos en pantalla son ficticios.
+import { withBase } from '../../utils/base.js';
+import ScreensMobile from './ScreensMobile.astro';
+import ScreenPanel from './ScreenPanel.astro';
+import ScreenCaja from './ScreenCaja.astro';
+const { eyebrow, title, intro, modules = [] } = Astro.props;
+---
+<section class="msh" id="modulos">
+  <div class="container msh__head">
+    {eyebrow && <p class="msh__eyebrow">{eyebrow}</p>}
+    <h2 class="msh__title">{title}</h2>
+    {intro && <p class="msh__intro">{intro}</p>}
+  </div>
+
+  <div class="container msh__body" data-msh>
+    <div class="msh__list" role="tablist" aria-label="Módulos de Mobile One">
+      {modules.map((m, i) => (
+        <div class={`msh__item ${i === 0 ? 'is-active' : ''}`} data-item>
+          <button class="msh__tab" role="tab" type="button" id={`msh-tab-${m.key}`} aria-controls={`msh-panel-${m.key}`}
+            aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-tab={i}>
+            <span class="msh__num">{String(i + 1).padStart(2, '0')}</span>
+            <span class="msh__name">{m.name}</span>
+            <span class="msh__tag">{m.tag}</span>
+          </button>
+          <div class="msh__detail" role="tabpanel" id={`msh-panel-${m.key}`} aria-labelledby={`msh-tab-${m.key}`}>
+            <div class="msh__detail-in">
+              <h3>{m.headline}</h3>
+              <p>{m.text}</p>
+              <ul role="list">{m.points.map((p) => <li>{p}</li>)}</ul>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="msh__stage" data-stage>
+      <div class="msh__halo" aria-hidden="true"></div>
+
+      <div class="dev dev--phone is-on" data-dev="phone">
+        <figure class="dev__pos" data-pos>
+          <img src={withBase('/images/pos-nuevo-mirror.webp')} alt="Terminal de pago con la app de Mobile One" width="2048" height="1536" />
+          <div class="dev__screen" data-screen><div class="dev__canvas dev__canvas--m"><ScreensMobile /></div></div>
+        </figure>
+      </div>
+
+      <div class="dev dev--phone dev--phoneL" data-dev="phoneL">
+        <figure class="dev__pos dev__pos--L" data-pos>
+          <img src={withBase('/images/pos-nuevo.webp')} alt="" width="2048" height="1536" />
+          <div class="dev__screen" data-screen><div class="dev__canvas dev__canvas--m"><ScreensMobile /></div></div>
+        </figure>
+      </div>
+
+      <div class="dev dev--laptop" data-dev="laptop">
+        <div class="lap">
+          <div class="lap__lid"><div class="lap__screen" data-lap><div class="lap__canvas" data-lap-canvas><ScreenPanel /></div></div></div>
+          <div class="lap__base"></div>
+        </div>
+      </div>
+
+      <div class="dev dev--caja" data-dev="caja">
+        <figure class="dev__pos dev__pos--caja" data-caja>
+          <img src={withBase('/images/caja-pos-frontal-crop.png')} alt="Equipo POS 15 pulgadas de Mobile One, la caja de pago" width="960" height="960" />
+          <div class="dev__screen dev__screen--caja" data-screen><div class="dev__canvas dev__canvas--c"><ScreenCaja /></div></div>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ order: modules.map((m) => ({ device: m.device, screen: m.screen ?? null, shot: m.shot ?? "medium" })) }}>
+  window.__mshOrder = order;
+</script>
+<script>
+  import { mountPosScreen, quadMatrix } from '../../utils/pos-screen.js';
+
+  const CAJA_QUAD = [[217.5, 137.3], [794.0, 101.5], [652.6, 676.0], [92.2, 621.5]]; // vidrio ACTIVO del equipo POS 15" (medido por análisis de píxeles) en la foto recortada 960×960
+  const CAJA_W = 960;
+  // Terminal POS nuevo (foto 2048×1536): esquinas del vidrio medidas sobre la pantalla blanca (TL, TR, BR, BL), centro del vidrio en x
+  const POS_NUEVO = { quad: [[825.6, 328.0], [1317.6, 293.0], [1071.6, 1347.5], [583.3, 1313.6]], cx: 0.4636, imgW: 2048, bleed: 4 };
+
+  function initShowcase() {
+    const root = document.querySelector('[data-msh]');
+    if (!root || root.dataset.mshInit) return;
+    root.dataset.mshInit = '1';
+    const order = window.__mshOrder ?? [];
+    const items = [...root.querySelectorAll('[data-item]')];
+    const tabs = [...root.querySelectorAll('[data-tab]')];
+    const devs = Object.fromEntries([...root.querySelectorAll('[data-dev]')].map((d) => [d.dataset.dev, d]));
+    const screensOf = (name) => [...devs[name].querySelectorAll('.msc')];
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const cleanups = [];
+
+    // Proyección de las pantallas sobre cada dispositivo
+    const phonePos = devs.phone.querySelector('[data-pos]');
+    cleanups.push(mountPosScreen(phonePos, devs.phone.querySelector('[data-screen]'), { mirror: true, minLeft: 0, ...POS_NUEVO }));
+    const posL = devs.phoneL.querySelector('[data-pos]');
+    cleanups.push(mountPosScreen(posL, devs.phoneL.querySelector('[data-screen]'), { mirror: false, minLeft: 0, ...POS_NUEVO }));
+
+    const cajaFig = devs.caja.querySelector('[data-caja]');
+    const cajaScreen = devs.caja.querySelector('[data-screen]');
+    const cx = CAJA_QUAD.reduce((a, [x]) => a + x, 0) / 4, cy = CAJA_QUAD.reduce((a, [, y]) => a + y, 0) / 4;
+    const INSET = -2; // px de la foto: la pantalla cubre apenas el borde del vidrio para no dejar costura
+    const inner = CAJA_QUAD.map(([x, y]) => { const dx = cx - x, dy = cy - y, d = Math.hypot(dx, dy); return [x + (dx / d) * INSET, y + (dy / d) * INSET]; });
+    const projectCaja = () => {
+      const s = cajaFig.offsetWidth / CAJA_W;
+      cajaScreen.style.transform = quadMatrix(cajaScreen.offsetWidth, cajaScreen.offsetHeight, inner.map(([x, y]) => [x * s, y * s]));
+    };
+    projectCaja();
+    const roC = new ResizeObserver(projectCaja); roC.observe(cajaFig); cleanups.push(() => roC.disconnect());
+
+    const lap = devs.laptop.querySelector('[data-lap]');
+    const lapCanvas = devs.laptop.querySelector('[data-lap-canvas]');
+    const fitLap = () => { lapCanvas.style.transform = `scale(${lap.offsetWidth / 1280})`; };
+    fitLap();
+    const roL = new ResizeObserver(fitLap); roL.observe(lap); cleanups.push(() => roL.disconnect());
+    document.addEventListener('astro:before-swap', () => cleanups.forEach((c) => c()), { once: true });
+
+    let current = 0, timer = null, tookOver = false;
+    const show = (i) => {
+      current = i;
+      const { device, screen, shot } = order[i];
+      items.forEach((it, k) => it.classList.toggle('is-active', k === i));
+      tabs.forEach((t, k) => { t.setAttribute('aria-selected', k === i ? 'true' : 'false'); t.tabIndex = k === i ? 0 : -1; });
+      Object.entries(devs).forEach(([name, el]) => {
+        const on = name === device;
+        el.classList.toggle('is-on', on);
+        el.classList.toggle('is-live', on);
+        if (on) el.dataset.shot = shot; // plano de cámara: medium, far, close, closeL
+      });
+      // reinicia las microanimaciones de la pantalla elegida
+      ['phone', 'phoneL'].forEach((n) => screensOf(n).forEach((s) => s.classList.remove('is-on')));
+      void root.offsetWidth;
+      if (device === 'phone' || device === 'phoneL') screensOf(device).find((s) => s.dataset.screen === screen)?.classList.add('is-on');
+    };
+    const stop = () => { clearInterval(timer); timer = null; };
+    const play = () => { if (reduce || tookOver || timer) return; timer = setInterval(() => show((current + 1) % order.length), 6500); };
+
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => { tookOver = true; stop(); show(i); });
+      t.addEventListener('keydown', (e) => {
+        if (!['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft'].includes(e.key)) return;
+        e.preventDefault(); tookOver = true; stop();
+        const n = (i + (e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        show(n); tabs[n].focus();
+      });
+    });
+    new IntersectionObserver((e) => (e[0].isIntersecting ? play() : stop()), { threshold: 0.4 }).observe(root.querySelector('[data-stage]'));
+    show(0);
+  }
+  document.addEventListener('astro:page-load', initShowcase);
+</script>
+
+<style>
+  .msh { padding-block: var(--space-xl); background: var(--bg-primary); }
+  .msh__head { display: grid; gap: var(--space-xs); margin-bottom: var(--space-lg); }
+  .msh__eyebrow { font-size: var(--text-sm); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+  .msh__title { font-family: var(--font-heading); font-size: clamp(2.1rem, 4.8vw, 3.6rem); letter-spacing: -.03em; line-height: 1.05; color: var(--navy); font-weight: 500; max-width: 20ch; }
+  .msh__intro { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; max-width: 56ch; }
+
+  .msh__body { display: grid; gap: var(--space-md); }
+  .msh__stage { order: -1; position: relative; display: grid; align-items: center; justify-items: center; min-height: clamp(300px, 70vw, 440px); border-radius: calc(var(--radius-lg) * 1.5); background: var(--bg-secondary); overflow: hidden; isolation: isolate; }
+  .msh__halo { position: absolute; inset: 8% 10%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--accent) 20%, transparent), transparent 68%); filter: blur(24px); z-index: -1; }
+  .dev { grid-area: 1 / 1; width: 100%; display: grid; justify-items: start; align-items: center; opacity: 0; visibility: hidden; transform: translateY(16px) scale(.98); transition: opacity .7s var(--ease-expo), transform .9s var(--ease-expo), visibility .7s; }
+  .dev.is-on { opacity: 1; visibility: visible; transform: none; }
+
+  .dev__pos { position: relative; margin: 0; width: min(100%, 700px); aspect-ratio: 2048 / 1536; }
+  .dev__pos img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; filter: drop-shadow(0 26px 34px color-mix(in srgb, var(--navy) 24%, transparent)); }
+  /* Plano de cámara: se escala desde el centro del vidrio. La transición mueve la "cámara" al cambiar de módulo. */
+  .dev--phone .dev__pos { transform-origin: 53.6% 53.4%; transition: transform 1.3s var(--ease-expo); will-change: transform; }
+  .dev--phoneL .dev__pos { transform-origin: 46.4% 53.4%; }
+  .dev--phone[data-shot="far"] .dev__pos { transform: translate(-10%, -1%) scale(.9); }
+  .dev--phone[data-shot="close"] .dev__pos { transform: translate(0, -3%) scale(1.42); }
+  .dev--phoneL[data-shot="closeL"] .dev__pos { transform: translate(5%, 1%) scale(1.3) rotate(-2deg); }
+  /* Caja de pago: plano cercano sobre el vidrio (se centra la pantalla y se acerca la cámara) */
+  .dev--caja .dev__pos { transform-origin: 45.7% 40%; transform: translate(0, 10%) scale(1.5); transition: transform 1.3s var(--ease-expo); will-change: transform; }
+  .dev__pos--caja { aspect-ratio: 1 / 1; width: min(100%, 470px); margin-inline: auto; }
+  .dev__screen { position: absolute; top: 0; left: 0; width: 900px; height: 1800px; transform-origin: 0 0; border-radius: 30px; overflow: hidden; clip-path: inset(0 round 30px); background: var(--bg-primary); backface-visibility: hidden; }
+  .dev__screen--caja { width: 2048px; height: 1536px; border-radius: 22px; clip-path: inset(0 round 22px); }
+  /* reflejo de vidrio sobre la pantalla proyectada */
+  .dev__screen--caja::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, color-mix(in srgb, var(--on-accent) 22%, transparent) 0%, transparent 38%, transparent 70%, color-mix(in srgb, var(--navy) 10%, transparent) 100%); box-shadow: inset 0 0 40px color-mix(in srgb, var(--navy) 18%, transparent); }
+  .dev__canvas { position: absolute; top: 0; left: 0; transform-origin: 0 0; } .dev__canvas--m { width: 300px; height: 600px; transform: scale(3); } .dev__canvas--c { width: 1024px; height: 768px; transform: scale(2); }
+
+  .dev--laptop { justify-items: center; }
+  .lap { width: min(100%, 640px); } .lap__lid { background: var(--navy); border-radius: 14px 14px 4px 4px; padding: 9px 9px 11px; box-shadow: 0 26px 34px color-mix(in srgb, var(--navy) 24%, transparent); }
+  .lap__screen { position: relative; aspect-ratio: 1280 / 800; overflow: hidden; border-radius: 5px; background: var(--bg-primary); } .lap__canvas { position: absolute; top: 0; left: 0; width: 1280px; height: 800px; transform-origin: 0 0; }
+  .lap__base { height: 12px; margin-inline: -4%; border-radius: 0 0 16px 16px; background: linear-gradient(180deg, var(--border), color-mix(in srgb, var(--text-secondary) 55%, var(--border))); }
+
+  .msh__list { display: grid; gap: .5rem; align-content: start; overflow-anchor: none; }
+  .msh__item { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-primary); overflow: hidden; transition: background-color .4s, border-color .4s; }
+  .msh__item.is-active { background: var(--grad-brand); border-color: transparent; color: var(--on-accent); box-shadow: 0 16px 34px -12px color-mix(in srgb, var(--accent-grad-start) 60%, transparent); }
+  .msh__tab { all: unset; box-sizing: border-box; width: 100%; display: grid; grid-template-columns: auto 1fr auto; align-items: center; column-gap: .8rem; padding: .85rem 1.1rem; min-height: 56px; cursor: pointer; color: var(--navy); }
+  .msh__item.is-active .msh__tab { color: var(--on-accent); } .msh__tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .msh__num { font-size: var(--text-sm); color: var(--accent); font-weight: 500; } .msh__item.is-active .msh__num { color: color-mix(in srgb, var(--accent-grad-end) 85%, var(--on-accent)); }
+  .msh__name { font-size: var(--text-base); font-weight: 500; } .msh__tag { font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; opacity: .65; }
+  .msh__detail { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .6s var(--ease-expo); } .msh__item.is-active .msh__detail { grid-template-rows: 1fr; }
+  .msh__detail-in { overflow: hidden; display: grid; gap: .6rem; padding: 0 1.1rem; } .msh__item.is-active .msh__detail-in { padding-bottom: 1.1rem; }
+  .msh__detail h3 { font-family: var(--font-heading); font-size: var(--text-xl); letter-spacing: -.02em; line-height: 1.12; font-weight: 500; } .msh__detail p { color: color-mix(in srgb, var(--on-accent) 82%, transparent); line-height: 1.55; }
+  .msh__detail ul { list-style: none; display: grid; gap: .4rem; font-size: var(--text-sm); } .msh__detail li { padding-left: 1.3rem; position: relative; } .msh__detail li::before { content: ''; position: absolute; left: 0; top: .5em; width: .6rem; height: .35rem; border-left: 2px solid var(--accent-grad-end); border-bottom: 2px solid var(--accent-grad-end); transform: rotate(-45deg); }
+
+  @media (min-width: 1024px) {
+    .msh__body { grid-template-columns: minmax(0, 4.4fr) minmax(0, 7.6fr); align-items: stretch; }
+    .msh__stage { order: 0; min-height: 560px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .dev, .msh__detail, .dev--phone .dev__pos, .dev--caja .dev__pos { transition: none; } }
+</style>

@@ -14,7 +14,9 @@ export default defineConfig({
   integrations: [
     sitemap({
       filter: (page) =>
-        !page.includes('/draft/') && !page.includes('/admin/'),
+        !page.includes('/draft/') && !page.includes('/admin/') &&
+        !page.includes('/clientes') && !page.includes('/propuesta') &&
+        !page.includes('/privacidad') && !page.includes('/terminos'),
     }),
   ],
 

@@ -14,3 +14,7 @@ export const CLIENT_LOGOS = [
 // Variante blanca — para fondos azules de marca.
 export const whiteClientLogos = () =>
   CLIENT_LOGOS.map((c) => ({ src: `/logos-clientes/white/${c.slug}.svg`, alt: c.alt }));
+
+// Variante oscura: para fondos claros.
+export const darkClientLogos = () =>
+  CLIENT_LOGOS.map((c) => ({ src: `/logos-clientes/dark/${c.slug}.svg`, alt: c.alt }));

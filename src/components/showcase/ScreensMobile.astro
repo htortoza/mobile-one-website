@@ -1,0 +1,122 @@
+---
+// src/components/showcase/ScreensMobile.astro
+// Cuatro pantallas ficticias de la app móvil (lienzo 300×630, estilo Material de la app real).
+// Datos de ejemplo: tienda, SKUs, folios y montos son inventados para demostración.
+import { withBase } from '../../utils/base.js';
+---
+<div class="ms" data-screens="mobile">
+
+  <!-- 1 · POS móvil: búsqueda con stock de toda la red -->
+  <section class="msc" data-screen="pos" aria-hidden="true">
+    <div class="sb"><span>11:18</span><span class="sb__r">5G&nbsp;&nbsp;86%</span></div>
+    <div class="hd"><img src={withBase('/brand/Isotipo-logo.svg')} alt="" /><div><b>Tienda Providencia</b><small>Vendedor: Camila R.</small></div></div>
+    <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg><span class="typed">zapatilla</span></div>
+    <ul class="list">
+      <li><i class="th th--a"></i><div><b>Zapatilla Urban Run</b><small>SKU-ZUR-210 · $64.990</small><em class="chip chip--ok">Stock red · 48 uds</em></div><span class="add">+</span></li>
+      <li><i class="th th--b"></i><div><b>Zapatilla Trail Pro</b><small>SKU-ZTP-118 · $79.990</small><em class="chip chip--ok">Stock red · 21 uds</em></div><span class="add">+</span></li>
+      <li><i class="th th--c"></i><div><b>Zapatilla Classic Blanca</b><small>SKU-ZCB-004 · $49.990</small><em class="chip chip--warn">Otra tienda · 6 uds</em></div><span class="add">+</span></li>
+      <li><i class="th th--d"></i><div><b>Zapatilla Kids Flex</b><small>SKU-ZKF-072 · $39.990</small><em class="chip chip--ok">Stock red · 33 uds</em></div><span class="add">+</span></li>
+    </ul>
+    <div class="cartbar"><span class="cartbar__n">2</span><div><small>Carrito</small><b>$144.980</b></div><span class="btn">Cobrar</span></div>
+  </section>
+
+  <!-- 2 · Facturación: checkout y boleta emitida -->
+  <section class="msc" data-screen="factura" aria-hidden="true">
+    <div class="sb"><span>11:22</span><span class="sb__r">5G&nbsp;&nbsp;85%</span></div>
+    <div class="ttl"><span class="back">&larr;</span><div><b>Checkout</b><small>Venta 318</small></div></div>
+    <div class="card">
+      <div class="row"><span>Cliente</span><b>María Soto</b></div>
+      <div class="row"><span>Tipo</span><b>Boleta electrónica</b></div>
+      <hr />
+      <div class="row"><span>1x Zapatilla Urban Run</span><b>$64.990</b></div>
+      <div class="row"><span>1x Polera Básica Algodón</span><b>$24.990</b></div>
+      <hr />
+      <div class="row row--tot"><span>Total</span><b>$89.980</b></div>
+    </div>
+    <p class="lbl">Medio de pago</p>
+    <div class="pays"><span class="pay pay--on">Tarjeta</span><span class="pay">Efectivo</span><span class="pay">Giftcard</span></div>
+    <span class="btn btn--full">Terminar cobro con tarjeta</span>
+    <div class="done"><div class="done__ck"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><b>Pago aprobado</b><small>Boleta N° 18.432 emitida</small><em class="chip chip--ok">Enviada al correo del cliente</em></div>
+  </section>
+
+  <!-- 3 · Recepción: escaneo de bulto y cuadratura -->
+  <section class="msc" data-screen="recepcion" aria-hidden="true">
+    <div class="sb"><span>08:41</span><span class="sb__r">5G&nbsp;&nbsp;72%</span></div>
+    <div class="ttl"><span class="back">&larr;</span><div><b>Recepción de mercadería</b><small>Orden de compra OC-4471</small></div></div>
+    <div class="scan"><span class="scan__c scan__c--tl"></span><span class="scan__c scan__c--tr"></span><span class="scan__c scan__c--bl"></span><span class="scan__c scan__c--br"></span><div class="bars"></div><span class="scan__line"></span></div>
+    <p class="hint">Apunta al código del bulto</p>
+    <div class="prog"><div class="prog__top"><b>Cuadratura con la OC</b><span>24 de 24 uds</span></div><div class="prog__bar"><span></span></div></div>
+    <ul class="chk">
+      <li><span class="ok"></span>Bulto 1 · Poleras (8 uds)</li>
+      <li><span class="ok"></span>Bulto 2 · Jeans slim (6 uds)</li>
+      <li><span class="ok ok--new"></span>Bulto 3 · Zapatillas (10 uds)</li>
+    </ul>
+    <span class="btn btn--full">Confirmar recepción</span>
+  </section>
+
+  <!-- 4 · Promociones: descuentos automáticos al cobrar -->
+  <section class="msc" data-screen="promos" aria-hidden="true">
+    <div class="sb"><span>17:05</span><span class="sb__r">5G&nbsp;&nbsp;64%</span></div>
+    <div class="ttl"><span class="back">&larr;</span><div><b>Carro de compra</b><small>Promociones aplicadas solas</small></div></div>
+    <ul class="lines">
+      <li><i class="th th--e"></i><div><b>Polera Estampada x2</b><small>Promo 2x1 polos</small></div><span><s>$39.980</s><b>$19.990</b></span></li>
+      <li><i class="th th--f"></i><div><b>Jeans Slim</b><small>Cupón VERANO15</small></div><span><s>$44.990</s><b>$38.240</b></span></li>
+      <li><i class="th th--b"></i><div><b>Chaleco Liviano</b><small>Sin promoción</small></div><span><b>$34.990</b></span></li>
+    </ul>
+    <div class="promo"><span class="promo__t">Promo 2x1 polos</span><span class="promo__v">-$19.990</span></div>
+    <div class="promo promo--b"><span class="promo__t">Cupón VERANO15</span><span class="promo__v">-$6.750</span></div>
+    <div class="card card--sum">
+      <div class="row"><span>Subtotal</span><b>$119.960</b></div>
+      <div class="row row--sav"><span>Ahorras</span><b>-$26.740</b></div>
+      <div class="row row--tot"><span>Total</span><b>$93.220</b></div>
+    </div>
+    <span class="btn btn--full">Continuar al cobro</span>
+  </section>
+</div>
+
+<style>
+  .ms { position: absolute; inset: 0; }
+  .msc { position: absolute; inset: 0; background: var(--bg-primary); color: var(--navy); font-family: var(--font-body); font-size: 12px; line-height: 1.3; display: flex; flex-direction: column; gap: 10px; padding: 0 14px 14px; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility .6s; }
+  .msc.is-on { opacity: 1; visibility: visible; }
+  .sb { display: flex; justify-content: space-between; margin: 0 -14px; padding: 6px 16px; font-size: 10px; background: color-mix(in srgb, var(--navy) 8%, var(--bg-primary)); }
+  .hd { display: flex; gap: 8px; align-items: center; } .hd img { width: 26px; height: 26px; } .hd b { display: block; font-size: 13px; } .hd small, .ttl small { color: var(--text-secondary); font-size: 10px; }
+  .ttl { display: flex; gap: 10px; align-items: center; } .ttl b { display: block; font-size: 17px; letter-spacing: -.01em; } .back { font-size: 18px; }
+  .search { display: flex; gap: 8px; align-items: center; border: 1.5px solid color-mix(in srgb, var(--accent) 35%, var(--border)); border-radius: 10px; padding: 9px 10px; font-size: 13px; }
+  .search svg { width: 15px; height: 15px; fill: none; stroke: var(--navy); stroke-width: 2; stroke-linecap: round; }
+  .typed { overflow: hidden; white-space: nowrap; width: 0; border-right: 1.5px solid var(--accent); }
+  .msc.is-on .typed { animation: type 1.4s steps(9) .3s forwards; } @keyframes type { to { width: 9ch; border-color: transparent; } }
+  .list, .lines, .chk { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .list li { display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); opacity: 0; transform: translateY(8px); }
+  .msc.is-on .list li { animation: rise .5s ease forwards; } .msc.is-on .list li:nth-child(1) { animation-delay: 1.5s; } .msc.is-on .list li:nth-child(2) { animation-delay: 1.65s; } .msc.is-on .list li:nth-child(3) { animation-delay: 1.8s; } .msc.is-on .list li:nth-child(4) { animation-delay: 1.95s; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .list b, .lines b { font-size: 12.5px; font-weight: 500; } .list small, .lines small { display: block; color: var(--text-secondary); font-size: 10px; }
+  .th { display: block; width: 38px; height: 38px; border-radius: 9px; }
+  .th--a { background: linear-gradient(135deg, var(--accent-grad-end), var(--navy)); } .th--b { background: linear-gradient(135deg, var(--border), var(--text-secondary)); } .th--c { background: linear-gradient(135deg, var(--bg-secondary), var(--border)); } .th--d { background: linear-gradient(135deg, var(--accent), var(--accent-grad-end)); } .th--e { background: linear-gradient(135deg, var(--navy), var(--text-secondary)); } .th--f { background: linear-gradient(135deg, var(--accent-grad-start), var(--accent-grad-end)); }
+  .chip { display: inline-block; font-style: normal; font-size: 9px; padding: 1px 7px; border-radius: 99px; margin-top: 2px; } .chip--ok { background: color-mix(in srgb, var(--accent) 12%, var(--bg-primary)); color: var(--accent-grad-start); } .chip--warn { background: color-mix(in srgb, var(--tone-getnet) 12%, var(--bg-primary)); color: var(--tone-getnet); }
+  .add { font-size: 20px; color: var(--navy); }
+  .cartbar { margin-top: auto; display: flex; align-items: center; gap: 10px; background: var(--navy); color: var(--on-accent); border-radius: 14px; padding: 10px 12px; } .cartbar small { display: block; opacity: .7; font-size: 9px; } .cartbar b { font-size: 14px; } .cartbar > div { flex: 1; }
+  .cartbar__n { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; font-weight: 600; }
+  .msc.is-on .cartbar__n { animation: pop .5s ease 2.4s both; } @keyframes pop { 0% { transform: scale(.6); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
+  .btn { display: inline-flex; justify-content: center; align-items: center; background: var(--accent-grad-start); color: var(--on-accent); border-radius: 99px; padding: 8px 16px; font-weight: 500; font-size: 12px; } .btn--full { padding: 12px; font-size: 13px; margin-top: auto; }
+  .card { background: var(--bg-secondary); border-radius: 14px; padding: 12px; display: grid; gap: 7px; } .card hr { border: 0; border-top: 1px solid var(--border); margin: 0; }
+  .row { display: flex; justify-content: space-between; gap: 8px; } .row span { color: var(--text-secondary); } .row--tot { font-size: 15px; } .row--tot span, .row--tot b { color: var(--accent-grad-start); font-weight: 600; } .row--sav b, .row--sav span { color: var(--accent-grad-start); }
+  .lbl { margin: 4px 0 0; color: var(--text-secondary); } .pays { display: flex; gap: 8px; } .pay { flex: 1; text-align: center; padding: 14px 4px; border-radius: 12px; background: var(--bg-secondary); border: 1.5px solid transparent; } .pay--on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg-primary)); font-weight: 500; }
+  .done { position: absolute; inset: 0; background: var(--bg-primary); display: grid; align-content: center; justify-items: center; gap: 8px; text-align: center; opacity: 0; } .done b { font-size: 18px; } .done small { color: var(--text-secondary); font-size: 12px; }
+  .done__ck { width: 64px; height: 64px; border-radius: 50%; background: var(--accent-grad-start); display: grid; place-items: center; } .done__ck svg { width: 32px; fill: none; stroke: var(--on-accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .msc.is-on .done { animation: showdone .6s ease 2.6s forwards; } @keyframes showdone { to { opacity: 1; } }
+  .scan { position: relative; height: 150px; border-radius: 14px; background: var(--navy); overflow: hidden; display: grid; place-items: center; }
+  .bars { width: 120px; height: 56px; background: repeating-linear-gradient(90deg, var(--on-accent) 0 3px, transparent 3px 6px, var(--on-accent) 6px 7px, transparent 7px 11px, var(--on-accent) 11px 15px, transparent 15px 17px); opacity: .9; border-radius: 3px; }
+  .scan__c { position: absolute; width: 22px; height: 22px; border: 3px solid var(--accent-grad-end); } .scan__c--tl { top: 12px; left: 12px; border-right: 0; border-bottom: 0; } .scan__c--tr { top: 12px; right: 12px; border-left: 0; border-bottom: 0; } .scan__c--bl { bottom: 12px; left: 12px; border-right: 0; border-top: 0; } .scan__c--br { bottom: 12px; right: 12px; border-left: 0; border-top: 0; }
+  .scan__line { position: absolute; left: 14px; right: 14px; height: 2px; background: var(--accent-grad-end); box-shadow: 0 0 10px var(--accent-grad-end); top: 20px; }
+  .msc.is-on .scan__line { animation: sweep 1.8s ease-in-out infinite alternate; } @keyframes sweep { to { top: 128px; } }
+  .hint { text-align: center; color: var(--text-secondary); margin: 0; }
+  .prog { display: grid; gap: 6px; } .prog__top { display: flex; justify-content: space-between; } .prog__top span { color: var(--accent-grad-start); font-weight: 500; } .prog__bar { height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; } .prog__bar span { display: block; height: 100%; width: 0; background: var(--accent-grad-start); border-radius: 99px; }
+  .msc.is-on .prog__bar span { animation: fill 2s ease .5s forwards; } @keyframes fill { to { width: 100%; } }
+  .chk li { display: flex; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); } .ok { width: 16px; height: 16px; border-radius: 50%; background: var(--accent-grad-start); position: relative; } .ok::after { content: ''; position: absolute; left: 5px; top: 3px; width: 4px; height: 7px; border: solid var(--on-accent); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .msc.is-on .chk li:last-child { animation: rise .5s ease 1.2s both; opacity: 0; }
+  .lines li { display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); } .lines span { text-align: right; display: grid; } .lines s { color: var(--text-secondary); font-size: 10px; }
+  .promo { display: flex; justify-content: space-between; background: color-mix(in srgb, var(--accent) 10%, var(--bg-primary)); border-radius: 10px; padding: 8px 10px; color: var(--accent-grad-start); font-weight: 500; opacity: 0; } .promo--b { background: color-mix(in srgb, var(--tone-mercadopago) 25%, var(--bg-primary)); color: var(--navy); }
+  .msc.is-on .promo { animation: rise .5s ease 1s both; } .msc.is-on .promo--b { animation-delay: 1.5s; }
+  .card--sum { margin-top: auto; }
+  @media (prefers-reduced-motion: reduce) { .msc * { animation: none !important; } .typed { width: 9ch; border: 0; } .list li, .promo, .chk li:last-child { opacity: 1; transform: none; } .prog__bar span { width: 100%; } .done { opacity: 0; } }
+</style>

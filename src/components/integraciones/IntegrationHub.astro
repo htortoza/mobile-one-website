@@ -1,0 +1,126 @@
+---
+// src/components/integraciones/IntegrationHub.astro
+// Hub animado reutilizable: el isotipo de Mobile One al centro, conectado por cables con paquetes
+// de datos a los ERP, los medios de pago y el documento electrónico. Cada nodo enlaza a su página.
+// `focus`: clave de un nodo ('erp1', 'tbk'...) o de un grupo ('erp', 'pay', 'dte') que se resalta.
+import { withBase } from '../../utils/base.js';
+const { focus = '' } = Astro.props;
+
+// Nodos del hub (ángulo en grados, 0 = derecha). dir: 'in' los datos llegan al centro, 'out' salen.
+const nodes = [
+  { key: 'erp1', group: 'erp', href: '/integraciones/erp/sap-business-one', label: 'SAP Business One', sub: 'ERP', angle: -135, dir: 'in', logo: '/images/logo-sap-business-one.png', light: true, wide: true },
+  { key: 'erp2', group: 'erp', href: '/integraciones/erp/retail-pro', label: 'Retail Pro', sub: 'ERP', angle: -90, dir: 'in', logo: '/images/logo-retailpro.png', light: true, wide: true },
+  { key: 'erp3', group: 'erp', href: '/integraciones/erp/retail-pro-prism', label: 'Retail Pro Prism', sub: 'ERP', angle: -45, dir: 'in', logo: '/images/logo-retailpro.png', light: true, wide: true, badge: 'Prism' },
+  { key: 'tbk', group: 'pay', href: '/integraciones/medios-de-pago/transbank', label: 'Transbank', sub: 'Chile', angle: 0, dir: 'in', logo: '/images/logo-transbank-white.png' },
+  { key: 'gnt', group: 'pay', href: '/integraciones/medios-de-pago/getnet', label: 'Getnet', sub: 'Chile', angle: 45, dir: 'in', logo: '/images/logo-getnet-white.png' },
+  { key: 'mp', group: 'pay', href: '/integraciones/medios-de-pago/mercado-pago', label: 'Mercado Pago', sub: 'Chile y Perú', angle: 90, dir: 'in', logo: '/images/logo-mercadopago-negativo.svg', tall: true },
+  { key: 'nbz', group: 'pay', href: '/integraciones/medios-de-pago/niubiz', label: 'Niubiz', sub: 'Perú', angle: 135, dir: 'in', text: 'Niubiz' },
+  { key: 'dte', group: 'dte', href: '/integraciones/facturacion', label: 'Documento electrónico', sub: 'Boleta o comprobante', angle: 180, dir: 'out', logo: '/brand/dte/dte-imagotipo-color.svg', light: true, tall: true },
+];
+const DIMS = {"logo-sap-business-one.png": (1292, 174), "logo-retailpro.png": (360, 97), "logo-transbank-white.png": (1200, 195), "logo-getnet-white.png": (858, 256), "logo-mercadopago-negativo.svg": (789, 201), "dte-imagotipo-color.svg": (322, 149)};
+const dimsOf = (src) => { const k = Object.keys(DIMS).find((n) => src && src.endsWith(n)); return k ? DIMS[k] : [0, 0]; };
+const R = { x: 36.5, y: 36 }; // radio del anillo en % del lienzo
+const pos = nodes.map((n) => {
+  const a = (n.angle * Math.PI) / 180;
+  const x = 50 + R.x * Math.cos(a), y = 50 + R.y * Math.sin(a);
+  // curva suave: punto de control desplazado perpendicular al cable
+  const mx = (50 + x) / 2, my = (50 + y) / 2, dx = x - 50, dy = y - 50, len = Math.hypot(dx, dy) || 1;
+  const bend = 5 * (nodes.indexOf(n) % 2 === 0 ? 1 : -1);
+  const cx = mx - (dy / len) * bend, cy = my + (dx / len) * bend;
+  const fwd = `M50,50 Q${cx.toFixed(2)},${cy.toFixed(2)} ${x.toFixed(2)},${y.toFixed(2)}`;
+  const back = `M${x.toFixed(2)},${y.toFixed(2)} Q${cx.toFixed(2)},${cy.toFixed(2)} 50,50`;
+  return { ...n, x, y, path: n.dir === 'in' ? back : fwd, line: fwd };
+});
+---
+<figure class="hub" data-hub aria-label="Mobile One conectado a SAP Business One, Retail Pro, Retail Pro Prism, medios de pago y documento electrónico">
+  <svg class="hub__lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <defs><linearGradient id="hubg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent-grad-end)" stop-opacity=".9" /><stop offset="1" stop-color="var(--accent-grad-start)" stop-opacity=".35" /></linearGradient></defs>
+    <g class="hub__ring"><circle cx="50" cy="50" r="24" /><circle cx="50" cy="50" r="38" /></g>
+    {pos.map((n) => <path class="hub__cable" d={n.line} />)}
+    {pos.map((n, i) => (
+      <circle class="hub__pkt" r="1.15" opacity="0">
+        <set attributeName="opacity" to="1" begin={`${i * 0.45}s`} fill="freeze" />
+        <animateMotion dur={`${3 + (i % 3) * 0.6}s`} begin={`${i * 0.45}s`} repeatCount="indefinite" path={n.path} />
+      </circle>
+    ))}
+  </svg>
+  <div class="hub__core"><span class="hub__pulse"></span><span class="hub__pulse hub__pulse--b"></span><img src={withBase('/brand/Isotipo-logo.svg')} alt="Mobile One" /></div>
+  {pos.map((n, i) => (
+    <div class="hub__slot" style={`left:${n.x}%;top:${n.y}%`}>
+    <a href={withBase(n.href)} aria-label={`${n.label}, ver integración`} class={`hub__node ${n.light ? 'hub__node--light' : ''} ${n.bare ? 'hub__node--bare' : ''} ${n.wide ? 'hub__node--wide' : ''} ${n.tall ? 'hub__node--tall' : ''} ${focus && (focus === n.key || focus === n.group) ? 'is-focus' : ''} ${focus && !(focus === n.key || focus === n.group) ? 'is-dim' : ''}`} style={`--d:${i * 0.7}s`}>
+      <span class="hub__chip">{n.logo ? <img src={withBase(n.logo)} alt={n.label} width={dimsOf(n.logo)[0]} height={dimsOf(n.logo)[1]} /> : <b>{n.text}</b>}{n.badge && <em class="hub__badge">{n.badge}</em>}</span>
+      <span class="hub__label">{n.sub}</span>
+    </a>
+    </div>
+  ))}
+</figure>
+
+<script>
+  import { gsap } from 'gsap';
+  function initHub() {
+    document.querySelectorAll('[data-hub]').forEach((hub) => {
+      if (hub.dataset.hubInit) return;
+      hub.dataset.hubInit = '1';
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const core = hub.querySelector('.hub__core'), nodes = [...hub.querySelectorAll('.hub__node')];
+      gsap.from(core, { scale: 0.4, opacity: 0, duration: 1.2, ease: 'back.out(1.5)', delay: 0.3 });
+      gsap.from(nodes, { scale: 0.5, opacity: 0, duration: 0.9, stagger: 0.1, ease: 'expo.out', delay: 0.6 });
+      gsap.from(hub.querySelectorAll('.hub__cable'), { opacity: 0, duration: 1.2, stagger: 0.08, delay: 0.7 });
+      // los nodos siguen ligeramente al cursor (profundidad), solo en escritorio
+      if (window.matchMedia('(min-width: 900px) and (hover: hover)').matches) {
+        hub.addEventListener('pointermove', (e) => {
+          const r = hub.getBoundingClientRect(), mx = (e.clientX - r.left) / r.width - 0.5, my = (e.clientY - r.top) / r.height - 0.5;
+          nodes.forEach((n, i) => gsap.to(n, { x: mx * (10 + (i % 3) * 5), y: my * (10 + (i % 3) * 5), duration: 0.9, ease: 'power3.out', overwrite: 'auto' }));
+          gsap.to(core, { x: mx * -8, y: my * -8, duration: 0.9, ease: 'power3.out', overwrite: 'auto' });
+        });
+        hub.addEventListener('pointerleave', () => { gsap.to([...nodes, core], { x: 0, y: 0, duration: 1.1, ease: 'expo.out' }); });
+      }
+    });
+  }
+  document.addEventListener('astro:page-load', initHub);
+</script>
+
+<style>
+  /* ── Hub ── */
+  /* El hub es un escenario con el gradiente oficial: el único momento de color fuerte de la sección */
+  .hub { position: relative; margin: 0; width: min(100%, 500px, calc(100svh - 150px)); aspect-ratio: 1; justify-self: center; border-radius: 36px; color: var(--navy); isolation: isolate; }
+  .hub::before { display: none; content: ''; position: absolute; inset: 0; border-radius: inherit; z-index: 0; pointer-events: none; background:
+      radial-gradient(ellipse 60% 50% at 78% 18%, color-mix(in srgb, var(--on-accent) 26%, transparent), transparent 70%),
+      linear-gradient(color-mix(in srgb, var(--on-accent) 7%, transparent) 1px, transparent 1px) 0 0 / 44px 44px,
+      linear-gradient(90deg, color-mix(in srgb, var(--on-accent) 7%, transparent) 1px, transparent 1px) 0 0 / 44px 44px;
+    mask-image: radial-gradient(circle at 50% 50%, #000 40%, rgba(0,0,0,.35) 100%); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 40%, rgba(0,0,0,.35) 100%); }
+  .hub__lines { z-index: 1; position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .hub__ring circle { fill: none; stroke: color-mix(in srgb, var(--accent-grad-start) 28%, transparent); stroke-width: .25; stroke-dasharray: 1 2.2; vector-effect: non-scaling-stroke; transform-origin: 50% 50%; }
+  .hub__ring circle:first-child { animation: ih-spin 60s linear infinite; } .hub__ring circle:last-child { animation: ih-spin 90s linear infinite reverse; }
+  @keyframes ih-spin { to { transform: rotate(360deg); } }
+  .hub__cable { fill: none; stroke: url(#hubg); stroke-width: .5; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+  .hub__pkt { fill: var(--accent-grad-start); filter: drop-shadow(0 0 3px var(--accent-grad-end)); }
+  .hub__core { position: absolute; left: 50%; top: 50%; width: 27%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: var(--on-accent); display: grid; place-items: center; box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent-grad-start) 9%, transparent), 0 0 0 1px var(--border), 0 24px 50px -10px color-mix(in srgb, var(--accent-grad-start) 40%, transparent); z-index: 3; }
+  .hub__core img { width: 52%; height: auto; }
+  .hub__pulse { position: absolute; inset: 0; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--accent-grad-end) 70%, transparent); animation: ih-pulse 3.2s ease-out infinite; z-index: -1; } .hub__pulse--b { animation-delay: 1.6s; }
+  @keyframes ih-pulse { from { transform: scale(1); opacity: .9; } to { transform: scale(1.9); opacity: 0; } }
+  .hub__slot { position: absolute; transform: translate(-50%, -50%); z-index: 2; }
+  .hub__node { position: relative; text-decoration: none; color: inherit; display: grid; justify-items: center; gap: .4rem; z-index: 2; animation: ih-float 6s ease-in-out infinite; animation-delay: var(--d); }
+  @keyframes ih-float { 50% { translate: 0 -7px; } }
+  .hub__chip { display: grid; place-items: center; min-width: 96px; height: 54px; padding: 0 .9rem; border-radius: var(--radius-lg); background: var(--accent-grad-start); border: 1px solid color-mix(in srgb, var(--on-accent) 35%, transparent); box-shadow: 0 14px 28px -6px color-mix(in srgb, var(--accent-grad-start) 70%, transparent); }
+  /* Logo oficial a color directamente sobre el fondo claro de la página (fondo blanco permitido por la marca), sin chip */
+  .hub__node--bare .hub__chip { background: none; border: 0; box-shadow: none; min-width: 0; padding: 0 .4rem; }
+  .hub__node--bare .hub__chip img { height: 46px; width: auto; max-height: none; max-width: none; aspect-ratio: 790 / 200; }
+  .hub__node--light .hub__chip { background: var(--on-accent); border-color: var(--border); box-shadow: 0 12px 26px -12px color-mix(in srgb, var(--accent-grad-start) 40%, transparent); }
+  .hub__badge { position: absolute; right: -6px; top: -9px; font-style: normal; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-full); background: var(--accent-gradient); color: var(--on-accent); box-shadow: 0 4px 12px color-mix(in srgb, var(--navy) 45%, transparent); }
+  .hub__chip { position: relative; }
+  .hub__chip img { height: auto; width: auto; max-height: 26px; max-width: 118px; object-fit: contain; display: block; }
+  .hub__node--wide .hub__chip img { max-height: 26px; max-width: 108px; }
+  .hub__node--tall .hub__chip { height: 62px; } .hub__node--tall .hub__chip img { max-height: 44px; max-width: 138px; } .hub__chip b { color: var(--on-accent); font-family: var(--font-heading); font-size: var(--text-lg); letter-spacing: -.01em; font-weight: 600; }
+  .hub__chip, .hub__label { transition: opacity .6s var(--ease-expo), filter .6s var(--ease-expo), transform .5s var(--ease-expo), box-shadow .6s var(--ease-expo); }
+  .hub__node.is-dim .hub__chip { filter: saturate(.55) brightness(1.18); } .hub__node.is-dim .hub__chip img, .hub__node.is-dim .hub__chip b { opacity: .5; } .hub__node.is-dim .hub__label { opacity: .5; }
+  .hub__node.is-dim:hover .hub__chip, .hub__node.is-dim:focus-visible .hub__chip { filter: none; } .hub__node.is-dim:hover .hub__chip img, .hub__node.is-dim:hover .hub__chip b { opacity: 1; } .hub__node.is-dim:hover .hub__label, .hub__node.is-dim:focus-visible .hub__label { opacity: .9; }
+  .hub__node.is-focus .hub__chip { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-grad-end) 80%, transparent), 0 0 36px color-mix(in srgb, var(--accent-grad-end) 60%, transparent); }
+  .hub__node:hover .hub__chip, .hub__node:focus-visible .hub__chip { transform: translateY(-3px) scale(1.06); }
+  .hub__node:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: var(--radius-lg); }
+  /* La etiqueta cuelga bajo el logo sin contar en el centrado: el cable apunta al centro del logo */
+  .hub__label { position: absolute; top: 100%; left: 50%; translate: -50% .45rem; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; opacity: .8; white-space: nowrap; color: var(--text-secondary); }
+
+  @media (max-width: 600px) { .hub__chip { min-width: 66px; height: 42px; padding: 0 .55rem; } .hub__chip img { max-height: 18px; max-width: 76px; } .hub__node--wide .hub__chip img { max-height: 16px; max-width: 64px; } .hub__badge { font-size: .5rem; padding: 1px 6px; } .hub__node--tall .hub__chip { height: 46px; } .hub__node--tall .hub__chip img { max-height: 28px; max-width: 70px; } .hub__chip b { font-size: var(--text-sm); } .hub__label { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .hub__ring circle, .hub__node, .hub__pulse { animation: none; } .hub__pkt { display: none; } }
+</style>

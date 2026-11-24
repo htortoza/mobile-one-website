@@ -1,0 +1,65 @@
+---
+// src/components/integraciones/IntegrationHero.astro
+// Hero inmersivo de /integraciones: titular + un hub animado. El isotipo de Mobile One al centro,
+// conectado por cables con paquetes de datos a ERP, medios de pago y documento electrónico.
+import { withBase } from '../../utils/base.js';
+import IntegrationHub from './IntegrationHub.astro';
+const { crumbs = [], title, accent = '', lead, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref, facts = [], focus = '' } = Astro.props;
+
+---
+<section class="ihero" data-ihero>
+  <div class="ihero__bg" aria-hidden="true"><span class="ihero__blob ihero__blob--a"></span><span class="ihero__blob ihero__blob--b"></span><span class="ihero__grid"></span></div>
+  <div class="container ihero__inner">
+    <div class="ihero__copy">
+      {crumbs.length > 0 && (
+        <nav class="ihero__crumbs" aria-label="Migas de pan"><a href={withBase('/')}>Inicio</a>{crumbs.map((c) => (<><span aria-hidden="true">/</span>{c.href ? <a href={withBase(c.href)}>{c.label}</a> : <span aria-current="page">{c.label}</span>}</>))}</nav>
+      )}
+      <h1 class="ihero__title" data-ih="rise">{title}{accent && <> <span class="ihero__accent">{accent}</span></>}</h1>
+      <p class="ihero__lead" data-ih="rise">{lead}</p>
+      <div class="ihero__cta" data-ih="rise">
+        <a class="ihero__btn ihero__btn--primary" href={withBase(ctaHref)}>{ctaText}</a>
+        {ctaSecondaryText && <a class="ihero__btn ihero__btn--ghost" href={withBase(ctaSecondaryHref)}>{ctaSecondaryText}</a>}
+      </div>
+      {facts.length > 0 && <ul class="ihero__facts" data-ih="rise" role="list">{facts.map((f) => <li>{f}</li>)}</ul>}
+    </div>
+
+    <IntegrationHub focus={focus} />
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  function initIHero() {
+    const root = document.querySelector('[data-ihero]');
+    if (!root || root.dataset.ihInit) return;
+    root.dataset.ihInit = '1';
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    gsap.from(root.querySelectorAll('[data-ih="rise"]'), { opacity: 0, y: 28, duration: 1, stagger: 0.12, ease: 'expo.out', delay: 0.1 });
+  }
+  document.addEventListener('astro:page-load', initIHero);
+</script>
+
+<style>
+  .ihero { position: relative; background: var(--grad-soft); color: var(--navy); overflow: clip; isolation: isolate; padding-block: var(--space-md) var(--space-lg); }
+  .ihero__bg { position: absolute; inset: 0; z-index: -1; }
+  .ihero__blob { position: absolute; border-radius: 50%; filter: blur(80px); }
+  .ihero__blob--a { width: 42vw; height: 42vw; left: -14vw; top: -18vw; background: radial-gradient(circle, var(--accent-grad-end), transparent 68%); opacity: .35; animation: ih-drift 16s ease-in-out infinite alternate; }
+  .ihero__blob--b { width: 36vw; height: 36vw; right: -10vw; bottom: -18vw; background: radial-gradient(circle, var(--accent), transparent 68%); opacity: .16; animation: ih-drift 20s ease-in-out infinite alternate-reverse; }
+  .ihero__grid { position: absolute; inset: 0; background-image: linear-gradient(color-mix(in srgb, var(--accent-grad-start) 7%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--accent-grad-start) 7%, transparent) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at 30% 40%, #000 0%, transparent 70%); -webkit-mask-image: radial-gradient(ellipse at 30% 40%, #000 0%, transparent 70%); }
+  @keyframes ih-drift { to { transform: translate(5vw, 4vw) scale(1.12); } }
+
+  .ihero__inner { display: grid; gap: var(--space-lg); align-items: center; }
+  .ihero__copy { display: grid; gap: var(--space-sm); align-content: center; max-width: 36rem; }
+  .ihero__crumbs { display: flex; gap: .5rem; font-size: var(--text-sm); color: var(--text-secondary); } .ihero__crumbs a { color: inherit; text-decoration: none; } .ihero__crumbs a:hover { color: var(--accent); }
+  .ihero__title { font-family: var(--font-heading); font-size: clamp(2.4rem, 5vw, 4.1rem); letter-spacing: -.035em; line-height: 1.02; font-weight: 500; text-wrap: balance; color: var(--navy); }
+  .ihero__accent { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .08em; }
+  .ihero__lead { font-size: clamp(1.05rem, 1.5vw, 1.25rem); line-height: 1.55; color: var(--text-secondary); max-width: 44ch; }
+  .ihero__cta { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-xs); }
+  .ihero__btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 1.5rem; border-radius: var(--radius-full); text-decoration: none; font-weight: 500; white-space: nowrap; transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast); }
+  .ihero__btn:active { transform: scale(.98); } .ihero__btn--primary { background: var(--grad-brand); color: var(--on-accent); box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--accent-grad-start) 60%, transparent); } .ihero__btn--primary:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -8px color-mix(in srgb, var(--accent-grad-start) 65%, transparent); }
+  .ihero__btn--ghost { color: var(--navy); border: 1px solid var(--border); background: var(--bg-primary); } .ihero__btn--ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .ihero__facts { list-style: none; display: flex; flex-wrap: wrap; gap: .6rem; margin-top: var(--space-xs); } .ihero__facts li { font-size: var(--text-sm); padding: .35rem .9rem; border-radius: var(--radius-full); border: 1px solid var(--border); background: var(--bg-primary); color: var(--navy); }
+
+  @media (min-width: 900px) { .ihero__inner { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } .ihero { padding-block: var(--space-md); } }
+  @media (prefers-reduced-motion: reduce) { .ihero__blob { animation: none; } }
+</style>

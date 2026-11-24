@@ -1,0 +1,31 @@
+---
+// src/pages/terminos.astro — Marco de la página legal. El texto lo redacta Legal.
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/pages/PageHero.astro';
+import Section from '../components/pages/Section.astro';
+import { graph, orgSchema, breadcrumbSchema } from '../utils/seo.js';
+
+const schemaData = graph(orgSchema, breadcrumbSchema([
+  { label: 'Inicio', href: '/' },
+  { label: 'Términos', href: '/terminos' },
+]));
+---
+
+<Layout
+  title="Términos | Mobile One"
+  description="Términos y condiciones de uso del sitio y los servicios de Mobile One."
+  image="/images/og-default.jpg"
+  schemaData={schemaData}
+  noindex={true}
+>
+  <PageHero tone="light" crumbs={[{ label: 'Términos' }]} title="Términos" lead="Mobile One es un producto de DOT Solutions." />
+
+  <Section>
+    <!-- TEXTO LEGAL PENDIENTE: pegar aquí el contenido que entregue Legal. -->
+    <p class="legal-note">Texto legal en revisión por Legal.</p>
+  </Section>
+</Layout>
+
+<style>
+  .legal-note { color: var(--text-secondary); font-size: var(--text-base); padding: var(--space-sm) var(--space-md); border: 1px dashed var(--border); border-radius: var(--radius-md); max-width: 36rem; }
+</style>

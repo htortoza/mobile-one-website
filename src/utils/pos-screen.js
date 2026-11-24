@@ -58,13 +58,17 @@ function bleedQuad(q, px) {
   });
 }
 
-export function mountPosScreen(pos, screen, { mirror = false, minLeft = -Infinity, bleed = 7 } = {}) {
+// `quad`, `cx` e `imgW` permiten usar otro terminal (otra foto): esquinas del vidrio TL,TR,BR,BL en px de
+// la foto, centro del vidrio en x (fracción del ancho) y ancho de la foto. Por defecto, el terminal original.
+export function mountPosScreen(pos, screen, { mirror = false, minLeft = -Infinity, bleed = 7, quad: baseQuad = POS_QUAD, cx: baseCx = POS_SCREEN_CX, imgW = POS_IMG_W } = {}) {
   const device = pos.parentElement;
-  const quad = bleedQuad(mirror ? POS_QUAD_MIRROR : POS_QUAD, bleed);
-  const cx = mirror ? 1 - POS_SCREEN_CX : POS_SCREEN_CX;
+  const flipW = ([x, y]) => [imgW - x, y];
+  const mirrored = [flipW(baseQuad[1]), flipW(baseQuad[0]), flipW(baseQuad[3]), flipW(baseQuad[2])];
+  const quad = bleedQuad(mirror ? mirrored : baseQuad, bleed);
+  const cx = mirror ? 1 - baseCx : baseCx;
   const project = () => {
     pos.style.marginLeft = Math.max(minLeft, device.offsetWidth / 2 - pos.offsetWidth * cx) + 'px';
-    const s = pos.offsetWidth / POS_IMG_W;
+    const s = pos.offsetWidth / imgW;
     const q = quad.map(([x, y]) => [x * s, y * s]);
     screen.style.transform = quadMatrix(screen.offsetWidth, screen.offsetHeight, q);
   };

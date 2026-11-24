@@ -9,8 +9,51 @@ const orderUrl = withBase(site.orderUrl ?? '#');
 const loginUrl = site.loginUrl ?? '#';
 // Enlace principal de navegación (por ahora solo Producto, la única página
 // del menú planificado que existe). aria-current marca la página activa.
-const productoUrl = withBase('/producto');
-const isProducto = Astro.url.pathname.replace(/\/$/, '') === productoUrl.replace(/\/$/, '');
+const here = Astro.url.pathname.replace(/\/$/, '');
+const MENUS = {
+  '/integraciones': [
+    { heading: 'Tu ERP', links: [
+      { label: 'SAP Business One', href: '/integraciones/erp/sap-business-one' },
+      { label: 'Retail Pro', href: '/integraciones/erp/retail-pro' },
+      { label: 'Retail Pro Prism', href: '/integraciones/erp/retail-pro-prism' },
+    ] },
+    { heading: 'Medios de pago', links: [
+      { label: 'Transbank', href: '/integraciones/medios-de-pago/transbank' },
+      { label: 'Getnet', href: '/integraciones/medios-de-pago/getnet' },
+      { label: 'Mercado Pago', href: '/integraciones/medios-de-pago/mercado-pago' },
+      { label: 'Niubiz', href: '/integraciones/medios-de-pago/niubiz' },
+    ] },
+    { heading: 'Documentos', links: [
+      { label: 'Facturación electrónica', href: '/integraciones/facturacion' },
+    ] },
+  ],
+  '/recursos': [
+    { heading: 'Aprende', links: [
+      { label: 'Casos de uso', href: '/recursos#casos-de-uso' },
+      { label: 'Guía de uso', href: '/recursos#guia-de-uso' },
+      { label: 'Perfiles de usuario', href: '/recursos#perfiles' },
+    ] },
+    { heading: 'Por industria', links: [
+      { label: 'Moda y calzado', href: '/recursos/industrias/moda-y-calzado' },
+      { label: 'Electrónica y tecnología', href: '/recursos/industrias/electronica-y-tecnologia' },
+      { label: 'Multitienda y holdings', href: '/recursos/industrias/multitienda-y-holdings' },
+      { label: 'Retail con ERP', href: '/recursos/industrias/retail-con-erp' },
+    ] },
+    { heading: 'Conócenos', links: [
+      { label: 'Equipo', href: '/recursos#equipo' },
+    ] },
+  ],
+};
+const navItems = [
+  { label: 'Producto', href: '/producto' },
+  { label: 'Integraciones', href: '/integraciones' },
+  { label: 'Recursos', href: '/recursos' },
+].map((i) => {
+  const url = withBase(i.href);
+  const base = url.replace(/\/$/, '');
+  const groups = (MENUS[i.href] ?? []).map((g) => ({ ...g, links: g.links.map((l) => ({ ...l, url: withBase(l.href) })) }));
+  return { ...i, url, groups, current: here === base || here.startsWith(base + '/') };
+});
 
 const ICON_USER = 'M12 8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z|M5 20c0-3.5 3-6 7-6s7 2.5 7 6';
 const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17.5V13Z|M21 13h-4v6h2.5a1.5 1.5 0 0 0 1.5-1.5V13Z|M19 19v1a3 3 0 0 1-3 3h-3';
@@ -24,7 +67,27 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
 
     <div class="header-actions">
       <nav class="header-nav" aria-label="Menú principal">
-        <a href={productoUrl} class="header-link" aria-current={isProducto ? 'page' : undefined}>Producto</a>
+        {navItems.map((i) => i.groups.length ? (
+          <div class="nav-item">
+            <a href={i.url} class="header-link has-menu" aria-current={i.current ? 'page' : undefined} aria-haspopup="true">
+              {i.label}
+              <svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" /></svg>
+            </a>
+            <div class="dd" role="group" aria-label={i.label}>
+              <div class="dd__panel" style={`--cols:${i.groups.length}`}>
+                {i.groups.map((g) => (
+                  <div class="dd__group">
+                    <p class="dd__head">{g.heading}</p>
+                    {g.links.map((l) => <a class="dd__link" href={l.url}>{l.label}</a>)}
+                  </div>
+                ))}
+                <a class="dd__all" href={i.url}>Ver {i.label.toLowerCase()} →</a>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <a href={i.url} class="header-link" aria-current={i.current ? 'page' : undefined}>{i.label}</a>
+        ))}
       </nav>
       <span class="header-sep" aria-hidden="true"></span>
       <a href={loginUrl} class="header-login">
@@ -80,7 +143,22 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
     </div>
 
     <nav class="overlay-actions" aria-label="Menú principal">
-      <a href={productoUrl} class="overlay-link" data-overlay-link aria-current={isProducto ? 'page' : undefined}>Producto</a>
+      {navItems.map((i) => i.groups.length ? (
+        <details class="overlay-acc" open={i.current}>
+          <summary class="overlay-link overlay-link--sum">{i.label}</summary>
+          <div class="overlay-sub">
+            {i.groups.map((g) => (
+              <div>
+                <p class="overlay-sub__head">{g.heading}</p>
+                {g.links.map((l) => <a class="overlay-sub__link" href={l.url} data-overlay-link>{l.label}</a>)}
+              </div>
+            ))}
+            <a class="overlay-sub__link overlay-sub__link--all" href={i.url} data-overlay-link>Ver todo →</a>
+          </div>
+        </details>
+      ) : (
+        <a href={i.url} class="overlay-link" data-overlay-link aria-current={i.current ? 'page' : undefined}>{i.label}</a>
+      ))}
       <span class="overlay-sep" aria-hidden="true"></span>
       <a href={loginUrl} class="overlay-login" data-overlay-link>
         <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -223,7 +301,7 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
   .header-icon { width: 16px; height: 16px; flex-shrink: 0; }
 
   /* Enlace de navegación: subrayado que se dibuja al hover; fijo en la página activa */
-  .header-nav { display: flex; align-items: center; }
+  .header-nav { display: flex; align-items: center; gap: 1.6rem; }
   .header-link {
     position: relative;
     font-family: var(--font-body);
@@ -445,6 +523,33 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
     border-radius: var(--radius-full);
     text-decoration: none;
   }
+
+  /* ── Desplegable (escritorio) ── */
+  .nav-item { position: relative; }
+  .has-menu { display: inline-flex; align-items: center; gap: 5px; }
+  .chev { width: 10px; height: 10px; transition: transform var(--transition-fast); }
+  .nav-item:hover .chev, .nav-item:focus-within .chev { transform: rotate(180deg); }
+  .dd { position: absolute; top: 100%; left: 50%; padding-top: 14px; opacity: 0; visibility: hidden; transform: translate(-50%, 6px); transition: opacity .25s, transform .35s var(--ease-expo), visibility 0s linear .25s; z-index: 5; }
+  .nav-item:hover .dd, .nav-item:focus-within .dd { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s; }
+  .dd__panel { display: grid; grid-template-columns: repeat(var(--cols), auto); gap: 1.6rem; padding: 1.2rem 1.4rem; min-width: max-content; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: 0 24px 50px -20px color-mix(in srgb, var(--accent-grad-start) 35%, transparent), var(--shadow-md); position: relative; }
+  .dd__panel::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: var(--grad-brand); }
+  .dd__group { display: grid; gap: 2px; align-content: start; min-width: 11rem; }
+  .dd__head { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 500; padding: 0 .6rem .4rem; }
+  .dd__link { font-size: var(--text-sm); color: var(--navy); text-decoration: none; padding: .45rem .6rem; border-radius: var(--radius-md); white-space: nowrap; transition: background-color var(--transition-fast), color var(--transition-fast); }
+  .dd__link:hover, .dd__link:focus-visible { background: var(--tint-strong); color: var(--accent); }
+  .dd__all { grid-column: 1 / -1; font-size: var(--text-sm); color: var(--accent); text-decoration: none; padding: .6rem .6rem 0; border-top: 1px solid var(--border); font-weight: 500; }
+  .dd__all:hover { text-decoration: underline; }
+
+  /* ── Acordeón (móvil) ── */
+  .overlay-acc > summary { list-style: none; cursor: pointer; }
+  .overlay-acc > summary::-webkit-details-marker { display: none; }
+  .overlay-link--sum::after { content: '+'; font-size: var(--text-lg); }
+  .overlay-acc[open] > .overlay-link--sum::after { content: '−'; }
+  .overlay-sub { display: grid; gap: var(--space-xs); padding: 0 var(--space-xs) var(--space-xs) var(--space-sm); border-left: 2px solid var(--tint-strong); margin-left: var(--space-xs); }
+  .overlay-sub__head { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin: .4rem 0 .15rem; }
+  .overlay-sub__link { display: block; padding: .55rem .4rem; font-size: var(--text-base); color: var(--navy); text-decoration: none; border-radius: var(--radius-md); min-height: 44px; box-sizing: border-box; }
+  .overlay-sub__link:hover { background: var(--bg-secondary); }
+  .overlay-sub__link--all { color: var(--accent); font-weight: 500; }
 
   /* ── Responsive ── */
   @media (max-width: 860px) {

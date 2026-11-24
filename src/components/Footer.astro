@@ -9,34 +9,57 @@ const { siteName } = site.site;
 const company = site.company ?? {};
 const legalLinks = site.footerLinks ?? [];
 
-const columns = [
+// Solo se muestran enlaces a páginas que existen. Al publicar una página nueva
+// (Integraciones, Seguridad, Casos, Privacidad, Términos…) basta con sumar su ruta aquí.
+const LIVE_ROUTES = new Set([
+  '/producto', '/integraciones', '/integraciones/erp', '/integraciones/facturacion',
+  '/integraciones/medios-de-pago', '/integraciones/erp/sap-business-one', '/integraciones/erp/retail-pro',
+  '/integraciones/erp/retail-pro-prism', '/integraciones/medios-de-pago/transbank', '/integraciones/medios-de-pago/getnet',
+  '/integraciones/medios-de-pago/mercado-pago', '/integraciones/medios-de-pago/niubiz', '/recursos', '/contacto',
+  '/recursos/industrias/moda-y-calzado', '/recursos/industrias/electronica-y-tecnologia',
+  '/recursos/industrias/multitienda-y-holdings', '/recursos/industrias/retail-con-erp',
+]);
+const isLive = (href) => LIVE_ROUTES.has(href);
+
+const allColumns = [
   {
     title: 'Producto',
     links: [
-      { label: 'POS Mobile',      href: '/producto' },
-      { label: 'Panel de control', href: '/producto' },
-      { label: 'Integraciones',   href: '/integraciones' },
-      { label: 'Seguridad',       href: '/integraciones' },
+      { label: 'POS móvil y caja de pago', href: '/producto' },
+      { label: 'Panel de control',         href: '/producto' },
     ],
   },
   {
-    title: 'Soluciones',
+    title: 'Integraciones',
     links: [
-      { label: 'Moda y calzado',           href: '/soluciones' },
-      { label: 'Electrónica y tecnología', href: '/soluciones' },
-      { label: 'Multitienda / holdings',   href: '/soluciones' },
-      { label: 'Retail con ERP SAP',       href: '/soluciones' },
+      { label: 'SAP Business One',     href: '/integraciones/erp/sap-business-one' },
+      { label: 'Retail Pro',           href: '/integraciones/erp/retail-pro' },
+      { label: 'Retail Pro Prism',     href: '/integraciones/erp/retail-pro-prism' },
+      { label: 'Medios de pago',       href: '/integraciones/medios-de-pago' },
+      { label: 'Facturación electrónica', href: '/integraciones/facturacion' },
     ],
   },
   {
     title: 'Compañía',
     links: [
-      { label: 'Nosotros',       href: '/nosotros' },
-      { label: 'Casos de éxito', href: '/casos-de-exito' },
-      { label: 'Contacto',       href: '/contacto' },
+      { label: 'Recursos', href: '/recursos' },
+      { label: 'Contacto', href: '/contacto' },
+    ],
+  },
+  {
+    title: 'Industrias',
+    links: [
+      { label: 'Moda y calzado',          href: '/recursos/industrias/moda-y-calzado' },
+      { label: 'Electrónica y tecnología', href: '/recursos/industrias/electronica-y-tecnologia' },
+      { label: 'Multitienda y holdings',  href: '/recursos/industrias/multitienda-y-holdings' },
+      { label: 'Retail con ERP',          href: '/recursos/industrias/retail-con-erp' },
     ],
   },
 ];
+const columns = allColumns
+  .map((col) => ({ ...col, links: col.links.filter((l) => isLive(l.href)) }))
+  .filter((col) => col.links.length > 0);
+const liveLegalLinks = legalLinks.filter((l) => isLive(l.href));
 ---
 
 <footer class="site-footer">
@@ -52,7 +75,7 @@ const columns = [
           <h3>{col.title}</h3>
           <ul role="list">
             {col.links.map((item) => (
-              <li><span class="site-footer__disabled">{item.label}</span></li>
+              <li><a href={withBase(item.href)}>{item.label}</a></li>
             ))}
           </ul>
         </div>
@@ -61,8 +84,8 @@ const columns = [
       <div class="site-footer__col">
         <h3>Legal</h3>
         <ul role="list">
-          {legalLinks.map((item) => (
-            <li><span class="site-footer__disabled">{item.label}</span></li>
+          {liveLegalLinks.map((item) => (
+            <li><a href={withBase(item.href)}>{item.label}</a></li>
           ))}
           {company.email && <li><a href={`mailto:${company.email}`}>{company.email}</a></li>}
         </ul>
@@ -128,7 +151,6 @@ const columns = [
     overflow-wrap: break-word;
   }
   .site-footer__col a:hover { color: var(--accent); }
-  .site-footer__disabled { opacity: 0.55; cursor: default; }
 
   .site-footer__bottom {
     padding-top: var(--space-md);
@@ -145,6 +167,6 @@ const columns = [
       align-items: start;
       gap: var(--space-2xl);
     }
-    .site-footer__cols { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-lg); }
+    .site-footer__cols { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: var(--space-lg); }
   }
 </style>

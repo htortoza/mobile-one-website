@@ -1,0 +1,55 @@
+---
+// src/components/showcase/ScreenPanel.astro
+// Panel de control "Métricas" con datos ficticios (lienzo 1280×800, estilo del panel real).
+import { withBase } from '../../utils/base.js';
+const bars = [38,46,41,58,52,66,61,74,69,83,78,92];
+---
+<div class="pn" data-screens="panel" aria-hidden="true">
+  <aside class="pn__side">
+    <img class="pn__logo" src={withBase('/brand/Imagotipo-logo.svg')} alt="" />
+    <p class="pn__g">ANÁLISIS</p><span class="pn__i pn__i--on">Métricas</span>
+    <p class="pn__g">OPERACIONES</p><span class="pn__i">Ventas</span><span class="pn__i">Ventas en Vivo</span><span class="pn__i">Cajas</span><span class="pn__i">Documentos pendientes</span>
+    <p class="pn__g">MAESTROS</p><span class="pn__i">Tiendas</span><span class="pn__i">Artículos</span><span class="pn__i">Recepción de Mercadería</span><span class="pn__i">Kardex</span><span class="pn__i">Clientes</span>
+  </aside>
+  <div class="pn__main">
+    <h3>Métricas</h3><p class="pn__sub">Rendimiento comercial y operación de tus tiendas.</p>
+    <div class="pn__filters"><span>Todas las tiendas</span><span>Últimos 30 días</span><span>vs. mes anterior</span></div>
+    <div class="pn__tabs"><span class="on">Visión Global</span><span>Desempeño por Tienda</span><span>Conversión y Promociones</span><span>Eficiencia POS</span><span>Uso del POS</span></div>
+    <div class="pn__kpis">
+      <div><small>Ventas totales</small><b data-n>$18.742.300</b><em>+22,4% vs 30 días anteriores</em></div>
+      <div><small>Ticket promedio</small><b>$52.480</b><em>+8,1% vs 30 días anteriores</em></div>
+      <div><small>Artículos por ticket</small><b>2,3</b><em>+0,2 vs 30 días anteriores</em></div>
+      <div><small>Cliente identificado</small><b>41,6%</b><em>+5,3 pts vs 30 días anteriores</em></div>
+    </div>
+    <div class="pn__row">
+      <div class="pn__chart"><b>Evolución de ventas</b><small>Venta diaria con IVA. La línea punteada es la referencia: 30 días anteriores.</small>
+        <div class="pn__bars">{bars.map((h, i) => <span style={`--h:${h}%;--d:${i * 70}ms`}></span>)}</div>
+      </div>
+      <div class="pn__donut"><b>Impacto omnicanal</b><small>Cómo se entregó lo vendido.</small>
+        <div class="pn__ring"></div>
+        <ul><li><i></i>Venta directa<b>62%</b></li><li><i></i>Despacho a domicilio<b>25%</b></li><li><i></i>Retiro en otra tienda<b>13%</b></li></ul>
+      </div>
+    </div>
+    <div class="pn__stores"><b>Ventas por tienda</b>
+      <div><span>Providencia</span><i style="--w:92%"></i><b>$5.120.400</b></div>
+      <div><span>Maipú</span><i style="--w:74%"></i><b>$4.086.900</b></div>
+      <div><span>Viña del Mar</span><i style="--w:61%"></i><b>$3.372.000</b></div>
+    </div>
+  </div>
+</div>
+<style>
+  .pn { position: absolute; inset: 0; display: grid; grid-template-columns: 210px 1fr; background: var(--bg-secondary); color: var(--navy); font-family: var(--font-body); font-size: 13px; }
+  .pn__side { background: var(--bg-primary); border-right: 1px solid var(--border); padding: 14px 12px; display: grid; align-content: start; gap: 3px; }
+  .pn__logo { height: 34px; width: auto; justify-self: start; margin-bottom: 10px; }
+  .pn__g { margin: 12px 0 2px 6px; font-size: 10px; letter-spacing: .1em; color: var(--text-secondary); } .pn__i { padding: 8px 10px; border-radius: 8px; } .pn__i--on { background: color-mix(in srgb, var(--accent) 10%, var(--bg-primary)); color: var(--accent-grad-start); font-weight: 500; }
+  .pn__main { padding: 22px 26px; display: grid; align-content: start; gap: 12px; min-width: 0; } .pn h3 { margin: 0; font-size: 24px; font-weight: 500; letter-spacing: -.02em; } .pn__sub { margin: -8px 0 0; color: var(--text-secondary); }
+  .pn__filters { display: flex; gap: 10px; } .pn__filters span { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; }
+  .pn__tabs { display: flex; gap: 6px; flex-wrap: wrap; } .pn__tabs span { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-secondary); } .pn__tabs .on { border-color: var(--accent); color: var(--accent-grad-start); font-weight: 500; }
+  .pn__kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; } .pn__kpis div { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: grid; gap: 4px; } .pn__kpis small { color: var(--text-secondary); } .pn__kpis b { font-size: 24px; letter-spacing: -.02em; font-weight: 600; } .pn__kpis em { font-style: normal; font-size: 11px; color: var(--accent-grad-start); }
+  .pn__row { display: grid; grid-template-columns: 1.7fr 1fr; gap: 12px; } .pn__chart, .pn__donut { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: grid; gap: 6px; align-content: start; } .pn small { color: var(--text-secondary); font-size: 11px; }
+  .pn__bars { display: flex; align-items: flex-end; gap: 8px; height: 170px; margin-top: 6px; border-bottom: 1px solid var(--border); } .pn__bars span { flex: 1; height: var(--h); border-radius: 6px 6px 0 0; background: linear-gradient(0deg, var(--accent-grad-start), var(--accent-grad-end)); transform-origin: bottom; }
+  :global(.is-live) .pn__bars span { animation: grow .9s var(--ease-expo) both; animation-delay: var(--d); } @keyframes grow { from { transform: scaleY(0); } }
+  .pn__stores { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: grid; gap: 8px; } .pn__stores > div { display: grid; grid-template-columns: 110px 1fr 100px; gap: 12px; align-items: center; } .pn__stores i { height: 8px; width: var(--w); border-radius: 99px; background: linear-gradient(90deg, var(--accent-grad-start), var(--accent-grad-end)); } .pn__stores > div b { text-align: right; font-weight: 500; }
+  .pn__ring { width: 120px; height: 120px; border-radius: 50%; margin: 8px auto; background: conic-gradient(var(--accent-grad-start) 0 62%, var(--accent-grad-end) 62% 87%, var(--border) 87% 100%); -webkit-mask: radial-gradient(circle, transparent 46%, #000 47%); mask: radial-gradient(circle, transparent 46%, #000 47%); }
+  .pn__donut ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; } .pn__donut li { display: flex; align-items: center; gap: 8px; } .pn__donut li b { margin-left: auto; } .pn__donut i { width: 9px; height: 9px; border-radius: 3px; background: var(--accent-grad-start); } .pn__donut li:nth-child(2) i { background: var(--accent-grad-end); } .pn__donut li:nth-child(3) i { background: var(--border); }
+</style>

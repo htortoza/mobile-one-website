@@ -1,0 +1,43 @@
+---
+// src/components/producto/ProductoBlockHead.astro
+// /producto - cabecera de bloque del esquema (Producto y solución, Confianza y métricas).
+// Solo texto: ancla la estructura en 4 bloques sin tocar las escenas de cada capítulo.
+const { eyebrow, title, text, id } = Astro.props;
+---
+<section class="pbh" id={id} data-gsap-section="pbh">
+  <div class="container pbh__inner">
+    <p class="pbh__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>
+    <h2 class="pbh__title" data-gsap-animate="fade-up">{title}</h2>
+    {text && <p class="pbh__text" data-gsap-animate="fade-up">{text}</p>}
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.querySelectorAll('[data-gsap-section="pbh"]').forEach((section) => {
+      gsap.from(section.querySelectorAll('[data-gsap-animate="fade-up"]'), {
+        opacity: 0, y: 18, duration: 0.7, stagger: 0.08, ease: 'power2.out',
+        scrollTrigger: { trigger: section, start: 'top 82%' },
+      });
+    });
+  });
+</script>
+
+<style>
+  .pbh { padding-block: var(--space-xl) var(--space-md); background: var(--bg-primary); }
+  .pbh__inner { display: grid; gap: var(--space-xs); }
+  .pbh__eyebrow { font-size: var(--text-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+  .pbh__title { font-family: var(--font-heading); font-size: clamp(2.1rem, 4.8vw, 3.6rem); letter-spacing: -0.03em; line-height: 1.05; color: var(--navy); font-weight: 500; max-width: 22ch; }
+  .pbh__text { font-size: var(--text-lg); color: var(--text-secondary); line-height: 1.6; max-width: 56ch; }
+
+  /* El rail de capítulos (ProductoChapterNav) es fixed en x 32 a 155px: el contenido arranca a 200px o más
+     para no quedar debajo de él (misma regla que ProductoScaleBand). */
+  @media (min-width: 900px) {
+    .pbh__inner { padding-inline-start: max(var(--container-pad), calc(200px - max(0px, (100vw - var(--container-max)) / 2))); }
+  }
+</style>

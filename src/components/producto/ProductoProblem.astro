@@ -1,0 +1,124 @@
+---
+// src/components/producto/ProductoProblem.astro
+// /producto - bloque 1 "Problema y dolor": tres pérdidas diarias del retail.
+// Tres tarjetas del MISMO tamaño. En escritorio funcionan como paneles que se expanden:
+// la activa crece y recorre sola las tres hasta que la persona interactúa.
+// En móvil se apilan, todas con la misma proporción y la pregunta sobre la foto.
+import { withBase } from '../../utils/base.js';
+const { eyebrow, title, items = [] } = Astro.props;
+---
+<section class="ppr" id="problema" data-gsap-section="ppr">
+  <div class="container ppr__inner">
+    <div class="ppr__head">
+      <p class="ppr__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>
+      <h2 class="ppr__title" data-gsap-animate="fade-up">{title}</h2>
+    </div>
+
+    <div class="ppr__strip" data-ppr-strip>
+      {items.map((it, i) => (
+        <article class={`ppr__card ${i === 0 ? 'is-active' : ''}`} data-ppr-card tabindex="0" aria-label={it.question}>
+          <img class="ppr__img" src={withBase(it.image)} alt={it.alt} loading="lazy" />
+          <div class="ppr__shade"></div>
+          <div class="ppr__copy">
+            {it.label && <span class="ppr__chip">{it.label}</span>}
+            <p class="ppr__q">{it.question}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <div class="ppr__dots" data-ppr-dots aria-hidden="true">
+      {items.map((_, i) => <span class={`ppr__dot ${i === 0 ? 'is-active' : ''}`}></span>)}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initProblem() {
+    const section = document.querySelector('[data-gsap-section="ppr"]');
+    if (!section || section.dataset.pprInit) return;
+    section.dataset.pprInit = '1';
+
+    const cards = [...section.querySelectorAll('[data-ppr-card]')];
+    const dots = [...section.querySelectorAll('.ppr__dot')];
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const wide = window.matchMedia('(min-width: 900px)');
+    let current = 0;
+    let timer = null;
+    let userTookOver = false;
+
+    const activate = (i) => {
+      current = i;
+      cards.forEach((c, k) => c.classList.toggle('is-active', k === i));
+      dots.forEach((d, k) => d.classList.toggle('is-active', k === i));
+    };
+    const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+    const play = () => {
+      if (reduce || userTookOver || !wide.matches || timer) return;
+      timer = setInterval(() => activate((current + 1) % cards.length), 3800);
+    };
+
+    cards.forEach((c, i) => {
+      const take = () => { userTookOver = true; stop(); activate(i); };
+      c.addEventListener('mouseenter', take);
+      c.addEventListener('focus', take);
+      c.addEventListener('click', take);
+    });
+
+    // Solo avanza sola mientras la sección está a la vista.
+    new IntersectionObserver((entries) => {
+      entries[0].isIntersecting ? play() : stop();
+    }, { threshold: 0.45 }).observe(section.querySelector('[data-ppr-strip]'));
+
+    if (reduce) return;
+    gsap.from(section.querySelectorAll('[data-gsap-animate="fade-up"]'), {
+      opacity: 0, y: 18, duration: 0.7, stagger: 0.08, ease: 'power2.out',
+      scrollTrigger: { trigger: section, start: 'top 82%' },
+    });
+    gsap.from(cards, {
+      opacity: 0, y: 32, duration: 0.9, stagger: 0.12, ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 70%' },
+    });
+  }
+
+  document.addEventListener('astro:page-load', initProblem);
+</script>
+
+<style>
+  .ppr { padding-block: var(--space-xl); background: var(--bg-secondary); }
+  .ppr__inner { display: grid; gap: var(--space-lg); }
+  .ppr__head { display: grid; gap: var(--space-xs); }
+  .ppr__eyebrow { font-size: var(--text-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+  .ppr__title { font-family: var(--font-heading); font-size: clamp(2.1rem, 4.8vw, 3.6rem); letter-spacing: -0.03em; line-height: 1.05; color: var(--navy); font-weight: 500; max-width: 22ch; }
+
+  /* Tarjetas del mismo tamaño: misma proporción en móvil, misma altura en escritorio */
+  .ppr__strip { display: grid; gap: var(--space-sm); grid-template-columns: minmax(0, 1fr); }
+  .ppr__card { position: relative; overflow: hidden; border-radius: var(--radius-lg); aspect-ratio: 4 / 3; box-shadow: var(--shadow-md); isolation: isolate; min-width: 0; outline-offset: 3px; }
+  .ppr__card:focus-visible { outline: 2px solid var(--accent); }
+  .ppr__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; z-index: -2; transition: transform 1.2s var(--ease-expo); }
+  .ppr__shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, color-mix(in srgb, var(--navy) 90%, transparent) 0%, color-mix(in srgb, var(--navy) 35%, transparent) 55%, transparent 100%); }
+  .ppr__copy { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 0.6rem; padding: var(--space-md); }
+  .ppr__chip { justify-self: start; padding: 2px 12px; border-radius: var(--radius-full); font-size: var(--text-xs); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; color: var(--on-accent); background: color-mix(in srgb, var(--on-accent) 20%, transparent); backdrop-filter: blur(6px); }
+  .ppr__q { font-family: var(--font-heading); font-size: clamp(1.25rem, 2vw, 1.6rem); line-height: 1.18; letter-spacing: -0.015em; color: var(--on-accent); max-width: 20ch; }
+  .ppr__dots { display: none; }
+
+  @media (min-width: 900px) {
+    .ppr__strip { display: flex; gap: var(--space-sm); height: clamp(420px, 56vh, 540px); }
+    .ppr__card { aspect-ratio: auto; flex: 1 1 0; cursor: pointer; transition: flex-grow 0.8s var(--ease-expo); }
+    .ppr__card.is-active { flex-grow: 1.9; }
+    .ppr__card:not(.is-active) .ppr__img { transform: scale(1.06); filter: saturate(0.75); }
+    .ppr__card.is-active .ppr__img { transform: scale(1); }
+    .ppr__q { transition: font-size 0.6s var(--ease-expo); }
+    .ppr__card.is-active .ppr__q { font-size: clamp(1.5rem, 2.4vw, 2rem); }
+    .ppr__dots { display: flex; gap: 8px; }
+    .ppr__dot { width: 28px; height: 4px; border-radius: var(--radius-full); background: var(--border); transition: background-color 0.4s, width 0.4s; }
+    .ppr__dot.is-active { width: 56px; background: var(--accent); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ppr__card, .ppr__img, .ppr__q { transition: none; }
+  }
+</style>

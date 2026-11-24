@@ -32,12 +32,12 @@ h1, h2, h3, h4, h5, h6 {
 :root {
   /* Colores — paleta oficial Mobile One (Manual de Marca) */
   --bg-primary:      #ffffff;
-  --bg-secondary:    #f5f7fb;
+  --bg-secondary:    #f3f6ff;   /* tinte azul muy claro, limpio (antes un gris azulado) */
   --text-primary:    #1c1c1c;
   --text-secondary:  #5a6472;
   --accent:          #0000ff;
   --accent-hover:    #0022aa;
-  --border:          #e3e6ec;
+  --border:          #e1e8f6;
 
   /* Marca — bloques full-bleed azules (Hero/scroll narrativo/CTA) */
   --navy:               #132d46;
@@ -45,6 +45,15 @@ h1, h2, h3, h4, h5, h6 {
   --accent-grad-end:    #4a90e2;
   --accent-gradient:    linear-gradient(135deg, var(--accent-grad-start), var(--accent-grad-end));
   --on-accent:          #ffffff;
+
+  /* Páginas claras con acentos de la paleta. El navy (#132D46) se usa para texto y detalles,
+     no como fondo de secciones. Los gradientes son el gradiente oficial #0022AA → #4A90E2. */
+  --black-brand: #0d0d0d; /* Negro de marca (Manual de Marca p10): fondo permitido para logos en versión negativa */
+  --tint:               #f3f6ff;   /* fondo claro azulado, alterna con el blanco */
+  --tint-strong:        #e6eeff;
+  --grad-brand:         linear-gradient(125deg, var(--accent-grad-start) 0%, color-mix(in srgb, var(--accent-grad-start) 46%, var(--accent-grad-end)) 46%, var(--accent-grad-end) 100%);
+  --grad-text:          linear-gradient(100deg, var(--accent-grad-start), var(--accent-grad-end));
+  --grad-soft:          linear-gradient(180deg, var(--bg-primary) 0%, var(--tint) 100%);
 
   /* Tono ambiental por pasarela de pago (sección "Compatibilidad") — no son el
      hex exacto de marca de terceros, solo un acento de color para diferenciar

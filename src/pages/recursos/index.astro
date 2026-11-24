@@ -1,0 +1,220 @@
+---
+// src/pages/recursos/index.astro — hub de Recursos. Solo contenido existente hoy (sin blog ni webinars).
+import Layout from '../../layouts/Layout.astro';
+import ResourcesHero from '../../components/recursos/ResourcesHero.astro';
+import CtaBand from '../../components/pages/CtaBand.astro';
+import { withBase } from '../../utils/base.js';
+import { graph, orgSchema, breadcrumbSchema } from '../../utils/seo.js';
+
+const schemaData = graph(orgSchema, breadcrumbSchema([
+  { label: 'Inicio', href: '/' },
+  { label: 'Recursos', href: '/recursos' },
+]));
+
+const heroItems = [
+  { tag: 'Casos de uso', title: 'Situaciones reales', text: 'Cuatro escenarios del día a día de una tienda.', href: '#casos-de-uso' },
+  { tag: 'Guía de uso', title: 'De la apertura al cierre', text: 'El recorrido de una venta, en resumen.', href: '#guia-de-uso' },
+  { tag: 'Perfiles', title: 'Cada persona, su vista', text: 'Vendedor, supervisor, soporte y administrador.', href: '#perfiles' },
+  { tag: 'Equipo', title: 'Detrás de cada sistema', text: 'Quién desarrolla y acompaña Mobile One.', href: '#equipo' },
+  { tag: 'Industrias', title: 'Soluciones por rubro', text: 'Moda, electrónica, multitienda y retail con ERP.', href: '#industrias' },
+];
+
+const useCases = [
+  { id: 'fila', img: '/images/solucion-fila.webp', alt: 'Dos vendedoras cobrando en distintos puntos de la tienda al mismo tiempo', tag: 'Ventas', title: 'Cobrar sin hacer fila', text: 'El vendedor atiende y cobra donde está el cliente, con el mismo terminal de pago. La caja deja de ser el cuello de botella en horas de alta venta.' },
+  { id: 'bultos', img: '/images/recepcion-infrarrojo.webp', alt: 'Trabajadora escaneando un bulto con el lector infrarrojo del terminal Mobile One mientras revisa el documento de la recepción', tag: 'Bodega', title: 'Recibir mercadería sin contar caja por caja', text: 'El documento del ERP trae lo que debería venir en el paquete. Se escanea cada bulto con la cámara o el infrarrojo del mismo terminal y el sistema cuadra que llegue lo que dice el documento. El equipo recupera las horas que perdía contando.' },
+  { id: 'promos', img: '/images/solucion-promo.webp', alt: 'Vendedora cobrando con un descuento aplicado automáticamente', tag: 'Comercial', title: 'Aplicar promociones sin cálculos manuales', text: 'Las reglas por cliente, categoría, marca o ticket se aplican solas al cobrar. El vendedor no calcula descuentos a mano.' },
+  { id: 'panel', img: '/images/solucion-backoffice.webp', alt: 'Encargada de tienda revisando ventas y stock en el panel de control', tag: 'Gestión', title: 'Seguir la operación desde el panel', text: 'Ventas, tiendas, artículos, clientes y usuarios en un panel web sincronizado con tu ERP, sin digitar la misma información dos veces.' },
+];
+
+const guide = [
+  { n: '1', t: 'Ingresar', d: 'El vendedor abre turno con el QR de la tienda y su credencial.' },
+  { n: '2', t: 'Armar la venta', d: 'Busca o escanea productos y ve el stock de toda la red.' },
+  { n: '3', t: 'Cobrar', d: 'Cobra con el terminal de pago que ya usa y emite el documento al instante.' },
+  { n: '4', t: 'Cerrar', d: 'La venta queda sincronizada con el ERP y visible en el panel.' },
+];
+
+const profiles = [
+  { i: 'Ve', t: 'Vendedor', d: 'Atiende, recomienda, cobra y emite el documento desde el terminal.' },
+  { i: 'Su', t: 'Supervisor', d: 'Sigue las ventas de la tienda y revisa carros pendientes y cierres.' },
+  { i: 'So', t: 'Soporte', d: 'Acompaña al equipo en la operación diaria y resuelve consultas.' },
+  { i: 'Ad', t: 'Administrador', d: 'Gestiona tiendas, usuarios y las funciones que se activan por cliente.' },
+];
+
+import { industrias } from '../../data/industrias.js';
+---
+
+<Layout
+  title="Recursos de Mobile One: casos de uso y guías"
+  description="Casos de uso, resumen de la guía de uso, perfiles de usuario y soluciones por industria para retail con Mobile One."
+  image="/images/og-default.jpg"
+  schemaData={schemaData}
+>
+  <ResourcesHero
+    crumbs={[{ label: 'Recursos' }]}
+    title="Todo para entender"
+    accent="cómo se usa Mobile One"
+    lead="Casos de uso, un resumen de la guía y los perfiles que operan la plataforma."
+    ctaText="Agendar demo" ctaHref="/contacto"
+    items={heroItems}
+  />
+
+  <!-- Casos de uso: composición asimétrica con imagen -->
+  <section class="uc" id="casos-de-uso">
+    <div class="container uc__inner">
+      <div class="head" data-rv><h2>Casos de uso</h2><p>Cuatro situaciones del día a día de una tienda y cómo se resuelven.</p></div>
+      <div class="uc__grid">
+        {useCases.map((c, i) => (
+          <article class={`ucc ucc--${i}`} id={c.id} data-rv>
+            <img src={withBase(c.img)} alt={c.alt} loading="lazy" />
+            <div class="ucc__shade"></div>
+            <div class="ucc__body"><span class="ucc__tag">{c.tag}</span><h3>{c.title}</h3><p>{c.text}</p></div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Guía de uso: recorrido que se dibuja -->
+  <section class="guide" id="guia-de-uso">
+    <div class="guide__bg" aria-hidden="true"><span class="guide__grid"></span><span class="guide__glow"></span></div>
+    <div class="container guide__inner">
+      <div class="head head--dark" data-rv><h2>Guía de uso, en resumen</h2><p>El recorrido de una venta, de la apertura al cierre.</p></div>
+      <ol class="path" data-path>
+        <span class="path__line" aria-hidden="true"><i data-path-line></i></span>
+        {guide.map((g) => (
+          <li data-rv><span class="path__n">{g.n}</span><h3>{g.t}</h3><p>{g.d}</p></li>
+        ))}
+      </ol>
+      <p class="guide__note" data-rv>¿Quieres ver el flujo completo con tu catálogo? <a href={withBase('/contacto')}>Agenda una demo</a>.</p>
+    </div>
+  </section>
+
+  <!-- Perfiles -->
+  <section class="prof" id="perfiles">
+    <div class="container prof__inner">
+      <div class="head" data-rv><h2>Perfiles de usuario</h2><p>Cada persona del equipo ve lo que necesita.</p></div>
+      <div class="prof__grid">
+        {profiles.map((p) => (
+          <article class="pcard" data-rv><span class="pcard__i">{p.i}</span><h3>{p.t}</h3><p>{p.d}</p></article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Equipo -->
+  <section class="team" id="equipo">
+    <img class="team__mark" src={withBase('/brand/Isotipo-logo.svg')} alt="" aria-hidden="true" />
+    <div class="container team__inner" data-rv>
+      <h2 class="team__title">Detrás de cada sistema, <span>un equipo.</span></h2>
+      <div class="team__body">
+        <p>Mobile One lo desarrolla DOT Solutions y acompaña a cada cliente desde la primera semana.</p>
+        <img class="team__logo" src={withBase('/brand/bydot-blanco.svg')} alt="Mobile One by DOT Solutions" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Industrias: lista editorial -->
+  <section class="ind" id="industrias">
+    <div class="container ind__inner">
+      <div class="head" data-rv><h2>Soluciones por industria</h2><p>Mobile One se adapta a cada rubro del retail.</p></div>
+      <ul class="ind__list" role="list">
+        {industrias.map((n) => (
+          <li data-rv><a href={withBase(`/recursos/industrias/${n.slug}`)}><span><b>{n.name}</b><small>{n.short}</small></span><i aria-hidden="true">→</i></a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand />
+</Layout>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+  document.addEventListener('astro:page-load', () => {
+    // Solo esta página: los otros scripts de la web también escuchan astro:page-load y no deben tocar estos elementos.
+    if (!location.pathname.replace(/\/$/, '').endsWith('/recursos')) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll('[data-path-line]').forEach((l) => { l.style.transform = 'none'; });
+      return;
+    }
+    gsap.utils.toArray('[data-rv]').forEach((el, i) => {
+      if (el.dataset.rvDone) return; el.dataset.rvDone = '1'; // evita que dos páginas animen el mismo elemento al navegar
+      gsap.from(el, { opacity: 0, y: 34, duration: 1, ease: 'expo.out', delay: (i % 4) * 0.07, scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
+    });
+    // el recorrido de la guía se dibuja con el scroll
+    const path = document.querySelector('[data-path]');
+    if (path) gsap.fromTo('[data-path-line]', { scaleX: 0, scaleY: 0 }, { scaleX: 1, scaleY: 1, ease: 'none', scrollTrigger: { trigger: path, start: 'top 75%', end: 'bottom 60%', scrub: true } });
+  });
+</script>
+
+<style>
+  .head { display: grid; gap: .6rem; } .head h2 { font-family: var(--font-heading); font-size: clamp(2rem, 4.4vw, 3.4rem); letter-spacing: -.03em; line-height: 1.05; color: var(--navy); font-weight: 500; max-width: 22ch; } .head p { font-size: var(--text-lg); color: var(--text-secondary); max-width: 52ch; }
+  .head--dark h2 { color: var(--on-accent); } .head--dark p { color: color-mix(in srgb, var(--on-accent) 78%, transparent); }
+
+  /* Casos de uso */
+  .uc { background: var(--bg-primary); padding-block: var(--space-xl); }
+  .uc__inner { display: grid; gap: var(--space-lg); }
+  .uc__grid { display: grid; gap: var(--space-sm); grid-template-columns: minmax(0, 1fr); }
+  .ucc { position: relative; overflow: hidden; border-radius: calc(var(--radius-lg) * 1.5); aspect-ratio: 4 / 3; isolation: isolate; color: var(--on-accent); box-shadow: var(--shadow-md); }
+  .ucc img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform 1.4s var(--ease-expo); } .ucc:hover img { transform: scale(1.06); }
+  .ucc__shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, color-mix(in srgb, var(--navy) 94%, transparent) 0%, color-mix(in srgb, var(--navy) 55%, transparent) 45%, transparent 100%); }
+  .ucc__body { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: .5rem; padding: var(--space-md); }
+  .ucc__tag { justify-self: start; font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; font-weight: 500; padding: 3px 12px; border-radius: var(--radius-full); background: color-mix(in srgb, var(--on-accent) 20%, transparent); backdrop-filter: blur(6px); }
+  .ucc h3 { font-family: var(--font-heading); font-size: clamp(1.4rem, 2.4vw, 2rem); letter-spacing: -.02em; line-height: 1.1; font-weight: 500; max-width: 22ch; } .ucc p { font-size: var(--text-base); line-height: 1.5; opacity: .88; max-width: 46ch; }
+  @media (min-width: 900px) {
+    .uc__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-rows: 270px; }
+    .ucc { aspect-ratio: auto; }
+    .ucc--0 { grid-column: span 7; grid-row: span 2; }
+    .ucc--1 { grid-column: span 5; } .ucc--2 { grid-column: span 5; }
+    .ucc--3 { grid-column: span 12; }
+    .ucc--0 h3 { font-size: clamp(1.8rem, 3vw, 2.6rem); }
+  }
+
+  /* Guía */
+  .guide { position: relative; background: var(--grad-brand); color: var(--on-accent); padding-block: var(--space-xl); overflow: clip; isolation: isolate; }
+  .guide__bg { position: absolute; inset: 0; z-index: -1; } .guide__grid { position: absolute; inset: 0; background-image: linear-gradient(color-mix(in srgb, var(--on-accent) 6%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--on-accent) 6%, transparent) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at 50% 50%, #000 0%, transparent 72%); -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 0%, transparent 72%); }
+  .guide__glow { position: absolute; right: -10vw; top: -20%; width: 46vw; height: 140%; background: radial-gradient(ellipse, color-mix(in srgb, var(--on-accent) 28%, transparent), transparent 65%); filter: blur(50px); }
+  .guide__inner { display: grid; gap: var(--space-lg); }
+  .path { position: relative; list-style: none; display: grid; gap: var(--space-md); grid-template-columns: minmax(0, 1fr); }
+  .path__line { position: absolute; left: 1.35rem; top: 1.35rem; bottom: 1.35rem; width: 2px; background: color-mix(in srgb, var(--on-accent) 18%, transparent); } .path__line i { position: absolute; inset: 0; background: linear-gradient(180deg, var(--accent-grad-end), var(--on-accent)); transform-origin: top; }
+  .path li { position: relative; display: grid; gap: .4rem; padding-left: 4rem; } .path__n { position: absolute; left: 0; top: 0; width: 2.7rem; height: 2.7rem; display: grid; place-items: center; border-radius: 50%; background: var(--on-accent); color: var(--navy); font-weight: 600; box-shadow: 0 0 0 6px color-mix(in srgb, var(--on-accent) 14%, transparent); }
+  .path h3 { font-family: var(--font-heading); font-size: var(--text-xl); letter-spacing: -.015em; font-weight: 500; padding-top: .35rem; } .path p { line-height: 1.55; color: color-mix(in srgb, var(--on-accent) 80%, transparent); max-width: 34ch; }
+  .guide__note { color: color-mix(in srgb, var(--on-accent) 80%, transparent); } .guide__note a { color: var(--on-accent); text-decoration-color: var(--accent-grad-end); text-underline-offset: 4px; }
+  @media (min-width: 900px) {
+    .path { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-md); padding-top: 3.6rem; }
+    .path__line { left: 1.35rem; right: 1.35rem; top: 1.35rem; bottom: auto; width: auto; height: 2px; } .path__line i { transform-origin: left; background: linear-gradient(90deg, var(--accent-grad-end), var(--on-accent)); }
+    .path li { padding-left: 0; padding-top: 0; } .path__n { top: -3.6rem; } .path h3 { padding-top: 0; }
+  }
+
+  /* Perfiles */
+  .prof { background: var(--bg-secondary); padding-block: var(--space-xl); }
+  .prof__inner { display: grid; gap: var(--space-lg); }
+  .prof__grid { display: grid; gap: var(--space-sm); grid-template-columns: minmax(0, 1fr); }
+  .pcard { display: grid; gap: .6rem; align-content: start; padding: var(--space-md); border-radius: calc(var(--radius-lg) * 1.5); background: var(--bg-primary); border: 1px solid var(--border); transition: transform .6s var(--ease-expo), box-shadow .6s var(--ease-expo), border-color .4s; }
+  .pcard:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); border-color: var(--accent); }
+  .pcard__i { width: 3.4rem; height: 3.4rem; display: grid; place-items: center; border-radius: var(--radius-lg); background: var(--accent-gradient); color: var(--on-accent); font-family: var(--font-heading); font-size: var(--text-lg); font-weight: 500; letter-spacing: -.02em; transition: transform .6s var(--ease-expo); } .pcard:hover .pcard__i { transform: rotate(-6deg) scale(1.08); }
+  .pcard h3 { font-family: var(--font-heading); font-size: var(--text-xl); letter-spacing: -.015em; color: var(--navy); font-weight: 500; margin-top: .4rem; } .pcard p { color: var(--text-secondary); line-height: 1.55; }
+  @media (min-width: 700px) { .prof__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1100px) { .prof__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .pcard:nth-child(even) { margin-top: var(--space-md); } }
+
+  /* Equipo */
+  .team { position: relative; background: var(--bg-primary); padding-block: var(--space-xl); overflow: clip; }
+  .team__mark { position: absolute; right: -6%; top: 50%; translate: 0 -50%; width: min(46vw, 520px); height: auto; opacity: .06; pointer-events: none; }
+  .team__inner { position: relative; display: grid; gap: var(--space-md); align-items: center; }
+  .team__title { font-family: var(--font-heading); font-size: clamp(2.2rem, 5vw, 4.2rem); letter-spacing: -.035em; line-height: 1.02; color: var(--navy); font-weight: 500; max-width: 14ch; } .team__title span { color: var(--accent); }
+  .team__body { display: grid; gap: var(--space-sm); justify-items: start; max-width: 28rem; } .team__body p { font-size: var(--text-lg); line-height: 1.55; color: var(--text-secondary); }
+  .team__logo { height: 34px; width: auto; padding: .7rem 1.1rem; box-sizing: content-box; background: var(--grad-brand); border-radius: var(--radius-md); }
+  @media (min-width: 900px) { .team__inner { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); } }
+
+  /* Industrias */
+  .ind { background: var(--bg-secondary); padding-block: var(--space-xl); }
+  .ind__inner { display: grid; gap: var(--space-lg); }
+  .ind__list { list-style: none; display: grid; }
+  .ind__list li { border-top: 1px solid var(--border); } .ind__list li:last-child { border-bottom: 1px solid var(--border); }
+  .ind__list a { display: flex; justify-content: space-between; align-items: center; gap: var(--space-sm); padding-block: 1.5rem; text-decoration: none; color: var(--navy); font-family: var(--font-heading); font-size: clamp(1.5rem, 3.2vw, 2.6rem); letter-spacing: -.025em; line-height: 1.1; transition: padding-left .6s var(--ease-expo), color .4s; }
+  .ind__list a span { display: grid; gap: .35rem; } .ind__list a b { font-weight: 500; } .ind__list a small { font-family: var(--font-body); font-size: var(--text-base); letter-spacing: 0; color: var(--text-secondary); }
+  .ind__list a i { font-style: normal; color: var(--accent); transition: transform .6s var(--ease-expo); }
+  .ind__list a:hover { padding-left: 1.2rem; color: var(--accent); } .ind__list a:hover i { transform: translateX(10px); }
+</style>

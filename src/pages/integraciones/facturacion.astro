@@ -1,0 +1,170 @@
+---
+// src/pages/integraciones/facturacion.astro — Boleta o factura electrónica, al instante. Generado por el frente A. Sin datos inventados: ver comentarios DATO PENDIENTE.
+import Layout from '../../layouts/Layout.astro';
+import IntegrationHero from '../../components/integraciones/IntegrationHero.astro';
+import Section from '../../components/pages/Section.astro';
+import FaqList from '../../components/pages/FaqList.astro';
+import CtaBand from '../../components/pages/CtaBand.astro';
+import { withBase } from '../../utils/base.js';
+import { graph, faqSchema, breadcrumbSchema, orgSchema } from '../../utils/seo.js';
+// DATO PENDIENTE: tipos de comprobante y estado de la integración con SUNAT en Perú
+// DATO PENDIENTE: confirmar tipos de documento disponibles por país
+
+const crumbs = [
+  {
+    "label": "Integraciones",
+    "href": "/integraciones"
+  },
+  {
+    "label": "Facturación electrónica"
+  }
+];
+const trail = [
+  {
+    "label": "Inicio",
+    "href": "/"
+  },
+  {
+    "label": "Integraciones",
+    "href": "/integraciones"
+  },
+  {
+    "label": "Facturación electrónica",
+    "href": "/integraciones/facturacion"
+  }
+];
+const faqs = [
+  {
+    "q": "¿Qué documentos emite Mobile One?",
+    "a": "Boleta electrónica o factura electrónica en Chile, y comprobante electrónico en Perú."
+  },
+  {
+    "q": "¿Se emite al cobrar o después?",
+    "a": "Al cobrar. El documento sale en el mismo flujo de la venta."
+  },
+  {
+    "q": "¿Puedo imprimir la boleta?",
+    "a": "En la caja de pago se pueden conectar impresoras para entregar la boleta física."
+  },
+  {
+    "q": "¿Dónde veo los documentos emitidos?",
+    "a": "En el panel de control, donde también aparecen los documentos pendientes."
+  },
+  {
+    "q": "¿Se integra con mi ERP?",
+    "a": "Sí. La venta se integra a tu ERP, SAP Business One, Retail Pro o Retail Pro Prism."
+  }
+];
+const steps = [
+  {
+    "t": "El cliente elige",
+    "d": "El vendedor define si la venta lleva boleta o factura antes de cobrar."
+  },
+  {
+    "t": "Se cobra",
+    "d": "El cobro se hace con el terminal de pago de tu tienda."
+  },
+  {
+    "t": "Se emite el documento",
+    "d": "Al terminar el cobro, Mobile One emite el documento electrónico."
+  },
+  {
+    "t": "Queda registrado",
+    "d": "El documento y la venta quedan visibles en el panel de control y en tu ERP."
+  }
+];
+const modules = [
+  {
+    "name": "POS móvil",
+    "text": "Emite el documento donde está el cliente, sin volver a la caja."
+  },
+  {
+    "name": "Caja de pago",
+    "text": "Emite el documento en el mostrador y, con impresora conectada, entrega la boleta física."
+  },
+  {
+    "name": "Panel de control",
+    "text": "Revisa los documentos emitidos y los pendientes desde un solo lugar."
+  }
+];
+const extra = {
+  "title": "Según el país",
+  "intro": "El flujo es el mismo. Cambia el documento y la normativa.",
+  "points": [
+    "Chile: boleta electrónica o factura electrónica, regidas por el SII.",
+    "Perú: comprobante electrónico, regido por la SUNAT.",
+    "La misma experiencia para el vendedor en ambos países.",
+    "Sin sistemas de facturación aparte que cuadrar a fin de día."
+  ]
+};
+const related = [
+  {
+    "name": "Medios de pago",
+    "href": "/integraciones/medios-de-pago",
+    "text": "Transbank, Getnet, Mercado Pago y Niubiz."
+  },
+  {
+    "name": "Tu ERP: SAP, Retail Pro y Retail Pro Prism",
+    "href": "/integraciones/erp",
+    "text": "El ERP integrado a la venta."
+  },
+  {
+    "name": "Todas las integraciones",
+    "href": "/integraciones",
+    "text": "Pagos, ERP y facturación."
+  }
+];
+const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(faqs));
+---
+
+<Layout title="Facturación electrónica desde el POS | Mobile One" description="Emite boleta o factura electrónica al cobrar en el POS móvil o la caja de Mobile One. Boleta en Chile y comprobante electrónico en Perú." image="/images/og-default.jpg" schemaData={schemaData}>
+  <IntegrationHero crumbs={crumbs} title="Boleta o factura electrónica, al instante" lead="El documento se emite en el mismo momento en que el cliente paga, desde el POS móvil o la caja de pago, sin pasos extra ni sistemas aparte." ctaText="Agendar demo" ctaHref="/contacto" ctaSecondaryText="Ver el producto" ctaSecondaryHref="/producto"  focus="dte" />
+  <section class="dte-band" aria-label="dotdte, facturación electrónica">
+    <div class="container dte-band__inner">
+      <img class="dte-band__logo" src={withBase("/brand/dte/dte-imagotipo-blanco.svg")} alt="dotdte, facturación electrónica" width="322" height="149" loading="lazy" />
+      <span class="dte-band__tag">Chile y Perú</span>
+    </div>
+  </section>
+  <Section title="Cómo se emite el documento" bg="white">
+    <ol class="steps">{steps.map((s) => (<li><h3>{s.t}</h3><p>{s.d}</p></li>))}</ol>
+  </Section>
+  <Section title="Dónde se emite" bg="light">
+    <div class="mods">{modules.map((m) => (<div><h3>{m.name}</h3><p>{m.text}</p></div>))}</div>
+  </Section>
+  <Section title={extra.title} intro={extra.intro} bg={'white'}>
+    <ul class="points">{extra.points.map((t) => (<li set:html={t} />))}</ul>
+  </Section>
+  <Section title="Preguntas frecuentes" bg="light">
+    <FaqList items={faqs} />
+  </Section>
+  <Section title="Sigue con" bg="white">
+    <div class="rel">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
+  </Section>
+  <CtaBand title="¿Quieres verlo con tu operación?" text="Agenda una demo de 30 minutos con tu catálogo." />
+</Layout>
+
+<style>
+  .dte-band { background: var(--grad-brand); color: var(--on-accent); padding-block: var(--space-lg); }
+  .dte-band__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-sm) var(--space-md); }
+  .dte-band__logo { height: 56px; width: auto; display: block; }
+  .dte-band__tag { display: inline-flex; padding: .3rem 1rem; border-radius: var(--radius-full); border: 1px solid color-mix(in srgb, var(--on-accent) 45%, transparent); font-size: var(--text-sm); color: var(--on-accent); }
+  .logo-strip { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-sm); }
+  .logo-chip { display:inline-flex; align-items:center; min-height:64px; padding:.9rem 1.4rem; border-radius:var(--radius-lg); border:1px solid var(--border); }
+  .logo-chip--dark { background:var(--accent-grad-start); border-color:var(--accent-grad-start); }
+  .logo-chip--light { background:var(--bg-primary); }
+  .logo-chip img { height:34px; width:auto; display:block; }
+  .logo-chip__text { font-family:var(--font-heading); font-size:var(--text-xl); color:var(--on-accent); letter-spacing:-0.01em; font-weight:500; }
+  .tag { display:inline-flex; padding:2px 12px; border-radius:var(--radius-full); border:1px solid var(--border); font-size:var(--text-sm); color:var(--text-secondary); background:var(--bg-primary); }
+  .steps { list-style:none; display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); counter-reset:s; }
+  .steps li { counter-increment:s; background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; }
+  .steps li::before { content:counter(s); font-size:var(--text-sm); font-weight:500; color:var(--accent); }
+  .steps h3, .cards h3, .mods h3, .rel h3 { font-family:var(--font-heading); font-size:var(--text-xl); letter-spacing:-0.01em; color:var(--navy); font-weight:500; }
+  .steps p, .cards p, .mods p, .rel p { color:var(--text-secondary); line-height:1.55; }
+  .mods, .cards, .rel { display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+  .mods > div, .cards > a, .rel > a { background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; text-decoration:none; transition:transform var(--transition-fast), border-color var(--transition-fast); min-width:0; }
+  .cards > a:hover, .rel > a:hover { transform:translateY(-3px); border-color:var(--accent); }
+  .cards .tag { justify-self:start; }
+  .points { list-style:none; display:grid; gap:.7rem; max-width:52rem; }
+  .points li { position:relative; padding-left:1.6rem; color:var(--text-primary); line-height:1.5; }
+  .points li::before { content:''; position:absolute; left:0; top:.5em; width:.7rem; height:.4rem; border-left:2px solid var(--accent); border-bottom:2px solid var(--accent); transform:rotate(-45deg); }
+</style>

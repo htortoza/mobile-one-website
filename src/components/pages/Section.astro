@@ -1,0 +1,25 @@
+---
+// src/components/pages/Section.astro
+// Bloque de contenido interior: título + texto + slot. bg: 'light' | 'white'.
+const { title, intro, bg = 'white', id } = Astro.props;
+---
+<section class={`psec psec--${bg}`} id={id}>
+  <div class="container psec__inner">
+    {(title || intro) && (
+      <div class="psec__head">
+        {title && <h2 class="psec__title">{title}</h2>}
+        {intro && <p class="psec__intro">{intro}</p>}
+      </div>
+    )}
+    <slot />
+  </div>
+</section>
+<style>
+  .psec { padding-block: var(--space-xl); }
+  .psec--white { background: var(--bg-primary); }
+  .psec--light { background: var(--bg-secondary); }
+  .psec__inner { display:grid; gap:var(--space-md); }
+  .psec__head { display:grid; gap:var(--space-xs); }
+  .psec__title { font-family:var(--font-heading); font-size:clamp(1.8rem,3.8vw,3rem); letter-spacing:-0.025em; line-height:1.08; color:var(--navy); font-weight:500; max-width:24ch; }
+  .psec__intro { font-size:var(--text-lg); color:var(--text-secondary); line-height:1.6; max-width:60ch; }
+</style>

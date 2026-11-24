@@ -1,0 +1,101 @@
+---
+// src/pages/clientes/index.astro — Área de clientes OCULTA (noindex, fuera del sitemap y de todo menú).
+// Comercial envía el enlace al cerrar la venta. Sin credenciales ni datos internos.
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/pages/PageHero.astro';
+import Section from '../../components/pages/Section.astro';
+import site from '../../../contracts/site.json';
+
+const loginUrl = site.loginUrl ?? '#';
+const email = site.company?.email ?? 'contacto@dotsolutions.io';
+
+const toc = [
+  ['bienvenida', 'Bienvenida'], ['acceso', 'Acceso e inicio de sesión'], ['primera-semana', 'Primera semana'],
+  ['perfiles', 'Perfiles'], ['paso-a-paso', 'Paso a paso'], ['panel', 'El panel'],
+  ['funciones', 'Funciones'], ['soporte', 'Soporte'],
+];
+const profiles = [
+  ['Vendedor', 'Abre turno, arma la venta, cobra y emite el documento.'],
+  ['Supervisor', 'Sigue las ventas de la tienda, carros pendientes y cierres.'],
+  ['Soporte', 'Acompaña al equipo en la operación diaria.'],
+  ['Administrador', 'Gestiona tiendas, usuarios y funciones.'],
+];
+const steps = [
+  ['Abrir turno', 'Escanea el QR de la tienda y tu credencial para ingresar.'],
+  ['Armar la venta', 'Busca por nombre o SKU, o escanea el código. Revisa el stock local y de la red.'],
+  ['Cobrar', 'Elige el medio de pago y cobra con el terminal. Se emite la boleta o factura al instante.'],
+  ['Cambios y devoluciones', 'Busca la venta original y registra el cambio o la devolución.'],
+  ['Recepción de mercadería', 'Escanea los bultos y cuadra el contenido contra la orden de compra.'],
+  ['Cerrar el turno', 'Revisa el resumen del día y cierra el turno.'],
+];
+const panel = ['Ventas en vivo', 'Documentos emitidos', 'Kardex de inventario', 'Métricas de la operación'];
+---
+
+<Layout
+  title="Área de clientes | Mobile One"
+  description="Guía de uso de Mobile One para clientes: acceso, primera semana, paso a paso, panel y soporte."
+  image="/images/og-default.jpg"
+  noindex={true}
+>
+  <PageHero tone="light" crumbs={[{ label: 'Clientes' }]} title="Bienvenido a Mobile One" lead="Esta guía te acompaña desde el primer día, en el orden en que la necesitas." />
+
+  <div class="c-wrap container">
+    <nav class="c-toc" aria-label="Contenido de la guía">
+      <ul role="list">
+        {toc.map(([id, label]) => <li><a href={`#${id}`}>{label}</a></li>)}
+      </ul>
+    </nav>
+
+    <div class="c-main">
+      <section id="bienvenida" class="c-sec"><h2>Bienvenida</h2><p>Mobile One convierte a tu equipo de venta en un punto de venta móvil, conectado al stock de toda tu red y a tu ERP. Aquí encuentras cómo operar la plataforma.</p></section>
+
+      <section id="acceso" class="c-sec"><h2>Acceso e inicio de sesión</h2><p>Ingresa al panel con el usuario que te asignó tu administrador.</p><p><a class="c-btn" href={loginUrl}>Ir al inicio de sesión</a></p></section>
+
+      <section id="primera-semana" class="c-sec"><h2>Primera semana</h2><p>Durante la primera semana acompañamos la puesta en marcha. Ten a mano la lista de tiendas, los usuarios que operarán y el terminal de pago que ya usas.</p></section>
+
+      <section id="perfiles" class="c-sec"><h2>Perfiles</h2>
+        <div class="c-grid">{profiles.map(([t, d]) => <article class="c-card"><h3>{t}</h3><p>{d}</p></article>)}</div>
+      </section>
+
+      <section id="paso-a-paso" class="c-sec"><h2>Paso a paso</h2>
+        <ol class="c-steps">{steps.map(([t, d]) => <li><h3>{t}</h3><p>{d}</p></li>)}</ol>
+      </section>
+
+      <section id="panel" class="c-sec"><h2>El panel</h2><p>El panel de control reúne lo que pasa en tus tiendas.</p>
+        <ul class="c-list" role="list">{panel.map((p) => <li>{p}</li>)}</ul>
+      </section>
+
+      <section id="funciones" class="c-sec"><h2>Funciones</h2><p>Algunas funciones se activan por cliente. Si necesitas una que no ves en tu cuenta, pídela a tu administrador o escríbenos.</p></section>
+
+      <section id="soporte" class="c-sec"><h2>Soporte</h2><p>Escríbenos a <a href={`mailto:${email}`}>{email}</a> y te ayudamos.</p></section>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .c-wrap { display:grid; gap:var(--space-md); padding-block:var(--space-lg); }
+  .c-toc ul { list-style:none; display:flex; flex-wrap:wrap; gap:var(--space-xs); }
+  .c-toc a { display:inline-block; padding:.45rem .9rem; border:1px solid var(--border); border-radius:var(--radius-full); color:var(--navy); text-decoration:none; font-size:var(--text-sm); }
+  .c-toc a:hover { border-color:var(--accent); color:var(--accent); }
+  .c-main { display:grid; gap:var(--space-lg); min-width:0; max-width:52rem; }
+  .c-sec { display:grid; gap:var(--space-sm); scroll-margin-top:6rem; }
+  .c-sec h2 { font-family:var(--font-heading); font-size:clamp(1.6rem,3vw,2.2rem); letter-spacing:-0.02em; color:var(--navy); font-weight:500; }
+  .c-sec p, .c-card p, .c-steps p, .c-list li { color:var(--text-secondary); line-height:1.6; }
+  .c-sec a { color:var(--accent); }
+  .c-btn { display:inline-flex; align-items:center; min-height:48px; padding:0 1.5rem; border-radius:var(--radius-full); background:var(--accent-gradient); color:var(--on-accent) !important; text-decoration:none; font-weight:500; }
+  .c-grid { display:grid; gap:var(--space-sm); grid-template-columns:minmax(0,1fr); }
+  .c-card { border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); background:var(--bg-secondary); }
+  .c-card h3, .c-steps h3 { font-family:var(--font-heading); font-size:var(--text-lg); color:var(--navy); font-weight:500; }
+  .c-steps { display:grid; gap:var(--space-sm); padding-left:1.4rem; }
+  .c-steps li::marker { color:var(--accent); font-weight:500; }
+  .c-list { list-style:none; display:grid; gap:.5rem; }
+  .c-list li { padding-left:1.2rem; position:relative; }
+  .c-list li::before { content:''; position:absolute; left:0; top:.6em; width:.5rem; height:.5rem; border-radius:2px; background:var(--accent); }
+  @media (min-width:700px) { .c-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media (min-width:1024px) {
+    .c-wrap { grid-template-columns:minmax(0,3fr) minmax(0,9fr); align-items:start; }
+    .c-toc { position:sticky; top:6rem; }
+    .c-toc ul { flex-direction:column; flex-wrap:nowrap; }
+    .c-toc a { display:block; border:0; padding:.4rem 0; border-radius:0; }
+  }
+</style>

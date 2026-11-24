@@ -37,8 +37,8 @@ const { eyebrow, headline, subheadline } = Astro.props;
 
     if (!reduced) {
       const words = section.querySelectorAll('.phero2__word');
-      const eyebrow = section.querySelector('[data-gsap-animate="fade-up"]');
-      const sub = section.querySelectorAll('[data-gsap-animate="fade-up"]')[1];
+      const eyebrow = section.querySelector('.phero2__eyebrow');
+      const sub = [...section.querySelectorAll('[data-gsap-animate="fade-up"]')].find((el) => el !== eyebrow);
 
       const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
       if (eyebrow) tl.from(eyebrow, { y: 16, opacity: 0, duration: 0.7 });

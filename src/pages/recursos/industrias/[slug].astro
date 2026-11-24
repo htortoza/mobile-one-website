@@ -1,0 +1,286 @@
+---
+// src/pages/recursos/industrias/[slug].astro
+// Una página por rubro (moda, electrónica, multitienda, retail con ERP). Contenido en src/data/industrias.js.
+// Estructura narrativa: hero con "ticket en vivo" -> antes/ahora -> un día en tu tienda -> lo que más usa tu rubro -> FAQ -> otros rubros -> demo.
+import Layout from '../../../layouts/Layout.astro';
+import Section from '../../../components/pages/Section.astro';
+import FaqList from '../../../components/pages/FaqList.astro';
+import CtaBand from '../../../components/pages/CtaBand.astro';
+import { withBase } from '../../../utils/base.js';
+import { graph, faqSchema, breadcrumbSchema, orgSchema } from '../../../utils/seo.js';
+import { industrias } from '../../../data/industrias.js';
+
+export function getStaticPaths() {
+  return industrias.map((ind) => ({ params: { slug: ind.slug }, props: { ind } }));
+}
+const { ind } = Astro.props;
+const others = industrias.filter((i) => i.slug !== ind.slug);
+const trail = [
+  { label: 'Inicio', href: '/' },
+  { label: 'Recursos', href: '/recursos' },
+  { label: 'Industrias', href: '/recursos#industrias' },
+  { label: ind.name },
+];
+const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(ind.faqs));
+---
+
+<Layout title={ind.seo.title} description={ind.seo.description} image="/images/og-default.jpg" schemaData={schemaData}>
+  <!-- 1. HERO: la tarjeta "ticket" muestra una venta de ejemplo (datos ficticios) -->
+  <section class="ih">
+    <div class="ih__bg" aria-hidden="true"><span class="ih__blob"></span><span class="ih__grid"></span></div>
+    <div class="container ih__inner">
+      <div class="ih__copy">
+        <nav class="ih__crumbs" aria-label="Migas de pan">
+          <a href={withBase('/')}>Inicio</a><span aria-hidden="true">/</span>
+          <a href={withBase('/recursos')}>Recursos</a><span aria-hidden="true">/</span>
+          <a href={withBase('/recursos#industrias')}>Industrias</a><span aria-hidden="true">/</span>
+          <span aria-current="page">{ind.name}</span>
+        </nav>
+        <p class="ih__pill" data-rv>{ind.eyebrow}</p>
+        <h1 class="ih__title" data-rv>{ind.h1}</h1>
+        <p class="ih__lead" data-rv>{ind.lead}</p>
+        <div class="ih__cta" data-rv>
+          <a class="ih__btn ih__btn--primary" href={withBase('/contacto')}>Agendar demo</a>
+          <a class="ih__btn ih__btn--ghost" href={withBase('/producto')}>Ver el producto</a>
+        </div>
+      </div>
+
+      <figure class="tk" aria-label="Ejemplo de venta en el terminal (datos ilustrativos)" data-rv>
+        <div class="tk__glow" aria-hidden="true"></div>
+        <div class="tk__card">
+          <div class="tk__head"><span class="tk__store">{ind.ticket.store}</span><span class="tk__live"><i></i>en vivo</span></div>
+          <ul class="tk__list">
+            {ind.ticket.items.map((it, i) => (
+              <li class="tk__row" style={`--i:${i}`}>
+                <span class="tk__main"><b>{it.name}</b><small>{it.meta}</small></span>
+                <span class={`tk__tag tk__tag--${it.tone}`}>{it.tag}</span>
+              </li>
+            ))}
+          </ul>
+          <div class="tk__foot"><span>Total</span><strong>{ind.ticket.total}</strong></div>
+        </div>
+        <div class="tk__float" aria-hidden="true"><i></i>{ind.ticket.float}</div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 2. ANTES / CON MOBILE ONE -->
+  <section class="ib">
+    <div class="container ib__inner">
+      <div class="ib__head" data-rv>
+        <h2>Lo que frena a tu rubro, resuelto</h2>
+        <p>Tres situaciones que se repiten cada día y cómo cambian.</p>
+      </div>
+      <ol class="ib__list">
+        {ind.pains.map((p, i) => (
+          <li class="ib__row" data-rv>
+            <span class="ib__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <div class="ib__now"><small>Hoy</small><p>{p.now}</p></div>
+            <span class="ib__arrow" aria-hidden="true"></span>
+            <div class="ib__then"><small>Con Mobile One</small><p>{p.then}</p></div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- 3. UN DÍA EN TU TIENDA (línea de tiempo) -->
+  <section class="id">
+    <div class="container id__inner">
+      <div class="id__head" data-rv>
+        <h2>{ind.dayTitle}</h2>
+        <p>El recorrido, momento a momento.</p>
+      </div>
+      <ol class="id__track">
+        {ind.day.map((d) => (
+          <li class="id__step" data-rv>
+            <span class="id__time">{d.time}</span>
+            <span class="id__dot" aria-hidden="true"></span>
+            <div class="id__card">
+              <h3>{d.title}</h3>
+              <p>{d.text}</p>
+              <div class="id__mod"><small>Función</small><b>{d.mod}</b></div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- 4. IMAGEN + LO QUE MÁS USA TU RUBRO -->
+  <section class="im">
+    <div class="container im__inner">
+      <div class="im__media" data-rv>
+        <img src={withBase(ind.image)} alt={ind.imageAlt} loading="lazy" width="960" height="720" />
+        <span class="im__badge">Menos de una semana para implementar</span>
+      </div>
+      <div class="im__copy">
+        <h2 data-rv>Lo que más usa tu rubro</h2>
+        <ul class="im__mods">
+          {ind.modules.map((m) => (
+            <li data-rv>
+              {m.href ? <a href={withBase(m.href)}><b>{m.name}</b><span>{m.text}</span><i aria-hidden="true">→</i></a> : <div><b>{m.name}</b><span>{m.text}</span></div>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <Section title="Preguntas frecuentes" bg="light">
+    <FaqList items={ind.faqs} />
+  </Section>
+
+  <!-- 5. OTROS RUBROS -->
+  <section class="io">
+    <div class="container io__inner">
+      <h2 data-rv>Otros rubros</h2>
+      <div class="io__grid">
+        {others.map((o) => (
+          <a class="io__card" href={withBase(`/recursos/industrias/${o.slug}`)} data-rv>
+            <small>Industria</small><b>{o.name}</b><span>{o.short}</span><i aria-hidden="true">→</i>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand title={ind.ctaTitle} text="Agenda una demo de 30 minutos con tu catálogo." />
+</Layout>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+  document.addEventListener('astro:page-load', () => {
+    // Solo esta página: los otros scripts de la web también escuchan astro:page-load y no deben tocar estos elementos.
+    if (!location.pathname.includes('/recursos/industrias/')) return;
+    if (!document.querySelector('.ih')) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    gsap.utils.toArray('[data-rv]').forEach((el, i) => {
+      if (el.dataset.rvDone) return; el.dataset.rvDone = '1'; // evita que dos páginas animen el mismo elemento al navegar
+      // El hero entra de inmediato (no depende del scroll); el resto, al llegar a la vista.
+      const inHero = !!el.closest('.ih');
+      gsap.from(el, { opacity: 0, y: 30, duration: 0.9, ease: 'expo.out', delay: inHero ? i * 0.08 : 0, ...(inHero ? {} : { scrollTrigger: { trigger: el, start: 'top 95%', once: true } }) });
+    });
+    // la línea de tiempo se dibuja al entrar
+    const track = document.querySelector('.id__track');
+    if (track) gsap.fromTo(track, { '--prog': 0 }, { '--prog': 1, ease: 'none', scrollTrigger: { trigger: track, start: 'top 75%', end: 'bottom 60%', scrub: true } });
+  });
+</script>
+
+<style>
+  /* ── Hero (claro, con gradiente de marca) ── */
+  .ih { position: relative; background: var(--grad-soft); overflow: clip; isolation: isolate; }
+  .ih__bg { position: absolute; inset: 0; z-index: -1; }
+  .ih__blob { position: absolute; width: 46vw; height: 46vw; right: -10vw; top: -14vw; border-radius: 50%; background: radial-gradient(circle, var(--accent-grad-end), transparent 66%); filter: blur(80px); opacity: .32; }
+  .ih__grid { position: absolute; inset: 0; background-image: linear-gradient(color-mix(in srgb, var(--accent-grad-start) 6%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--accent-grad-start) 6%, transparent) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at 70% 40%, #000, transparent 72%); -webkit-mask-image: radial-gradient(ellipse at 70% 40%, #000, transparent 72%); }
+  .ih__inner { display: grid; gap: var(--space-lg); padding-block: var(--space-xl); align-items: center; }
+  .ih__copy { display: grid; gap: var(--space-sm); justify-items: start; min-width: 0; }
+  .ih__crumbs { display: flex; flex-wrap: wrap; gap: .4rem; font-size: var(--text-sm); color: var(--text-secondary); }
+  .ih__crumbs a { color: inherit; text-decoration: none; } .ih__crumbs a:hover { color: var(--accent); }
+  .ih__pill { font-size: var(--text-sm); font-weight: 500; color: var(--accent); background: var(--tint-strong); border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent); padding: .4rem .9rem; border-radius: var(--radius-full); }
+  .ih__title { font-family: var(--font-heading); font-size: clamp(2.3rem, 5vw, 4rem); line-height: 1.03; letter-spacing: -.035em; color: var(--navy); font-weight: 500; max-width: 16ch; text-wrap: balance; }
+  .ih__lead { font-size: clamp(1.05rem, 1.5vw, 1.25rem); line-height: 1.55; color: var(--text-secondary); max-width: 46ch; }
+  .ih__cta { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-xs); }
+  .ih__btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 1.5rem; border-radius: var(--radius-full); font-weight: 500; text-decoration: none; white-space: nowrap; transition: transform var(--transition-fast), box-shadow var(--transition-fast); }
+  .ih__btn--primary { background: var(--grad-brand); color: var(--on-accent); box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--accent-grad-start) 70%, transparent); }
+  .ih__btn--ghost { color: var(--navy); background: var(--bg-primary); border: 1px solid var(--border); }
+  .ih__btn:hover { transform: translateY(-2px); }
+
+  /* Tarjeta ticket */
+  .tk { position: relative; margin: 0; display: grid; place-items: center; min-width: 0; padding: var(--space-md) var(--space-sm); }
+  .tk__glow { position: absolute; inset: 6% 4%; border-radius: 40px; background: var(--grad-brand); opacity: .9; transform: rotate(-3deg); box-shadow: 0 40px 80px -30px color-mix(in srgb, var(--accent-grad-start) 70%, transparent); }
+  .tk__card { position: relative; width: min(100%, 400px); background: var(--bg-primary); border-radius: 26px; padding: 1.2rem; display: grid; gap: .9rem; box-shadow: 0 30px 60px -24px color-mix(in srgb, var(--navy) 55%, transparent); transform: rotate(1.5deg); }
+  .tk__head { display: flex; justify-content: space-between; align-items: center; gap: .6rem; font-size: var(--text-sm); }
+  .tk__store { font-weight: 600; color: var(--navy); }
+  .tk__live { display: inline-flex; align-items: center; gap: .4rem; color: var(--accent); font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; }
+  .tk__live i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: tk-pulse 1.8s ease-in-out infinite; }
+  @keyframes tk-pulse { 50% { opacity: .25; transform: scale(.7); } }
+  .tk__list { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+  .tk__row { display: grid; gap: .35rem; padding: .7rem .8rem; border-radius: var(--radius-lg); background: var(--tint); border: 1px solid var(--border); animation: tk-in .8s var(--ease-expo) both; animation-delay: calc(var(--i) * .15s + .3s); }
+  @keyframes tk-in { from { opacity: 0; transform: translateY(10px); } }
+  .tk__main { display: grid; line-height: 1.25; } .tk__main b { font-weight: 500; color: var(--navy); font-size: var(--text-sm); } .tk__main small { color: var(--text-secondary); font-size: var(--text-xs); }
+  .tk__tag { justify-self: start; font-size: .68rem; letter-spacing: .02em; font-weight: 500; padding: 2px 9px; border-radius: var(--radius-full); }
+  .tk__tag--here { background: color-mix(in srgb, var(--accent) 12%, var(--bg-primary)); color: var(--accent); }
+  .tk__tag--net { background: var(--accent-grad-start); color: var(--on-accent); }
+  .tk__tag--promo { background: var(--navy); color: var(--on-accent); }
+  .tk__foot { display: flex; justify-content: space-between; align-items: baseline; padding: .8rem 1rem; border-radius: var(--radius-lg); background: var(--grad-brand); color: var(--on-accent); }
+  .tk__foot span { font-size: var(--text-sm); opacity: .85; } .tk__foot strong { font-family: var(--font-heading); font-weight: 500; font-size: var(--text-lg); letter-spacing: -.02em; }
+  .tk__float { position: absolute; right: 0; top: 4%; display: inline-flex; align-items: center; gap: .5rem; background: var(--bg-primary); color: var(--navy); font-size: var(--text-sm); font-weight: 500; padding: .6rem 1rem; border-radius: var(--radius-full); box-shadow: 0 18px 36px -16px color-mix(in srgb, var(--navy) 50%, transparent); animation: tk-float 5s ease-in-out infinite; max-width: 80%; }
+  .tk__float i { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+  @keyframes tk-float { 50% { transform: translateY(-8px); } }
+  @media (min-width: 900px) { .ih__inner { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); } }
+
+  /* ── Antes / con Mobile One ── */
+  .ib { background: var(--bg-primary); padding-block: var(--space-xl); }
+  .ib__inner { display: grid; gap: var(--space-lg); }
+  .ib__head h2, .id__head h2, .im__copy h2, .io__inner h2 { font-family: var(--font-heading); font-size: clamp(1.9rem, 4vw, 3rem); letter-spacing: -.03em; line-height: 1.06; color: var(--navy); font-weight: 500; }
+  .ib__head p, .id__head p { margin-top: .5rem; font-size: var(--text-lg); color: var(--text-secondary); }
+  .ib__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-sm); }
+  .ib__row { position: relative; display: grid; gap: .8rem; padding: var(--space-md); border-radius: calc(var(--radius-lg) * 1.4); border: 1px solid var(--border); background: var(--bg-primary); transition: box-shadow .5s var(--ease-expo), transform .5s var(--ease-expo); }
+  .ib__row:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .ib__n { font-family: var(--font-heading); font-size: var(--text-sm); color: var(--accent); letter-spacing: .1em; }
+  .ib__row small { display: block; font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; font-weight: 500; margin-bottom: .35rem; }
+  .ib__now small { color: var(--text-secondary); } .ib__then small { color: var(--accent); }
+  .ib__now p { color: var(--text-secondary); line-height: 1.5; text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--text-secondary) 45%, transparent); text-decoration-thickness: 1px; }
+  .ib__then p { color: var(--navy); line-height: 1.5; font-weight: 500; }
+  .ib__arrow { width: 34px; height: 34px; border-radius: 50%; background: var(--grad-brand); position: relative; justify-self: start; }
+  .ib__arrow::after { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; border-right: 2px solid var(--on-accent); border-bottom: 2px solid var(--on-accent); transform: translate(-50%, -65%) rotate(45deg); }
+  @media (min-width: 900px) {
+    .ib__row { grid-template-columns: 3rem minmax(0, 1fr) auto minmax(0, 1.25fr); align-items: center; gap: var(--space-md); }
+    .ib__arrow::after { transform: translate(-65%, -50%) rotate(-45deg); }
+  }
+
+  /* ── Un día en tu tienda ── */
+  .id { background: var(--tint); padding-block: var(--space-xl); }
+  .id__inner { display: grid; gap: var(--space-lg); }
+  .id__track { --prog: 0; list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-md); position: relative; }
+  .id__track::before { content: ''; position: absolute; left: 11px; top: 8px; bottom: 8px; width: 2px; background: var(--border); }
+  .id__track::after { content: ''; position: absolute; left: 11px; top: 8px; bottom: 8px; width: 2px; background: var(--grad-brand); transform-origin: top; transform: scaleY(var(--prog)); }
+  .id__step { position: relative; display: grid; padding-left: 2.6rem; min-width: 0; }
+  .id__dot { position: absolute; left: 0; top: .15rem; width: 24px; height: 24px; border-radius: 50%; background: var(--bg-primary); border: 3px solid var(--accent); box-shadow: 0 0 0 6px var(--tint); }
+  .id__time { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--accent); font-weight: 500; letter-spacing: .04em; margin-bottom: .5rem; }
+  .id__card { display: grid; grid-template-rows: auto 1fr auto; gap: .5rem; height: 100%; padding: 1.1rem 1.1rem 0; border-radius: var(--radius-lg); background: var(--bg-primary); border: 1px solid var(--border); box-shadow: 0 14px 30px -22px color-mix(in srgb, var(--accent-grad-start) 55%, transparent); overflow: hidden; transition: transform .5s var(--ease-expo), box-shadow .5s var(--ease-expo); }
+  .id__step:hover .id__card { transform: translateY(-4px); box-shadow: 0 22px 40px -20px color-mix(in srgb, var(--accent-grad-start) 55%, transparent); }
+  .id__card h3 { font-family: var(--font-heading); font-size: var(--text-lg); letter-spacing: -.02em; color: var(--navy); font-weight: 500; line-height: 1.2; }
+  .id__card p { color: var(--text-secondary); line-height: 1.5; font-size: var(--text-sm); }
+  .id__mod { display: grid; gap: .1rem; margin: .4rem -1.1rem 0; padding: .75rem 1.1rem; background: var(--tint); border-top: 1px solid var(--border); }
+  .id__mod small { font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; color: var(--text-secondary); font-weight: 500; }
+  .id__mod b { font-size: var(--text-sm); font-weight: 500; color: var(--accent); line-height: 1.25; }
+  @media (min-width: 1000px) {
+    .id__track { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-sm); padding-top: 2.4rem; }
+    .id__track::before, .id__track::after { left: 0; right: 0; top: 2.2rem; bottom: auto; width: auto; height: 2px; }
+    .id__track::after { transform-origin: left; transform: scaleX(var(--prog)); }
+    .id__step { padding-left: 0; padding-top: 1.6rem; }
+    .id__dot { left: 0; top: -.9rem; }
+    .id__time { position: absolute; top: -2.4rem; left: 0; margin: 0; }
+  }
+
+  /* ── Imagen + módulos ── */
+  .im { background: var(--bg-primary); padding-block: var(--space-xl); }
+  .im__inner { display: grid; gap: var(--space-lg); align-items: center; }
+  .im__media { position: relative; border-radius: calc(var(--radius-lg) * 1.5); overflow: hidden; box-shadow: var(--shadow-lg); aspect-ratio: 4 / 3; }
+  .im__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .im__badge { position: absolute; left: 1rem; bottom: 1rem; background: var(--grad-brand); color: var(--on-accent); font-size: var(--text-sm); font-weight: 500; padding: .5rem 1rem; border-radius: var(--radius-full); }
+  .im__copy { display: grid; gap: var(--space-sm); }
+  .im__mods { list-style: none; margin: var(--space-xs) 0 0; padding: 0; display: grid; gap: .6rem; }
+  .im__mods a, .im__mods div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1rem; align-items: center; padding: .9rem 1.1rem; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--bg-primary); text-decoration: none; color: var(--navy); transition: transform .5s var(--ease-expo), border-color .4s, box-shadow .5s var(--ease-expo); }
+  .im__mods a:hover { transform: translateX(6px); border-color: var(--accent); box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--accent-grad-start) 45%, transparent); }
+  .im__mods b { font-weight: 500; grid-column: 1; } .im__mods span { grid-column: 1; color: var(--text-secondary); font-size: var(--text-sm); line-height: 1.4; } .im__mods i { grid-column: 2; grid-row: 1 / span 2; font-style: normal; color: var(--accent); }
+  @media (min-width: 900px) { .im__inner { grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); } }
+
+  /* ── Otros rubros ── */
+  .io { background: var(--bg-primary); padding-block: var(--space-xl); border-top: 1px solid var(--border); }
+  .io__inner { display: grid; gap: var(--space-md); }
+  .io__grid { display: grid; gap: var(--space-sm); grid-template-columns: minmax(0, 1fr); }
+  .io__card { position: relative; display: grid; gap: .35rem; padding: var(--space-md); border-radius: calc(var(--radius-lg) * 1.4); background: var(--tint); border: 1px solid var(--border); text-decoration: none; color: var(--navy); transition: transform .5s var(--ease-expo), box-shadow .5s var(--ease-expo), background-color .4s; }
+  .io__card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); background: var(--tint-strong); }
+  .io__card small { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+  .io__card b { font-family: var(--font-heading); font-size: var(--text-xl); letter-spacing: -.02em; font-weight: 500; }
+  .io__card span { color: var(--text-secondary); line-height: 1.45; max-width: 34ch; }
+  .io__card i { font-style: normal; color: var(--accent); margin-top: .3rem; transition: transform .5s var(--ease-expo); } .io__card:hover i { transform: translateX(5px); }
+  @media (min-width: 800px) { .io__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+  @media (prefers-reduced-motion: reduce) { .tk__row, .tk__float, .tk__live i { animation: none; } .id__track::after { transform: none; } }
+</style>

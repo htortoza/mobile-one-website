@@ -65,7 +65,7 @@ const ICONS = {
       section.dataset.pchInit = '1';
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      const frame = section.querySelector('[data-gsap-animate="fade-up"]');
+      const frame = section.querySelector('.pch__frame');
       const items = section.querySelectorAll('[data-pch-item]');
 
       gsap.from(section.querySelectorAll('.pch__eyebrow, .pch__title'), {

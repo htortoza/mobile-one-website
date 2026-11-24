@@ -1,0 +1,76 @@
+---
+// src/components/recursos/ResourcesHero.astro
+// Hero de /recursos: titular + una cascada de tarjetas de vidrio, una por apartado, que enlazan
+// a su sección. Flotan, se elevan al pasar el mouse y entran escalonadas.
+import { withBase } from '../../utils/base.js';
+const { crumbs = [], title, accent = '', lead, ctaText, ctaHref, items = [] } = Astro.props;
+---
+<section class="rhero" data-rhero>
+  <div class="rhero__bg" aria-hidden="true"><span class="rhero__blob rhero__blob--a"></span><span class="rhero__blob rhero__blob--b"></span><span class="rhero__grid"></span></div>
+  <div class="container rhero__inner">
+    <div class="rhero__copy">
+      {crumbs.length > 0 && <nav class="rhero__crumbs" aria-label="Migas de pan"><a href={withBase('/')}>Inicio</a>{crumbs.map((c) => (<><span aria-hidden="true">/</span><span aria-current="page">{c.label}</span></>))}</nav>}
+      <h1 class="rhero__title" data-rr>{title}{accent && <> <span class="rhero__accent">{accent}</span></>}</h1>
+      <p class="rhero__lead" data-rr>{lead}</p>
+      <div class="rhero__cta" data-rr><a class="rhero__btn" href={withBase(ctaHref)}>{ctaText}</a></div>
+    </div>
+    <ul class="rhero__stack" role="list">
+      {items.map((it, i) => (
+        <li style={`--i:${i};--d:${i * 0.6}s`}>
+          <a class="rcard" href={it.href} data-rcard>
+            <span class="rcard__tag">{it.tag}</span>
+            <b>{it.title}</b>
+            <small>{it.text}</small>
+            <i class="rcard__go" aria-hidden="true">→</i>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  function initRHero() {
+    const root = document.querySelector('[data-rhero]');
+    if (!root || root.dataset.rrInit) return;
+    root.dataset.rrInit = '1';
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    gsap.from(root.querySelectorAll('[data-rr]'), { opacity: 0, y: 28, duration: 1, stagger: 0.12, ease: 'expo.out', delay: 0.1 });
+    gsap.from(root.querySelectorAll('.rhero__stack li'), { opacity: 0, x: 60, duration: 1.1, stagger: 0.12, ease: 'expo.out', delay: 0.35 });
+  }
+  document.addEventListener('astro:page-load', initRHero);
+</script>
+
+<style>
+  .rhero { position: relative; background: var(--grad-soft); color: var(--navy); overflow: clip; isolation: isolate; padding-block: var(--space-md); }
+  .rhero__bg { position: absolute; inset: 0; z-index: -1; }
+  .rhero__blob { position: absolute; border-radius: 50%; filter: blur(80px); }
+  .rhero__blob--a { width: 42vw; height: 42vw; left: -14vw; top: -18vw; background: radial-gradient(circle, var(--accent-grad-end), transparent 68%); opacity: .35; animation: rh-drift 16s ease-in-out infinite alternate; }
+  .rhero__blob--b { width: 40vw; height: 40vw; right: -8vw; top: 4vw; background: radial-gradient(circle, var(--accent-grad-start), transparent 68%); opacity: .22; animation: rh-drift 20s ease-in-out infinite alternate-reverse; }
+  .rhero__grid { position: absolute; inset: 0; background-image: linear-gradient(color-mix(in srgb, var(--accent-grad-start) 7%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--accent-grad-start) 7%, transparent) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at 30% 40%, #000 0%, transparent 70%); -webkit-mask-image: radial-gradient(ellipse at 30% 40%, #000 0%, transparent 70%); }
+  @keyframes rh-drift { to { transform: translate(5vw, 4vw) scale(1.12); } }
+  .rhero__inner { display: grid; gap: var(--space-lg); align-items: center; }
+  .rhero__copy { display: grid; gap: var(--space-sm); max-width: 36rem; }
+  .rhero__crumbs { display: flex; gap: .5rem; font-size: var(--text-sm); color: var(--text-secondary); } .rhero__crumbs a { color: inherit; text-decoration: none; }
+  .rhero__title { font-family: var(--font-heading); font-size: clamp(2.3rem, 4.4vw, 3.6rem); letter-spacing: -.035em; line-height: 1.02; font-weight: 500; text-wrap: balance; color: var(--navy); }
+  .rhero__accent { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .08em; }
+  .rhero__lead { font-size: clamp(1.05rem, 1.5vw, 1.25rem); line-height: 1.55; color: var(--text-secondary); max-width: 44ch; }
+  .rhero__btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 1.5rem; border-radius: var(--radius-full); text-decoration: none; font-weight: 500; background: var(--grad-brand); color: var(--on-accent); box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--accent-grad-start) 60%, transparent); transition: transform var(--transition-fast), box-shadow var(--transition-fast); } .rhero__btn:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -8px color-mix(in srgb, var(--accent-grad-start) 65%, transparent); }
+
+  .rhero__stack { list-style: none; display: grid; gap: .6rem; justify-self: center; width: min(100%, 440px); }
+  .rhero__stack li { margin-left: calc(var(--i) * 0px); animation: rh-float 6s ease-in-out infinite; animation-delay: var(--d); }
+  @keyframes rh-float { 50% { translate: 0 -6px; } }
+  .rcard { position: relative; display: grid; gap: .15rem; padding: .75rem 3rem .75rem 1.2rem; border-radius: var(--radius-lg); text-decoration: none; color: inherit; background: var(--bg-primary); border: 1px solid var(--border); box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--accent-grad-start) 35%, transparent); transition: transform .6s var(--ease-expo), border-color .4s, box-shadow .6s var(--ease-expo); }
+  .rcard:hover, .rcard:focus-visible { transform: translateX(-10px) scale(1.02); border-color: var(--accent); box-shadow: 0 20px 40px -14px color-mix(in srgb, var(--accent-grad-start) 50%, transparent); }
+  .rcard:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .rcard__tag { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+  .rcard b { font-family: var(--font-heading); font-size: var(--text-xl); letter-spacing: -.015em; font-weight: 500; color: var(--navy); } .rcard small { font-size: var(--text-sm); color: var(--text-secondary); }
+  .rcard__go { position: absolute; right: 1.2rem; top: 50%; translate: 0 -50%; font-style: normal; font-size: 1.4rem; color: var(--accent); transition: transform .5s var(--ease-expo); } .rcard:hover .rcard__go { transform: translateX(6px); }
+  @media (min-width: 900px) {
+    .rhero { padding-block: var(--space-md); }
+    .rhero__inner { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
+    .rhero__stack li { margin-left: calc((var(--i) % 3) * 28px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .rhero__blob, .rhero__stack li { animation: none; } }
+</style>

@@ -1,16 +1,17 @@
 ---
-// src/pages/index.astro — Home. Copy fuente: doc maestro "Mobile One 2.0 — Sitio Web de Ventas" §4.
+// src/pages/index.astro - Home (esquema aprobado nov 2026).
+// 7 secciones: hero, logos de clientes, módulos (5 + caja de pago), integraciones, cifras, equipo, cierre-demo.
+// Motion: init en astro:page-load, reduced-motion respetado. Solo variables de theme.css.
+// Los datos que se ven dentro de las pantallas (tienda, folios, montos) son ficticios.
 import Layout from '../layouts/Layout.astro';
-import ProblemHook from '../components/home/ProblemHook.astro';
-import SolutionSlide from '../components/home/SolutionSlide.astro';
-import HeroSplit from '../components/home/HeroSplit.astro';
-import BrandCompat from '../components/home/BrandCompat.astro';
-import SolutionPair from '../components/home/SolutionPair.astro';
-import HowItWorksFlow from '../components/home/HowItWorksFlow.astro';
-import ArchitectureTeaser from '../components/home/ArchitectureTeaser.astro';
-import SocialProofStat from '../components/home/SocialProofStat.astro';
-import CtaClose from '../components/home/CtaClose.astro';
-import { whiteClientLogos } from '../utils/client-logos.js';
+import ModuleShowcase from '../components/showcase/ModuleShowcase.astro';
+import ScreensMobile from '../components/showcase/ScreensMobile.astro';
+import IntegrationHub from '../components/integraciones/IntegrationHub.astro';
+import { showcaseModules } from '../data/showcase-modules.js';
+import { withBase } from '../utils/base.js';
+import { darkClientLogos } from '../utils/client-logos.js';
+
+const logos = darkClientLogos();
 
 const schemaData = {
   '@context': 'https://schema.org',
@@ -19,160 +20,294 @@ const schemaData = {
   url: 'https://mobile-one.io',
 };
 
-// Logos reales de clientes, variante blanca (sobre el panel azul del hero).
-const heroLogos = whiteClientLogos();
+// Un chip flotante por pantalla del terminal: aparece cuando esa pantalla está activa.
+const heroScenes = [
+  { screen: 'pos', chip: 'Stock en tu red', value: '48 unidades', side: 'l' },
+  { screen: 'factura', chip: 'Boleta N° 18.432', value: 'Emitida al instante', side: 'r' },
+  { screen: 'recepcion', chip: 'Cuadratura con la OC', value: '24 de 24 uds', side: 'l' },
+  { screen: 'promos', chip: 'Promoción aplicada', value: 'Ahorras $26.740', side: 'r' },
+];
+
+const stats = [
+  { n: 100, pre: '', suf: '+', label: 'tiendas operando hoy' },
+  { n: 1, pre: '<', suf: '', unit: 'semana', label: 'para implementar' },
+  { n: 2, pre: '', suf: '', unit: 'países', label: 'Chile y Perú' },
+  { n: 6, pre: '', suf: '', unit: 'soluciones', label: 'cinco módulos y la caja' },
+];
 ---
 
 <Layout
-  title="Mobile One: POS móvil para retail con inventario conectado"
-  description="Convierte a tus vendedores en un punto de venta móvil. Vende con el stock de toda tu red, integrado a SAP Business One y a tu hardware de pago actual. Implementación en horas."
+  title="Mobile One: POS móvil y caja de pago para retail"
+  description="POS móvil y caja de pago en una sola plataforma, integrada a SAP Business One, Retail Pro y a tu terminal de pago. Menos de una semana."
   image="/images/og-default.jpg"
   schemaData={schemaData}
 >
-  <HeroSplit
-    eyebrow="Plataforma de venta asistida omnicanal"
-    headline="Cada terminal de cobro, un vendedor asistido y potenciado."
-    accentPhrase="asistido y potenciado"
-    breakAfterAccent={true}
-    subheadline="Mobile One no reemplaza a tu vendedor: le da un pasillo infinito de productos y las herramientas para cobrar, recomendar y facturar desde donde está el cliente, con el mismo terminal Getnet, Transbank o Mercado Pago que ya tienen."
-    ctaText="Agendar demo"
-    ctaHref="/contacto"
-    ctaSecondaryText="Ver cómo funciona"
-    ctaSecondaryHref="/producto"
-    logosLabel="Marcas que ya confían en Mobile One"
-    logos={heroLogos}
-  />
+  <main class="pp">
+    <!-- 1. HERO: terminal vivo -->
+    <section class="hero" data-hero>
+      <div class="hero__bg" data-hero-bg aria-hidden="true">
+        <span class="hero__glow"></span><span class="hero__blob hero__blob--a"></span><span class="hero__blob hero__blob--b"></span><span class="hero__grid"></span>
+      </div>
+      <div class="container hero__inner">
+        <div class="hero__copy">
+          <h1 class="hero__title" data-rise>Vende y cobra en sala <span class="hero__accent">y en caja.</span></h1>
+          <p class="hero__sub" data-rise>Un servicio integral para tu retail: vendedor, caja y ERP en una sola plataforma.</p>
+          <div class="hero__cta" data-rise>
+            <a class="btn btn--primary" href={withBase('/contacto')}>Agendar demo</a>
+            <a class="btn btn--ghost" href="#modulos">Ver módulos</a>
+          </div>
+          <dl class="hero__stats" data-rise>
+            {stats.map((st) => (
+              <div class="hstat">
+                <dt class="hstat__num">{st.pre}<span data-count={st.n}>0</span>{st.suf}{st.unit && <span class="hstat__unit"> {st.unit}</span>}</dt>
+                <dd class="hstat__label">{st.label}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
 
-  <ProblemHook
-    lines={[
-      '¿Cuántos clientes se fueron hoy solo por hacer fila?',
-      '¿Cuántas ventas se pierden por falta de una recomendación?',
-      '¿Cuántas horas se pierden contando cajas, una por una?',
-      'Imagina resolver las tres desde un solo dispositivo.',
-    ]}
-    images={[
-      '/images/hook-frustracion.webp',
-      '/images/hook-stock.webp',
-      '/images/hook-bulto.webp',
-      '/images/hook-resuelto.webp',
-    ]}
-  />
+        <figure class="live" data-live aria-label="Terminal de pago con Mobile One: venta, boleta, recepción y promociones">
+          <div class="live__halo" aria-hidden="true"></div>
+          <div class="live__pos" data-pos>
+            <img src={withBase('/images/hero-mobile-pos-mirror.webp')} alt="" width="1958" height="1722" />
+            <div class="live__screen" data-screen><div class="live__canvas"><ScreensMobile /></div></div>
+          </div>
+          {heroScenes.map((c) => (
+            <div class={`live__chip live__chip--${c.side}`} data-chip={c.screen} aria-hidden="true">
+              <span class="live__chip-dot"></span><span><b>{c.chip}</b><small>{c.value}</small></span>
+            </div>
+          ))}
+          <div class="live__steps" aria-hidden="true">{heroScenes.map((c, i) => <span class={`live__step ${i === 0 ? 'is-on' : ''}`}></span>)}</div>
+        </figure>
+      </div>
+    </section>
 
-  <SolutionSlide
-    eyebrow="Así lo resuelve"
-    title="Un mismo terminal, tres problemas resueltos"
-    panels={[
-      {
-        num: '01',
-        image: '/images/solucion-fila.webp',
-        alt: 'Dos vendedoras cobrando en distintos puntos de la tienda al mismo tiempo, sin caja fija ni fila',
-        heading: 'Venta asistida, y potenciada',
-        text: 'El vendedor asesora y cobra donde está el cliente, con el mismo terminal de pago. Ninguna caja fija decide cuánto vendes.',
-      },
-      {
-        num: '02',
-        image: '/images/solucion-stock.webp',
-        alt: 'Vendedor con terminal Mobile One despachando un producto grande que solo puede salir por envío',
-        heading: 'El "sin stock" se vuelve un pasillo infinito',
-        text: 'El vendedor recomienda con el catálogo completo de la red: si no está en la sala, lo encuentra en otra tienda y reserva el despacho ahí mismo, frente al cliente.',
-      },
-      {
-        num: '03',
-        image: '/images/solucion-bulto.webp',
-        alt: 'Trabajador escaneando un bulto sellado con el terminal, sin abrirlo',
-        heading: 'El tiempo vuelve a la venta, no al conteo',
-        text: 'Se escanea el bulto una vez y el sistema reconcilia todo su contenido contra la orden de compra, y el vendedor recupera las horas que antes perdía contando, para venderle al cliente.',
-      },
-    ]}
-  />
+    <!-- 2. Logos de clientes (único marquee de la página) -->
+    <section class="clients" aria-label="Marcas que confían en Mobile One">
+      <div class="clients__mask">
+        <div class="clients__track">
+          {logos.map((l) => <img src={withBase(l.src)} alt={l.alt} class="clients__logo" loading="lazy" />)}
+          {logos.map((l) => <img src={withBase(l.src)} alt="" aria-hidden="true" class="clients__logo" loading="lazy" />)}
+        </div>
+      </div>
+    </section>
 
-  <BrandCompat
-    eyebrow="Compatibilidad total"
-    title="El mismo terminal que ya usas para cobrar"
-  />
+    <!-- 3. La plataforma: explorador con dispositivos -->
+    <ModuleShowcase
+      eyebrow="La plataforma"
+      title="Cinco módulos y la caja: un servicio integral"
+      intro="Del vendedor en sala a la caja de pago, todo con una misma plataforma. Elige un módulo y mira cómo funciona."
+      modules={showcaseModules}
+    />
 
-  <SolutionPair
-    eyebrow="Más allá de la caja"
-    title="Todo lo que potencia al vendedor corre en el mismo terminal"
-    items={[
-      {
-        image: '/images/solucion-promo.webp',
-        alt: 'Vendedora cobrando con terminal Mobile One con un descuento aplicado automáticamente',
-        heading: 'Las promociones se aplican solas',
-        text: 'Reglas por cliente, categoría, marca o ticket total, con CloudPromo y Prism conectados en tiempo real. El vendedor no calcula nada a mano.',
-      },
-      {
-        image: '/images/solucion-backoffice.webp',
-        alt: 'Encargada de tienda revisando ventas y stock en un panel web desde laptop y tablet',
-        heading: 'El panel de control ya no es otro sistema',
-        text: 'Ventas, tiendas, artículos, clientes y usuarios desde un panel web sincronizado con tu ERP, sin digitar la misma información dos veces.',
-      },
-    ]}
-  />
+    <!-- 4. Integraciones -->
+    <section class="integ">
+      <div class="integ__bg" aria-hidden="true"><span class="integ__grid"></span><span class="integ__blob"></span></div>
+      <div class="container integ__inner">
+        <div class="integ__copy" data-reveal>
+          <h2 class="integ__title">Se integra con <span class="integ__accent">lo que ya tienes.</span></h2>
+          <p class="integ__text">Mobile One consulta el stock a tu ERP y opera sobre el hardware de pago que ya certificaste. No reemplaza tus sistemas: los conecta.</p>
+          <ul class="integ__list" role="list">
+            <li><a href={withBase('/integraciones/erp')}><b>ERP</b><span>SAP Business One, Retail Pro y Retail Pro Prism</span></a></li>
+            <li><a href={withBase('/integraciones/medios-de-pago')}><b>Pagos</b><span>Transbank, Getnet, Mercado Pago y Niubiz</span></a></li>
+            <li><a href={withBase('/integraciones/facturacion')}><b>Documentos</b><span>Boleta en Chile, comprobante en Perú</span></a></li>
+          </ul>
+          <a class="btn btn--primary" href={withBase('/integraciones')}>Ver todas las integraciones</a>
+        </div>
+        <div class="integ__hub" data-reveal><IntegrationHub /></div>
+      </div>
+    </section>
 
-  <HowItWorksFlow
-    title="Cómo funciona, en 4 pasos"
-    headings={[
-      'Entra con un QR',
-      'Encuentra el producto, en cualquier tienda',
-      'El descuento se aplica solo',
-      'Todo queda sincronizado',
-    ]}
-    steps={[
-      'El vendedor escanea el QR de la tienda y su credencial',
-      'Escanea o busca el producto y ve el pasillo infinito: stock real, local y de toda la red',
-      'Aplica promos automáticas, cobra y elige entrega',
-      'Se emite el documento y la venta se integra a SAP B1',
-    ]}
-  />
+    <!-- 5. Cifras -->
 
-  <ArchitectureTeaser
-    title="Se integra con lo que ya tienes, no lo reemplaza"
-    text="Mobile One no duplica reglas de negocio: consulta el stock a tu ERP, delega las promociones a tu motor de promociones y opera sobre el hardware de pago que ya certificaste."
-    badges={['Service Layer nativo', 'Agnóstico de hardware POS', 'Multi-tenant con feature flags']}
-    inputs={[
-      {
-        label: 'Transbank · Getnet · Mercado Pago',
-        sub: 'El hardware de pago que ya certificaste',
-        logos: [
-          { src: '/images/logo-transbank-white.png', tone: 'transbank' },
-          { src: '/images/logo-getnet-white.png', tone: 'getnet' },
-          { src: '/images/logo-mercadopago-color.svg', tone: 'light', scale: 1.3 },
-        ],
-      },
-      {
-        label: 'SAP Business One',
-        sub: 'Tu ERP, sin duplicar datos',
-        logos: [{ src: '/images/logo-sap-business-one.png', tone: 'light' }],
-      },
-      { label: 'CloudPromo / Prism', sub: 'Tu motor de promociones' },
-    ]}
-    hub={{ label: 'Mobile One Core', sub: 'Orquesta, no reemplaza' }}
-    outputs={[
-      { label: 'App de venta móvil', sub: 'Vendedores en la sala' },
-      {
-        label: 'Facturador electrónico',
-        sub: 'Boleta y factura al instante',
-        logos: [{ src: '/images/logo-dte.png', tone: 'light', scale: 1.3 }],
-      },
-    ]}
-  />
+    <!-- 6. Equipo -->
+    <section class="team">
+      <img class="team__mark" src={withBase('/brand/Isotipo-logo.svg')} alt="" aria-hidden="true" />
+      <div class="container team__inner" data-reveal>
+        <div class="team__lead">
+          <h2 class="team__title">Detrás de cada sistema, <span class="team__accent">un equipo.</span></h2>
+        </div>
+        <div class="team__body">
+          <p>Mobile One lo desarrolla DOT Solutions, y te acompañamos desde la primera semana.</p>
+          <ul role="list"><li>Implementación en menos de una semana</li><li>Acompañamiento desde el primer día</li><li>Operación en Chile y Perú</li></ul>
+          <img class="team__logo" src={withBase('/brand/bydot-blanco.svg')} alt="Mobile One by DOT Solutions" />
+        </div>
+      </div>
+    </section>
 
-  <SocialProofStat
-    title="Retailers que ya potenciaron a su primer vendedor sin usar una caja"
-    statLabel="Implementación típica"
-    statText="Horas, no semanas."
-    note="Casos de clientes reales se publican solo con autorización expresa. Mientras tanto, agenda una demo y te mostramos el flujo completo con tu catálogo."
-  />
-
-  <CtaClose
-    title="¿Listo para potenciar a tu equipo de venta?"
-    body="Agenda una demo de 30 minutos y te mostramos Mobile One funcionando con tu catálogo."
-    ctaText="Agendar demo"
-    ctaHref="/contacto"
-    ctaSecondaryText="Contactar un consultor"
-    ctaSecondaryHref="/contacto"
-    logosLabel="Súmate a las marcas que ya trabajan con nosotros"
-    logos={heroLogos}
-  />
+    <!-- 7. Cierre -->
+    <section class="close">
+      <span class="close__blob" aria-hidden="true"></span>
+      <div class="container close__inner" data-reveal>
+        <h2 class="close__title">¿Listo para potenciar a tu equipo de venta?</h2>
+        <p class="close__sub">Agenda una demo de 30 minutos con tu catálogo.</p>
+        <a class="btn btn--light" href={withBase('/contacto')}>Agendar demo</a>
+      </div>
+    </section>
+  </main>
 </Layout>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { mountPosScreen } from '../utils/pos-screen.js';
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initHome() {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ── Hero: terminal vivo. Las pantallas cambian solas y cada una trae su chip ──
+    const live = document.querySelector('[data-live]');
+    if (live && !live.dataset.liveInit) {
+      live.dataset.liveInit = '1';
+      const pos = live.querySelector('[data-pos]');
+      const cleanup = mountPosScreen(pos, live.querySelector('[data-screen]'), { mirror: true, minLeft: 0 });
+      document.addEventListener('astro:before-swap', cleanup, { once: true });
+      const order = ['pos', 'factura', 'recepcion', 'promos'];
+      const screens = [...live.querySelectorAll('.msc')];
+      const chips = [...live.querySelectorAll('[data-chip]')];
+      const steps = [...live.querySelectorAll('.live__step')];
+      let cur = 0, timer = null;
+      const show = (i) => {
+        cur = i;
+        screens.forEach((s) => s.classList.remove('is-on'));
+        void live.offsetWidth; // reinicia las microanimaciones de la pantalla
+        screens.find((s) => s.dataset.screen === order[i])?.classList.add('is-on');
+        chips.forEach((c) => c.classList.toggle('is-on', c.dataset.chip === order[i]));
+        steps.forEach((s, k) => s.classList.toggle('is-on', k === i));
+      };
+      const play = () => { if (reduce || timer) return; timer = setInterval(() => show((cur + 1) % order.length), 5200); };
+      const stop = () => { clearInterval(timer); timer = null; };
+      show(0);
+      steps.forEach((s, k) => s.addEventListener('click', () => { stop(); show(k); }));
+      new IntersectionObserver((e) => (e[0].isIntersecting ? play() : stop()), { threshold: 0.3 }).observe(live);
+    }
+
+    // Contadores (el valor real; solo cambia cómo se muestra)
+    document.querySelectorAll('[data-count]').forEach((el) => {
+      const target = Number(el.dataset.count);
+      if (reduce) { el.textContent = String(target); return; }
+      const o = { v: 0 };
+      gsap.to(o, { v: target, duration: 1.6, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true }, onUpdate: () => { el.textContent = String(Math.round(o.v)); } });
+    });
+
+    if (reduce) return;
+
+    gsap.from('[data-rise]', { opacity: 0, y: 28, duration: 1, stagger: 0.12, ease: 'expo.out', delay: 0.1 });
+    gsap.from('.live__pos', { opacity: 0, y: 60, duration: 1.2, ease: 'expo.out', delay: 0.25 });
+    gsap.utils.toArray('[data-reveal]').forEach((el, i) => {
+      gsap.from(el, { opacity: 0, y: 32, duration: 1, ease: 'expo.out', delay: (i % 4) * 0.07, scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
+    });
+
+    // Parallax del hero y de las cifras (solo escritorio)
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 900px)', () => {
+      const hero = document.querySelector('[data-hero]');
+      gsap.to('.hero__glow', { yPercent: 10, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+      // El parallax va en la figura completa (con sus chips); la entrada anima solo .live__pos.
+      // Así no compiten por 'y' y el terminal no salta al hacer scroll.
+      gsap.to('.live', { y: -50, ease: 'none', immediateRender: false, scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+    });
+  }
+  document.addEventListener('astro:page-load', initHome);
+</script>
+
+<style>
+  .pp { background: var(--bg-primary); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 1.6rem; border-radius: var(--radius-full); font-size: var(--text-base); font-weight: 500; text-decoration: none; white-space: nowrap; transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast); }
+  .btn:active { transform: translateY(1px) scale(0.98); }
+  .btn--primary { background: var(--grad-brand); color: var(--on-accent); box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--accent-grad-start) 60%, transparent); } .btn--primary:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -8px color-mix(in srgb, var(--accent-grad-start) 65%, transparent); }
+  .btn--ghost { color: var(--navy); border: 1px solid var(--border); background: var(--bg-primary); } .btn--ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn--light { background: var(--on-accent); color: var(--navy); } .btn--light:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+  /* ── 1. Hero ── */
+  .hero { position: relative; min-height: calc(100svh - 70px); display: grid; align-items: center; overflow: clip; background: var(--grad-soft); isolation: isolate; }
+  /* Fondo claro y limpio: blanco → tinte azul, con luz de gradiente y cuadrícula tenue de marca */
+  .hero__bg { position: absolute; inset: 0; z-index: -1; }
+  .hero__glow { position: absolute; inset: 0; background: radial-gradient(ellipse 50% 70% at 76% 50%, color-mix(in srgb, var(--accent-grad-end) 30%, transparent), transparent 70%); }
+  .hero__blob { position: absolute; border-radius: 50%; filter: blur(80px); }
+  .hero__blob--a { width: 42vw; height: 42vw; left: -14vw; top: -18vw; background: radial-gradient(circle, var(--accent-grad-end), transparent 68%); opacity: .3; animation: hero-drift 18s ease-in-out infinite alternate; }
+  .hero__blob--b { width: 34vw; height: 34vw; right: -10vw; bottom: -16vw; background: radial-gradient(circle, var(--accent), transparent 68%); opacity: .16; animation: hero-drift 22s ease-in-out infinite alternate-reverse; }
+  .hero__grid { position: absolute; inset: 0; background-image: linear-gradient(color-mix(in srgb, var(--accent-grad-start) 7%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--accent-grad-start) 7%, transparent) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at 30% 40%, #000 0%, transparent 70%); -webkit-mask-image: radial-gradient(ellipse at 30% 40%, #000 0%, transparent 70%); }
+  @keyframes hero-drift { to { transform: translate(5vw, 4vw) scale(1.1); } }
+  .hero__inner { display: grid; gap: var(--space-md); padding-block: var(--space-lg); align-items: center; }
+  .hero__copy { display: grid; gap: var(--space-md); max-width: 40rem; }
+  .hero__title { font-family: var(--font-heading); font-size: clamp(2.5rem, 5vw, 3.9rem); line-height: 1.02; letter-spacing: -0.035em; color: var(--navy); font-weight: 500; }
+  .hero__accent { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 0.08em; }
+  .hero__sub { font-size: clamp(1.05rem, 1.6vw, 1.3rem); color: var(--text-secondary); line-height: 1.5; max-width: 34ch; }
+  .hero__cta { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+  .hero__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm) var(--space-md); padding-top: var(--space-sm); border-top: 1px solid var(--border); margin: 0; }
+  .hstat { display: grid; gap: .2rem; align-content: start; margin: 0; }
+  .hstat__num { font-family: var(--font-heading); font-size: clamp(1.9rem, 3vw, 2.5rem); letter-spacing: -.035em; line-height: 1; font-weight: 500; font-variant-numeric: tabular-nums; background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .08em; white-space: nowrap; }
+  .hstat__unit { font-size: .45em; letter-spacing: 0; color: var(--text-secondary); -webkit-text-fill-color: var(--text-secondary); }
+  .hstat__label { font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.35; margin: 0; }
+  @media (min-width: 560px) { .hero__stats { grid-template-columns: repeat(4, minmax(0, auto)); justify-content: space-between; } }
+
+  /* Terminal vivo + chips flotantes */
+  .live { position: relative; margin: 0; width: min(100%, 560px, calc(100svh - 120px)); aspect-ratio: 1; justify-self: center; display: grid; justify-items: start; }
+  .live__halo { position: absolute; left: 10%; top: 8%; width: 80%; aspect-ratio: 1; border-radius: 50%; background: var(--grad-brand); box-shadow: 0 40px 80px -20px color-mix(in srgb, var(--accent-grad-start) 55%, transparent); }
+  .live__halo::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(ellipse 60% 40% at 70% 18%, color-mix(in srgb, var(--on-accent) 30%, transparent), transparent 70%); }
+  .live__pos { position: relative; width: min(118%, 560px); aspect-ratio: 1958 / 1722; align-self: center; }
+  .live__pos img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; filter: drop-shadow(0 28px 34px color-mix(in srgb, var(--accent-grad-start) 55%, transparent)); }
+  .live__screen { position: absolute; top: 0; left: 0; width: 900px; height: 1890px; transform-origin: 0 0; border-radius: 30px; overflow: hidden; clip-path: inset(0 round 30px); background: var(--bg-primary); backface-visibility: hidden; }
+  .live__canvas { position: absolute; top: 0; left: 0; width: 300px; height: 630px; transform: scale(3); transform-origin: 0 0; }
+  .live__chip { position: absolute; display: flex; align-items: center; gap: .7rem; padding: .7rem 1rem .7rem .8rem; border-radius: var(--radius-lg); background: var(--bg-primary); border: 1px solid var(--border); color: var(--navy); box-shadow: 0 18px 36px -10px color-mix(in srgb, var(--accent-grad-start) 45%, transparent); opacity: 0; transform: translateY(14px) scale(.94); transition: opacity .7s var(--ease-expo), transform .9s var(--ease-expo); pointer-events: none; }
+  .live__chip.is-on { opacity: 1; transform: none; animation: live-float 5s ease-in-out infinite; }
+  .live__chip b { display: block; font-weight: 500; font-size: var(--text-sm); } .live__chip small { display: block; color: var(--text-secondary); font-size: var(--text-xs); }
+  .live__chip-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
+  .live__chip--l { left: -2%; top: 18%; } .live__chip--r { right: -2%; bottom: 22%; }
+  @keyframes live-float { 50% { translate: 0 -8px; } }
+  .live__steps { position: absolute; left: 50%; bottom: -2%; translate: -50% 0; display: flex; gap: 8px; }
+  .live__step { width: 26px; height: 4px; border-radius: 99px; background: color-mix(in srgb, var(--accent-grad-start) 20%, transparent); cursor: pointer; transition: width .5s var(--ease-expo), background-color .4s; } .live__step.is-on { width: 54px; background: var(--accent); }
+  @media (min-width: 900px) { .hero__inner { grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); } }
+  @media (max-width: 899px) { .live { width: min(100%, 420px); } .live__chip--l { left: 0; top: 6%; } .live__chip--r { right: 0; bottom: 10%; } }
+
+  /* ── 2. Logos ── */
+  .clients { background: var(--bg-primary); padding-block: var(--space-md); border-block: 1px solid var(--border); }
+  .clients__mask { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .clients__track { display: flex; align-items: center; gap: 4rem; width: max-content; animation: marquee 38s linear infinite; }
+  .clients__logo { height: 30px; width: auto; opacity: .7; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  /* ── 4. Integraciones ── */
+  .integ { position: relative; background: var(--bg-primary); color: var(--navy); padding-block: var(--space-xl); overflow: clip; isolation: isolate; }
+  .integ__bg { position: absolute; inset: 0; z-index: -1; }
+  .integ__grid { position: absolute; inset: 0; background-image: linear-gradient(color-mix(in srgb, var(--accent-grad-start) 6%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--accent-grad-start) 6%, transparent) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at 70% 50%, #000 0%, transparent 70%); -webkit-mask-image: radial-gradient(ellipse at 70% 50%, #000 0%, transparent 70%); }
+  .integ__blob { position: absolute; width: 50vw; height: 50vw; right: -14vw; top: -12vw; border-radius: 50%; background: radial-gradient(circle, var(--accent-grad-end), transparent 66%); filter: blur(80px); opacity: .3; }
+  .integ__inner { display: grid; gap: var(--space-lg); align-items: center; }
+  .integ__copy { display: grid; gap: var(--space-sm); justify-items: start; max-width: 34rem; }
+  .integ__title { font-family: var(--font-heading); font-size: clamp(2.1rem, 4.6vw, 3.6rem); letter-spacing: -.03em; line-height: 1.04; font-weight: 500; }
+  .integ__accent { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .08em; }
+  .integ__text { font-size: var(--text-lg); line-height: 1.6; color: var(--text-secondary); }
+  .integ__list { list-style: none; display: grid; gap: .6rem; width: 100%; margin-block: var(--space-xs); }
+  .integ__list a { display: grid; grid-template-columns: 6.2rem 1fr; gap: 1rem; align-items: baseline; padding: .85rem 1.1rem; border-radius: var(--radius-lg); text-decoration: none; color: var(--navy); background: var(--bg-primary); border: 1px solid var(--border); transition: transform .5s var(--ease-expo), border-color .4s, box-shadow .5s var(--ease-expo); }
+  .integ__list a:hover { transform: translateX(6px); border-color: var(--accent); box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--accent-grad-start) 45%, transparent); }
+  .integ__list b { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; font-weight: 500; color: var(--accent); } .integ__list span { line-height: 1.4; }
+  .integ__hub { display: grid; justify-items: center; }
+  .integ__hub :global(.hub) { width: min(100%, 520px); }
+  @media (min-width: 900px) { .integ__inner { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } }
+
+  /* ── 5. Cifras ── */
+
+  /* ── 6. Equipo ── */
+  .team { position: relative; background: var(--bg-secondary); padding-block: var(--space-xl); overflow: clip; }
+  .team__mark { position: absolute; right: -6%; top: 50%; translate: 0 -50%; width: min(46vw, 520px); height: auto; opacity: .07; pointer-events: none; }
+  .team__inner { position: relative; display: grid; gap: var(--space-lg); align-items: center; }
+  .team__title { font-family: var(--font-heading); font-size: clamp(2.2rem, 5vw, 4.2rem); letter-spacing: -.035em; line-height: 1.02; color: var(--navy); font-weight: 500; max-width: 14ch; }
+  .team__accent { color: var(--accent); }
+  .team__body { display: grid; gap: var(--space-sm); justify-items: start; max-width: 30rem; }
+  .team__body p { font-size: var(--text-lg); line-height: 1.55; color: var(--text-secondary); }
+  .team__body ul { list-style: none; display: grid; gap: .5rem; } .team__body li { position: relative; padding-left: 1.5rem; color: var(--navy); } .team__body li::before { content: ''; position: absolute; left: 0; top: .5em; width: .65rem; height: .38rem; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
+  .team__logo { height: 34px; width: auto; margin-top: var(--space-xs); padding: .7rem 1.1rem; box-sizing: content-box; background: var(--grad-brand); border-radius: var(--radius-md); }
+  @media (min-width: 900px) { .team__inner { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); } }
+
+  /* ── 7. Cierre ── */
+  .close { position: relative; overflow: clip; isolation: isolate; background: var(--accent-gradient); color: var(--on-accent); padding-block: var(--space-xl); }
+  .close__blob { position: absolute; z-index: -1; width: 46vw; height: 46vw; right: -10vw; bottom: -20vw; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--on-accent) 30%, transparent), transparent 65%); animation: close-drift 14s ease-in-out infinite alternate; }
+  @keyframes close-drift { to { transform: translate(-6vw, -4vw) scale(1.15); } }
+  .close__inner { display: grid; gap: var(--space-sm); justify-items: start; }
+  .close__title { font-family: var(--font-heading); font-size: clamp(2.2rem, 5.4vw, 4.4rem); letter-spacing: -0.03em; line-height: 1.04; font-weight: 500; max-width: 18ch; }
+  .close__sub { font-size: var(--text-lg); color: color-mix(in srgb, var(--on-accent) 85%, transparent); margin-bottom: var(--space-xs); }
+
+  @media (prefers-reduced-motion: reduce) { .clients__track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; } .live__chip.is-on { animation: none; } .close__blob, .hero__blob { animation: none; } }
+</style>

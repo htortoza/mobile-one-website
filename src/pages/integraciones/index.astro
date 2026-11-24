@@ -1,0 +1,239 @@
+---
+// src/pages/integraciones/index.astro — Se integra con lo que ya tienes. Generado por el frente A. Sin datos inventados: ver comentarios DATO PENDIENTE.
+import Layout from '../../layouts/Layout.astro';
+import IntegrationHero from '../../components/integraciones/IntegrationHero.astro';
+import Section from '../../components/pages/Section.astro';
+import FaqList from '../../components/pages/FaqList.astro';
+import CtaBand from '../../components/pages/CtaBand.astro';
+import { withBase } from '../../utils/base.js';
+import { graph, faqSchema, breadcrumbSchema, orgSchema } from '../../utils/seo.js';
+// DATO PENDIENTE: otros ERP soportados
+
+const crumbs = [
+  {
+    "label": "Integraciones"
+  }
+];
+const trail = [
+  {
+    "label": "Inicio",
+    "href": "/"
+  },
+  {
+    "label": "Integraciones",
+    "href": "/integraciones"
+  }
+];
+const faqs = [
+  {
+    "q": "¿Con qué ERP se integra Mobile One?",
+    "a": "Con SAP Business One y con Retail Pro."
+  },
+  {
+    "q": "¿Con qué medios de pago funciona?",
+    "a": "Transbank, Getnet y Mercado Pago en Chile, Mercado Pago y Niubiz en Perú."
+  },
+  {
+    "q": "¿Funciona en Chile y en Perú?",
+    "a": "Sí. El flujo es el mismo y el documento electrónico se adapta a cada país."
+  },
+  {
+    "q": "¿Tengo que cambiar mis terminales?",
+    "a": "No. Mobile One usa el terminal de pago que tu tienda ya tiene."
+  },
+  {
+    "q": "¿Cuánto demora la implementación?",
+    "a": "Menos de una semana."
+  }
+];
+const cards = [
+  {
+    "name": "ERP: SAP Business One, Retail Pro y Retail Pro Prism",
+    "tag": "ERP",
+    "href": "/integraciones/erp",
+    "text": "Stock y ventas integrados a tu ERP, sin digitar dos veces."
+  },
+  {
+    "name": "Medios de pago",
+    "tag": "Transbank, Getnet, Mercado Pago y Niubiz",
+    "href": "/integraciones/medios-de-pago",
+    "text": "Cobra con el terminal que ya usas, en Chile y Perú."
+  },
+  {
+    "name": "Facturación electrónica",
+    "tag": "Boleta, factura y comprobante",
+    "href": "/integraciones/facturacion",
+    "text": "El documento sale al cobrar, desde el POS móvil o la caja."
+  }
+];
+const extra = {
+  "title": "Qué significa integrarse",
+  "intro": "Mobile One se conecta a tres cosas que tu tienda ya tiene.",
+  "points": [
+    "Tu ERP, para consultar el stock y registrar las ventas.",
+    "Tu terminal de pago, para cobrar sin cambiar de adquirente.",
+    "El documento electrónico de cada país, para emitirlo al cobrar.",
+    "Todo en una implementación de menos de una semana."
+  ]
+};
+const related = [
+  {
+    "name": "Producto",
+    "href": "/producto",
+    "text": "Los módulos de Mobile One."
+  },
+  {
+    "name": "Contacto",
+    "href": "/contacto",
+    "text": "Agenda una demo de 30 minutos."
+  }
+];
+const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(faqs));
+---
+
+<Layout title="Integraciones de Mobile One: ERP, pagos y facturación" description="Mobile One se integra con SAP Business One, Retail Pro, Retail Pro Prism, Transbank, Getnet, Mercado Pago y Niubiz, y emite el documento electrónico." image="/images/og-default.jpg" schemaData={schemaData}>
+  <IntegrationHero
+    crumbs={crumbs}
+    title="Se integra con"
+    accent="lo que ya tienes"
+    lead="Mobile One no reemplaza tus sistemas: consulta el stock a tu ERP, cobra con el terminal de pago que ya usas y emite el documento electrónico."
+    ctaText="Agendar demo" ctaHref="/contacto" ctaSecondaryText="Ver el producto" ctaSecondaryHref="/producto"
+    facts={['Chile y Perú', 'Sin cambiar de terminal', 'Menos de una semana']}
+  />
+
+  <section class="fr">
+    <div class="container fr__inner">
+      <div class="fr__head" data-rv>
+        <h2>Tres frentes de integración</h2>
+        <p>Elige uno para ver cómo funciona.</p>
+      </div>
+      <div class="fr__grid">
+        <a class="fc fc--pay" href={withBase('/integraciones/medios-de-pago')} data-rv>
+          <div class="fc__main">
+            <span class="fc__tag">Medios de pago</span>
+            <h3>Cobra con el terminal que ya usas</h3>
+            <p>Transbank, Getnet y Mercado Pago en Chile, Mercado Pago y Niubiz en Perú. Sin cambiar de adquirente.</p>
+            <span class="fc__go">Ver medios de pago <i aria-hidden="true">→</i></span>
+          </div>
+          <div class="fc__side">
+            <div class="fc__logos">
+              <img src={withBase('/images/logo-transbank-white.png')} alt="Transbank" />
+              <img src={withBase('/images/logo-getnet-white.png')} alt="Getnet" />
+              <span class="fc__pill fc__mpp"><img src={withBase('/images/logo-mercadopago-negativo.svg')} alt="Mercado Pago" width="789" height="201" /></span>
+              <span class="fc__txt">Niubiz</span>
+            </div>
+            <ul class="fc__cty"><li><b>Chile</b>Transbank, Getnet y Mercado Pago</li><li><b>Perú</b>Mercado Pago y Niubiz</li></ul>
+          </div>
+        </a>
+        <a class="fc fc--erp" href={withBase('/integraciones/erp')} data-rv>
+          <span class="fc__tag">ERP</span>
+          <h3>Tu ERP</h3>
+          <p>SAP Business One, Retail Pro y Retail Pro Prism. Stock y ventas integrados, sin digitar dos veces.</p>
+          <span class="fc__pills"><span class="fc__pill fc__pill--lg"><img src={withBase('/images/logo-sap-business-one.png')} alt="SAP Business One" /></span><span class="fc__pill fc__pill--lg"><img src={withBase('/images/logo-retailpro.png')} alt="Retail Pro" /></span><span class="fc__pill fc__pill--lg"><img src={withBase('/images/logo-retailpro.png')} alt="Retail Pro Prism" /><em class="fc__badge">Prism</em></span></span>
+          <span class="fc__go">Ver los tres ERP <i aria-hidden="true">→</i></span>
+        </a>
+        <a class="fc fc--dte" href={withBase('/integraciones/facturacion')} data-rv>
+          <span class="fc__tag">Documentos</span>
+          <h3>Facturación electrónica</h3>
+          <p>El documento sale al cobrar, desde el POS móvil o la caja. Boleta en Chile, comprobante en Perú.</p>
+          <img class="fc__dte" src={withBase('/brand/dte/dte-imagotipo-blanco.svg')} alt="dotdte, facturación electrónica" width="322" height="149" />
+          <span class="fc__go">Ver facturación <i aria-hidden="true">→</i></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="mean">
+    <div class="container mean__inner">
+      <div class="mean__stat" data-rv>
+        <p class="mean__big">Menos de<br />una semana</p>
+        <p class="mean__cap">para implementar Mobile One sobre lo que ya tienes.</p>
+      </div>
+      <div class="mean__list" data-rv>
+        <h2>{extra.title}</h2>
+        <p class="mean__intro">{extra.intro}</p>
+        <ul>
+          <li><span class="mean__k">ERP</span>Tu ERP, para consultar el stock y registrar las ventas.</li>
+          <li><span class="mean__k">Pago</span>Tu terminal de pago, para cobrar sin cambiar de adquirente.</li>
+          <li><span class="mean__k">Documento</span>El documento electrónico de cada país, para emitirlo al cobrar.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <Section title="Preguntas frecuentes" bg="white">
+    <FaqList items={faqs} />
+  </Section>
+  <Section title="Más sobre el producto" bg="light">
+    <div class="rel">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
+  </Section>
+  <CtaBand title="¿Quieres verlo con tu operación?" text="Agenda una demo de 30 minutos con tu catálogo." />
+</Layout>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+  document.addEventListener('astro:page-load', () => {
+    // Solo esta página: los otros scripts de la web también escuchan astro:page-load y no deben tocar estos elementos.
+    if (!location.pathname.replace(/\/$/, '').endsWith('/integraciones')) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    gsap.utils.toArray('[data-rv]').forEach((el, i) => {
+      if (el.dataset.rvDone) return; el.dataset.rvDone = '1'; // evita que dos páginas animen el mismo elemento al navegar
+      gsap.from(el, { opacity: 0, y: 36, duration: 1, ease: 'expo.out', delay: (i % 3) * 0.08, scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
+    });
+    // la cifra grande entra con un barrido de máscara
+    const big = document.querySelector('.mean__big');
+    if (big) gsap.from(big, { clipPath: 'inset(0 100% 0 0)', duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: big, start: 'top 85%', once: true } });
+  });
+</script>
+
+<style>
+  .rel { display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+  .rel > a { background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); text-decoration:none; transition:transform var(--transition-fast), border-color var(--transition-fast); }
+  .rel > a:hover { transform:translateY(-3px); border-color:var(--accent); }
+  .rel h3 { font-family:var(--font-heading); font-size:var(--text-xl); color:var(--navy); font-weight:500; } .rel p { color:var(--text-secondary); }
+
+  /* ── Tres frentes (asimétrico) ── */
+  .fr { background: var(--bg-primary); padding-block: var(--space-xl); }
+  .fr__inner { display: grid; gap: var(--space-lg); }
+  .fr__head h2 { font-family: var(--font-heading); font-size: clamp(2rem, 4.4vw, 3.4rem); letter-spacing: -.03em; line-height: 1.05; color: var(--navy); font-weight: 500; }
+  .fr__head p { margin-top: .6rem; font-size: var(--text-lg); color: var(--text-secondary); }
+  .fr__grid { display: grid; gap: var(--space-sm); grid-template-columns: minmax(0, 1fr); }
+  .fc { position: relative; display: grid; gap: .8rem; align-content: start; padding: var(--space-md); border-radius: calc(var(--radius-lg) * 1.5); text-decoration: none; overflow: hidden; min-width: 0; isolation: isolate; transition: transform .6s var(--ease-expo), box-shadow .6s var(--ease-expo); }
+  .fc:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+  .fc h3 { font-family: var(--font-heading); font-size: clamp(1.5rem, 2.6vw, 2.2rem); letter-spacing: -.025em; line-height: 1.08; font-weight: 500; }
+  .fc p { line-height: 1.55; max-width: 42ch; }
+  .fc__tag { justify-self: start; font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; font-weight: 500; padding: .25rem .8rem; border-radius: var(--radius-full); border: 1px solid currentColor; opacity: .85; }
+  .fc__go { margin-top: auto; padding-top: var(--space-sm); font-weight: 500; display: inline-flex; gap: .5rem; align-items: center; } .fc__go i { font-style: normal; transition: transform .5s var(--ease-expo); } .fc:hover .fc__go i { transform: translateX(8px); }
+  .fc__pill { display: inline-grid; place-items: center; justify-self: start; background: var(--on-accent); border-radius: var(--radius-md); padding: .5rem .9rem; } .fc__pill img { height: 26px; width: auto; display: block; } .fc__pill--lg img { height: 40px; } .fc__pill--lg { padding: .8rem 1.3rem; }
+  .fc--pay { background: var(--accent-gradient); color: var(--on-accent); }
+  .fc__main, .fc__side { display: grid; gap: .8rem; align-content: start; min-width: 0; } .fc__side { align-content: center; gap: var(--space-sm); }
+  .fc__mpp { padding: 0; background: none; border: 0; box-shadow: none; border-radius: 0; }
+  .fc__dte { height: 52px; width: auto; justify-self: start; display: block; }
+  .fc__cty { list-style: none; display: grid; gap: .5rem; margin-top: var(--space-sm); } .fc__cty li { display: flex; gap: .8rem; align-items: baseline; padding: .7rem 1rem; border-radius: var(--radius-md); background: color-mix(in srgb, var(--on-accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--on-accent) 20%, transparent); } .fc__cty b { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; min-width: 3.4rem; }
+  .fc--pay::before { content: ''; position: absolute; width: 70%; aspect-ratio: 1; right: -18%; top: -22%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--on-accent) 28%, transparent), transparent 65%); z-index: -1; transition: transform 1.2s var(--ease-expo); } .fc--pay:hover::before { transform: scale(1.25); }
+  .fc__logos { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.3rem; margin-top: var(--space-xs); } .fc__logos > img { height: 26px; width: auto; display: block; } .fc__txt { font-family: var(--font-heading); font-size: var(--text-xl); font-weight: 600; }
+  .fc__pills { display: flex; flex-wrap: wrap; gap: .6rem; } .fc__pills .fc__pill--lg { padding: .6rem 1rem; } .fc__pills .fc__pill--lg img { height: 30px; }
+  .fc__badge { margin-left: .5rem; font-style: normal; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-full); background: var(--accent-gradient); color: var(--on-accent); }
+  .fc__pills .fc__pill { display: inline-flex; align-items: center; }
+  .fc--erp { background: var(--bg-secondary); color: var(--navy); border: 1px solid var(--border); } .fc--erp p { color: var(--text-secondary); } .fc--erp .fc__pill { border: 1px solid var(--border); }
+  .fc--dte { background: var(--grad-brand); color: var(--on-accent); } .fc--dte p { color: color-mix(in srgb, var(--on-accent) 78%, transparent); }
+  @media (min-width: 900px) {
+    .fr__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* Medios de pago: franja ancha con el texto a un lado y los logos y países al otro, sin espacio muerto */
+    .fc--pay { grid-column: 1 / -1; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--space-lg); align-items: center; padding: var(--space-lg); }
+    .fc--pay .fc__go { margin-top: var(--space-xs); padding-top: 0; }
+  }
+
+  /* ── Qué significa integrarse ── */
+  .mean { background: var(--bg-secondary); padding-block: var(--space-xl); }
+  .mean__inner { display: grid; gap: var(--space-lg); align-items: center; }
+  .mean__big { font-family: var(--font-heading); font-size: clamp(3rem, 8.4vw, 7rem); letter-spacing: -.045em; line-height: .95; font-weight: 500; color: var(--accent); }
+  .mean__cap { margin-top: var(--space-sm); font-size: var(--text-lg); color: var(--text-secondary); max-width: 24ch; line-height: 1.45; }
+  .mean__list { display: grid; gap: var(--space-sm); } .mean__list h2 { font-family: var(--font-heading); font-size: clamp(1.8rem, 3.4vw, 2.6rem); letter-spacing: -.025em; color: var(--navy); font-weight: 500; }
+  .mean__intro { color: var(--text-secondary); font-size: var(--text-lg); }
+  .mean__list ul { list-style: none; display: grid; margin-top: var(--space-xs); } .mean__list li { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--space-sm); align-items: baseline; padding-block: 1rem; border-top: 1px solid var(--border); line-height: 1.45; color: var(--text-primary); } .mean__list li:last-child { border-bottom: 1px solid var(--border); }
+  .mean__k { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+  @media (min-width: 900px) { .mean__inner { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } }
+</style>

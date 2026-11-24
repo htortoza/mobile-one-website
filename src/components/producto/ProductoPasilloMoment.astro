@@ -6,7 +6,7 @@
 // el copy original de la feature "Venta omnicanal" de producto.astro. No
 // se repite este tratamiento tipográfico en ningún otro capítulo.
 import { withBase } from '../../utils/base.js';
-const { id, eyebrow, title, text, image, imageAlt } = Astro.props;
+const { id, eyebrow, title, text, image, imageAlt, points = [] } = Astro.props;
 ---
 
 <section id={id} class="ppm" data-gsap-section="ppm">
@@ -19,6 +19,17 @@ const { id, eyebrow, title, text, image, imageAlt } = Astro.props;
     {eyebrow && <p class="ppm__eyebrow" data-gsap-animate="fade-up">{eyebrow}</p>}
     <h2 class="ppm__title" data-gsap-split="words">{title}</h2>
     <p class="ppm__text" data-gsap-animate="fade-up">{text}</p>
+    {points.length > 0 && (
+      <ol class="ppm__points" data-gsap-animate="fade-up">
+        {points.map((pt, i) => (
+          <li class="ppm__point">
+            <span class="ppm__point-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <strong>{pt.title}</strong>
+            <span>{pt.text}</span>
+          </li>
+        ))}
+      </ol>
+    )}
   </div>
 </section>
 
@@ -78,6 +89,8 @@ const { id, eyebrow, title, text, image, imageAlt } = Astro.props;
   }
 
   .ppm__copy { position: relative; z-index: 1; display: grid; gap: var(--space-md); max-width: 60ch; }
+  .ppm__copy:has(.ppm__points) { max-width: 64rem; }
+  .ppm__copy:has(.ppm__points) > :not(.ppm__points) { max-width: 60ch; }
   .ppm__eyebrow { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; color: color-mix(in srgb, var(--on-accent) 70%, transparent); }
   .ppm__title {
     font-family: var(--font-heading);
@@ -90,4 +103,14 @@ const { id, eyebrow, title, text, image, imageAlt } = Astro.props;
   .ppm__word-outer { display: inline-block; overflow: hidden; vertical-align: top; }
   .ppm__word { display: inline-block; }
   .ppm__text { font-size: clamp(1.1rem, 1.6vw, 1.35rem); color: color-mix(in srgb, var(--on-accent) 85%, transparent); line-height: 1.6; }
+  .ppm__points { list-style: none; margin: var(--space-xs) 0 0; padding: 0; display: grid; gap: var(--space-sm); grid-template-columns: minmax(0, 1fr); }
+  .ppm__point { display: grid; gap: .35rem; align-content: start; padding: 1.1rem 1.2rem; border-radius: var(--radius-lg); background: color-mix(in srgb, var(--on-accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--on-accent) 28%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--on-accent); }
+  .ppm__point-n { font-size: var(--text-xs); letter-spacing: .12em; opacity: .8; }
+  .ppm__point strong { font-family: var(--font-heading); font-weight: 500; font-size: var(--text-lg); letter-spacing: -.01em; }
+  .ppm__point span:last-child { font-size: var(--text-base); line-height: 1.5; color: color-mix(in srgb, var(--on-accent) 88%, transparent); }
+  @media (min-width: 800px) { .ppm__points { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  /* El rail de capítulos (fixed, x 32 a 155px) no debe tapar el texto */
+  @media (min-width: 900px) {
+    .ppm__copy { padding-inline-start: max(var(--container-pad), calc(200px - max(0px, (100vw - var(--container-max)) / 2))); }
+  }
 </style>
