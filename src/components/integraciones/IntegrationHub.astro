@@ -20,8 +20,19 @@ const nodes = [
 const DIMS = {"logo-sap-business-one.png": (1292, 174), "logo-retailpro.png": (360, 97), "logo-transbank-white.png": (1200, 195), "logo-getnet-white.png": (858, 256), "logo-mercadopago-negativo.svg": (789, 201), "dte-imagotipo-color.svg": (322, 149)};
 const dimsOf = (src) => { const k = Object.keys(DIMS).find((n) => src && src.endsWith(n)); return k ? DIMS[k] : [0, 0]; };
 const R = { x: 36.5, y: 36 }; // radio del anillo en % del lienzo
+// Giro del anillo: el nodo en foco (o el centro de su grupo) queda arriba (-90°). Sin foco, no gira hasta que se elige uno.
+const focusNodes = focus ? nodes.filter((n) => focus === n.key || focus === n.group) : [];
+let theta0 = 0;
+if (focusNodes.length) {
+  const sx = focusNodes.reduce((t, n) => t + Math.cos((n.angle * Math.PI) / 180), 0);
+  const sy = focusNodes.reduce((t, n) => t + Math.sin((n.angle * Math.PI) / 180), 0);
+  const mean = (Math.atan2(sy, sx) * 180) / Math.PI;
+  theta0 = (((-90 - mean + 540) % 360) + 360) % 360 - 180;
+}
+const interactive = !focus;
+const nodesData = nodes.map((n) => ({ key: n.key, group: n.group, angle: n.angle, dir: n.dir }));
 const pos = nodes.map((n) => {
-  const a = (n.angle * Math.PI) / 180;
+  const a = ((n.angle + theta0) * Math.PI) / 180;
   const x = 50 + R.x * Math.cos(a), y = 50 + R.y * Math.sin(a);
   // curva suave: punto de control desplazado perpendicular al cable
   const mx = (50 + x) / 2, my = (50 + y) / 2, dx = x - 50, dy = y - 50, len = Math.hypot(dx, dy) || 1;
@@ -32,7 +43,7 @@ const pos = nodes.map((n) => {
   return { ...n, x, y, path: n.dir === 'in' ? back : fwd, line: fwd };
 });
 ---
-<figure class="hub" data-hub aria-label="Mobile One conectado a SAP Business One, Retail Pro, Retail Pro Prism, medios de pago y documento electrónico">
+<figure class={`hub ${focusNodes.length > 1 ? "hub--group" : ""}`} data-hub data-theta={theta0} data-interactive={interactive ? "1" : "0"} data-nodes={JSON.stringify(nodesData)} aria-label="Mobile One conectado a SAP Business One, Retail Pro, Retail Pro Prism, medios de pago y documento electrónico">
   <svg class="hub__lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
     <defs><linearGradient id="hubg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent-grad-end)" stop-opacity=".9" /><stop offset="1" stop-color="var(--accent-grad-start)" stop-opacity=".35" /></linearGradient></defs>
     <g class="hub__ring"><circle cx="50" cy="50" r="24" /><circle cx="50" cy="50" r="38" /></g>
@@ -49,7 +60,7 @@ const pos = nodes.map((n) => {
     <div class="hub__slot" style={`left:${n.x}%;top:${n.y}%`}>
     <a href={withBase(n.href)} aria-label={`${n.label}, ver integración`} class={`hub__node ${n.light ? 'hub__node--light' : ''} ${n.bare ? 'hub__node--bare' : ''} ${n.wide ? 'hub__node--wide' : ''} ${n.tall ? 'hub__node--tall' : ''} ${focus && (focus === n.key || focus === n.group) ? 'is-focus' : ''} ${focus && !(focus === n.key || focus === n.group) ? 'is-dim' : ''}`} style={`--d:${i * 0.7}s`}>
       <span class="hub__chip">{n.logo ? <img src={withBase(n.logo)} alt={n.label} width={dimsOf(n.logo)[0]} height={dimsOf(n.logo)[1]} /> : <b>{n.text}</b>}{n.badge && <em class="hub__badge">{n.badge}</em>}</span>
-      <span class="hub__label">{n.sub}</span>
+      <span class="hub__label" data-sub={n.sub}>{n.sub}</span>
     </a>
     </div>
   ))}
@@ -57,15 +68,80 @@ const pos = nodes.map((n) => {
 
 <script>
   import { gsap } from 'gsap';
+  const R = { x: 36.5, y: 36 };
+  const f2 = (v) => v.toFixed(2);
+  // misma geometría que el servidor: posición del nodo y curvas de su cable
+  function geo(angle, i) {
+    const a = (angle * Math.PI) / 180;
+    const x = 50 + R.x * Math.cos(a), y = 50 + R.y * Math.sin(a);
+    const mx = (50 + x) / 2, my = (50 + y) / 2, dx = x - 50, dy = y - 50, len = Math.hypot(dx, dy) || 1;
+    const bend = 5 * (i % 2 === 0 ? 1 : -1);
+    const cx = mx - (dy / len) * bend, cy = my + (dx / len) * bend;
+    return { x, y, fwd: `M50,50 Q${f2(cx)},${f2(cy)} ${f2(x)},${f2(y)}`, back: `M${f2(x)},${f2(y)} Q${f2(cx)},${f2(cy)} 50,50` };
+  }
   function initHub() {
     document.querySelectorAll('[data-hub]').forEach((hub) => {
       if (hub.dataset.hubInit) return;
       hub.dataset.hubInit = '1';
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      const core = hub.querySelector('.hub__core'), nodes = [...hub.querySelectorAll('.hub__node')];
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const data = JSON.parse(hub.dataset.nodes || '[]');
+      const theta0 = Number(hub.dataset.theta || 0);
+      const interactive = hub.dataset.interactive === '1';
+      const core = hub.querySelector('.hub__core');
+      const nodes = [...hub.querySelectorAll('.hub__node')];
+      const slots = [...hub.querySelectorAll('.hub__slot')];
+      const cables = [...hub.querySelectorAll('.hub__cable')];
+      const motions = [...hub.querySelectorAll('animateMotion')];
+      const st = { th: theta0 };
+      let selected = -1;
+
+      const apply = (th) => {
+        data.forEach((d, i) => {
+          const g = geo(d.angle + th, i);
+          slots[i].style.left = g.x + '%'; slots[i].style.top = g.y + '%';
+          cables[i].setAttribute('d', g.fwd);
+          motions[i].setAttribute('path', d.dir === 'in' ? g.back : g.fwd);
+        });
+      };
+      const spinTo = (target, dur = 1.3) => {
+        let d = target - st.th; d = ((((d + 540) % 360) + 360) % 360) - 180;
+        const to = st.th + d;
+        if (reduce) { st.th = to; apply(to); return; }
+        gsap.to(st, { th: to, duration: dur, ease: 'power3.inOut', overwrite: true, onUpdate: () => apply(st.th) });
+      };
+
+      // Sin foco: al elegir un nodo, el anillo gira, el elegido sube y los demás se apagan y se achican.
+      const select = (i) => {
+        selected = i;
+        nodes.forEach((n, k) => {
+          const on = k === i;
+          n.classList.toggle('is-focus', on); n.classList.toggle('is-dim', !on);
+          const lab = n.querySelector('.hub__label');
+          if (lab) lab.textContent = on ? 'Ver integración →' : lab.dataset.sub;
+        });
+        spinTo(-90 - data[i].angle);
+      };
+      const reset = () => {
+        if (selected < 0) return;
+        selected = -1;
+        nodes.forEach((n) => { n.classList.remove('is-focus', 'is-dim'); const lab = n.querySelector('.hub__label'); if (lab) lab.textContent = lab.dataset.sub; });
+        spinTo(0);
+      };
+      if (interactive) {
+        hub.classList.add('is-interactive');
+        nodes.forEach((n, i) => n.addEventListener('click', (e) => { if (selected === i) return; e.preventDefault(); select(i); }));
+        core?.addEventListener('click', reset);
+        hub.addEventListener('keydown', (e) => { if (e.key === 'Escape') reset(); });
+      } else if (theta0 !== 0 && !reduce) {
+        // páginas de una integración: el anillo gira hasta dejar su nodo arriba
+        st.th = theta0 - 70; apply(st.th);
+        gsap.to(st, { th: theta0, duration: 1.8, delay: 0.5, ease: 'power3.out', onUpdate: () => apply(st.th) });
+      }
+
+      if (reduce) return;
       gsap.from(core, { scale: 0.4, opacity: 0, duration: 1.2, ease: 'back.out(1.5)', delay: 0.3 });
       gsap.from(nodes, { scale: 0.5, opacity: 0, duration: 0.9, stagger: 0.1, ease: 'expo.out', delay: 0.6 });
-      gsap.from(hub.querySelectorAll('.hub__cable'), { opacity: 0, duration: 1.2, stagger: 0.08, delay: 0.7 });
+      gsap.from(cables, { opacity: 0, duration: 1.2, stagger: 0.08, delay: 0.7 });
       // los nodos siguen ligeramente al cursor (profundidad), solo en escritorio
       if (window.matchMedia('(min-width: 900px) and (hover: hover)').matches) {
         hub.addEventListener('pointermove', (e) => {
@@ -112,15 +188,20 @@ const pos = nodes.map((n) => {
   .hub__chip img { height: auto; width: auto; max-height: 26px; max-width: 118px; object-fit: contain; display: block; }
   .hub__node--wide .hub__chip img { max-height: 26px; max-width: 108px; }
   .hub__node--tall .hub__chip { height: 62px; } .hub__node--tall .hub__chip img { max-height: 44px; max-width: 138px; } .hub__chip b { color: var(--on-accent); font-family: var(--font-heading); font-size: var(--text-lg); letter-spacing: -.01em; font-weight: 600; }
-  .hub__chip, .hub__label { transition: opacity .6s var(--ease-expo), filter .6s var(--ease-expo), transform .5s var(--ease-expo), box-shadow .6s var(--ease-expo); }
-  .hub__node.is-dim .hub__chip { filter: saturate(.55) brightness(1.18); } .hub__node.is-dim .hub__chip img, .hub__node.is-dim .hub__chip b { opacity: .5; } .hub__node.is-dim .hub__label { opacity: .5; }
-  .hub__node.is-dim:hover .hub__chip, .hub__node.is-dim:focus-visible .hub__chip { filter: none; } .hub__node.is-dim:hover .hub__chip img, .hub__node.is-dim:hover .hub__chip b { opacity: 1; } .hub__node.is-dim:hover .hub__label, .hub__node.is-dim:focus-visible .hub__label { opacity: .9; }
-  .hub__node.is-focus .hub__chip { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-grad-end) 80%, transparent), 0 0 36px color-mix(in srgb, var(--accent-grad-end) 60%, transparent); }
+  .hub__chip, .hub__label { transition: opacity .6s var(--ease-expo), filter .6s var(--ease-expo), transform .5s var(--ease-expo), scale .8s var(--ease-expo), box-shadow .6s var(--ease-expo), color .4s; }
+  .hub__node.is-dim .hub__chip { filter: grayscale(1) brightness(2.2); scale: .72; }
+  .hub__node--light.is-dim .hub__chip { filter: grayscale(1) brightness(.93); } .hub__node--light.is-dim .hub__chip img { opacity: .6; } .hub__node.is-dim .hub__chip img, .hub__node.is-dim .hub__chip b { opacity: .5; } .hub__node.is-dim .hub__label { opacity: .5; }
+  .hub__node.is-dim:hover .hub__chip, .hub__node.is-dim:focus-visible .hub__chip { filter: none; scale: .86; } .hub__node.is-dim:hover .hub__chip img, .hub__node.is-dim:hover .hub__chip b { opacity: 1; } .hub__node.is-dim:hover .hub__label, .hub__node.is-dim:focus-visible .hub__label { opacity: .9; }
+  .hub__node.is-focus .hub__chip { scale: 1.18; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-grad-end) 80%, transparent), 0 0 36px color-mix(in srgb, var(--accent-grad-end) 60%, transparent); }
   .hub__node:hover .hub__chip, .hub__node:focus-visible .hub__chip { transform: translateY(-3px) scale(1.06); }
   .hub__node:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: var(--radius-lg); }
   /* La etiqueta cuelga bajo el logo sin contar en el centrado: el cable apunta al centro del logo */
+  .hub.is-interactive .hub__node { cursor: pointer; } .hub.is-interactive .hub__core { cursor: pointer; }
+  .hub--group .hub__node.is-focus .hub__chip { scale: 1; }
+  .hub__node.is-focus .hub__label { opacity: 1; color: var(--accent); font-weight: 500; translate: -50% .9rem; }
   .hub__label { position: absolute; top: 100%; left: 50%; translate: -50% .45rem; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; opacity: .8; white-space: nowrap; color: var(--text-secondary); }
 
   @media (max-width: 600px) { .hub__chip { min-width: 66px; height: 42px; padding: 0 .55rem; } .hub__chip img { max-height: 18px; max-width: 76px; } .hub__node--wide .hub__chip img { max-height: 16px; max-width: 64px; } .hub__badge { font-size: .5rem; padding: 1px 6px; } .hub__node--tall .hub__chip { height: 46px; } .hub__node--tall .hub__chip img { max-height: 28px; max-width: 70px; } .hub__chip b { font-size: var(--text-sm); } .hub__label { display: none; } }
+  @media (max-width: 600px) { .hub__node.is-focus .hub__chip { scale: 1.05; } .hub__node.is-dim .hub__chip { scale: .68; } }
   @media (prefers-reduced-motion: reduce) { .hub__ring circle, .hub__node, .hub__pulse { animation: none; } .hub__pkt { display: none; } }
 </style>

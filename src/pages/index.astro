@@ -1,10 +1,11 @@
 ---
 // src/pages/index.astro - Home (esquema aprobado nov 2026).
-// 7 secciones: hero, logos de clientes, módulos (5 + caja de pago), integraciones, cifras, equipo, cierre-demo.
+// 7 secciones: hero, logos de clientes, módulos (principales + más módulos), integraciones, cifras, equipo, cierre-demo.
 // Motion: init en astro:page-load, reduced-motion respetado. Solo variables de theme.css.
 // Los datos que se ven dentro de las pantallas (tienda, folios, montos) son ficticios.
 import Layout from '../layouts/Layout.astro';
 import ModuleShowcase from '../components/showcase/ModuleShowcase.astro';
+import MoreModules from '../components/showcase/MoreModules.astro';
 import ScreensMobile from '../components/showcase/ScreensMobile.astro';
 import IntegrationHub from '../components/integraciones/IntegrationHub.astro';
 import { showcaseModules } from '../data/showcase-modules.js';
@@ -32,7 +33,7 @@ const stats = [
   { n: 100, pre: '', suf: '+', label: 'tiendas operando hoy' },
   { n: 1, pre: '<', suf: '', unit: 'semana', label: 'para implementar' },
   { n: 2, pre: '', suf: '', unit: 'países', label: 'Chile y Perú' },
-  { n: 6, pre: '', suf: '', unit: 'soluciones', label: 'cinco módulos y la caja' },
+  { n: 15, pre: '+', suf: '', unit: 'módulos', label: 'en terminal, caja y panel' },
 ];
 ---
 
@@ -95,10 +96,11 @@ const stats = [
     <!-- 3. La plataforma: explorador con dispositivos -->
     <ModuleShowcase
       eyebrow="La plataforma"
-      title="Cinco módulos y la caja: un servicio integral"
-      intro="Del vendedor en sala a la caja de pago, todo con una misma plataforma. Elige un módulo y mira cómo funciona."
+      title="Una plataforma completa, del terminal al panel"
+      intro="Del vendedor en sala a la caja de pago y al panel de control, todo sobre una misma plataforma. Elige un módulo y mira cómo funciona."
       modules={showcaseModules}
     />
+    <MoreModules />
 
     <!-- 4. Integraciones -->
     <section class="integ">

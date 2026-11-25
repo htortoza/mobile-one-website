@@ -19,6 +19,7 @@ import ProductoScaleBand from '../components/producto/ProductoScaleBand.astro';
 import ProductoBlockHead from '../components/producto/ProductoBlockHead.astro';
 import ProductoProblem from '../components/producto/ProductoProblem.astro';
 import ModuleShowcase from '../components/showcase/ModuleShowcase.astro';
+import MoreModules from '../components/showcase/MoreModules.astro';
 import { showcaseModules } from '../data/showcase-modules.js';
 import CtaClose from '../components/home/CtaClose.astro';
 import { whiteClientLogos } from '../utils/client-logos.js';
@@ -72,10 +73,11 @@ const chapters = [
   <!-- Bloque 2: Producto y solución -->
   <ModuleShowcase
     eyebrow="Lo que cambia"
-    title="Cinco módulos y la caja: un servicio integral"
-    intro="Del vendedor en sala a la caja de pago, todo con una misma plataforma. Elige un módulo y mira cómo funciona."
+    title="Una plataforma completa, del terminal al panel"
+    intro="Del vendedor en sala a la caja de pago y al panel de control, todo sobre una misma plataforma. Elige un módulo y mira cómo funciona."
     modules={showcaseModules}
   />
+  <MoreModules />
 
   <ProductoChapterNav chapters={chapters} />
 
