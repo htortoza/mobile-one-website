@@ -1,0 +1,72 @@
+---
+// src/pages/soluciones/[slug].astro — Páginas por necesidad (SEO genérico): "POS para SAP Business One",
+// "POS móvil para retail", "POS para tiendas de ropa". Contenido en src/data/soluciones.js; solo
+// afirmaciones que ya publica el sitio. Sin CSS propio (CLAUDE.md §22).
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/pages/PageHero.astro';
+import Section from '../../components/pages/Section.astro';
+import FaqList from '../../components/pages/FaqList.astro';
+import CtaBand from '../../components/pages/CtaBand.astro';
+import { withBase } from '../../utils/base.js';
+import { graph, faqSchema, breadcrumbSchema, orgSchema } from '../../utils/seo.js';
+import { soluciones } from '../../data/soluciones.js';
+
+export function getStaticPaths() {
+  return soluciones.map((s) => ({ params: { slug: s.slug }, props: { s } }));
+}
+const { s } = Astro.props;
+const others = soluciones.filter((o) => o.slug !== s.slug);
+const trail = [
+  { label: 'Inicio', href: '/' },
+  { label: 'Comparativas', href: '/comparativas' },
+  { label: s.name, href: `/soluciones/${s.slug}` },
+];
+const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(s.faqs));
+---
+
+<Layout title={s.seo.title} description={s.seo.description} image="/images/og-default.jpg" schemaData={schemaData}>
+  <PageHero
+    crumbs={[{ label: 'Comparativas', href: '/comparativas' }, { label: s.name }]}
+    title={s.h1}
+    lead={s.lead}
+    ctaText="Agendar demo"
+    ctaHref="/contacto"
+    ctaSecondaryText="Ver el producto"
+    ctaSecondaryHref="/producto"
+  />
+
+  <Section title={s.painsTitle}>
+    <ul class="check-list">{s.pains.map((p) => <li>{p}</li>)}</ul>
+  </Section>
+
+  <Section bg="light" title={s.featuresTitle}>
+    <div class="card-grid">
+      {s.features.map((f) => (
+        <div data-rv><h3>{f.title}</h3><p>{f.text}</p></div>
+      ))}
+    </div>
+  </Section>
+
+  <Section title="Cómo empiezas">
+    <ol class="step-list">
+      {s.steps.map((st) => (<li data-rv><h3>{st.title}</h3><p>{st.text}</p></li>))}
+    </ol>
+  </Section>
+
+  <Section bg="light" title="Preguntas frecuentes">
+    <FaqList items={s.faqs} />
+  </Section>
+
+  <Section title="Sigue explorando">
+    <div class="card-grid">
+      {s.related.map((r) => (<a href={withBase(r.href)}><h3>{r.title}</h3><p>{r.text}</p></a>))}
+      {others.map((o) => (<a href={withBase(`/soluciones/${o.slug}`)}><h3>{o.name}</h3><p>{o.card}</p></a>))}
+    </div>
+  </Section>
+
+  <CtaBand title={s.ctaTitle} text="Agenda una demo de 30 minutos con tu catálogo." />
+</Layout>
+
+<script>
+  import '../../scripts/reveal.js';
+</script>

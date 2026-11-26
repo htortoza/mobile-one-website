@@ -113,38 +113,16 @@ const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(faqs));
 <Layout title="Medios de pago compatibles con Mobile One" description="Mobile One cobra con Transbank, Getnet, Mercado Pago y Niubiz, usando el terminal de pago que ya tienes. Compara cada medio y agenda una demo." image="/images/og-default.jpg" schemaData={schemaData}>
   <IntegrationHero crumbs={crumbs} title="Cobra con" accent="el terminal que ya tienes" lead="Mobile One opera con cuatro medios de pago. Elige el tuyo para ver cómo funciona el cobro, el documento electrónico y los módulos que intervienen." ctaText="Agendar demo" ctaHref="/contacto" ctaSecondaryText="Ver el producto" ctaSecondaryHref="/producto"  focus="pay" />
   <Section title="Medios de pago" intro="Una página por cada medio, con su flujo de cobro y sus preguntas frecuentes." bg="white">
-    <div class="cards">{cards.map((c) => (<a href={withBase(c.href)}><span class="tag">{c.tag}</span><h3>{c.name}</h3><p>{c.text}</p></a>))}</div>
+    <div class="card-grid">{cards.map((c) => (<a href={withBase(c.href)}><span class="tag">{c.tag}</span><h3>{c.name}</h3><p>{c.text}</p></a>))}</div>
   </Section>
   <Section title={extra.title} intro={extra.intro} bg={'white'}>
-    <ul class="points">{extra.points.map((t) => (<li set:html={t} />))}</ul>
+    <ul class="check-list">{extra.points.map((t) => (<li set:html={t} />))}</ul>
   </Section>
   <Section title="Preguntas frecuentes" bg="light">
     <FaqList items={faqs} />
   </Section>
   <Section title="También te puede interesar" bg="white">
-    <div class="rel">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
+    <div class="card-grid">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
   </Section>
   <CtaBand title="¿Quieres verlo con tu operación?" text="Agenda una demo de 30 minutos con tu catálogo." />
 </Layout>
-
-<style>
-  .logo-strip { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-sm); }
-  .logo-chip { display:inline-flex; align-items:center; min-height:64px; padding:.9rem 1.4rem; border-radius:var(--radius-lg); border:1px solid var(--border); }
-  .logo-chip--dark { background:var(--accent-grad-start); border-color:var(--accent-grad-start); }
-  .logo-chip--light { background:var(--bg-primary); }
-  .logo-chip img { height:34px; width:auto; display:block; }
-  .logo-chip__text { font-family:var(--font-heading); font-size:var(--text-xl); color:var(--on-accent); letter-spacing:-0.01em; font-weight:500; }
-  .tag { display:inline-flex; padding:2px 12px; border-radius:var(--radius-full); border:1px solid var(--border); font-size:var(--text-sm); color:var(--text-secondary); background:var(--bg-primary); }
-  .steps { list-style:none; display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); counter-reset:s; }
-  .steps li { counter-increment:s; background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; }
-  .steps li::before { content:counter(s); font-size:var(--text-sm); font-weight:500; color:var(--accent); }
-  .steps h3, .cards h3, .mods h3, .rel h3 { font-family:var(--font-heading); font-size:var(--text-xl); letter-spacing:-0.01em; color:var(--navy); font-weight:500; }
-  .steps p, .cards p, .mods p, .rel p { color:var(--text-secondary); line-height:1.55; }
-  .mods, .cards, .rel { display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
-  .mods > div, .cards > a, .rel > a { background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; text-decoration:none; transition:transform var(--transition-fast), border-color var(--transition-fast); min-width:0; }
-  .cards > a:hover, .rel > a:hover { transform:translateY(-3px); border-color:var(--accent); }
-  .cards .tag { justify-self:start; }
-  .points { list-style:none; display:grid; gap:.7rem; max-width:52rem; }
-  .points li { position:relative; padding-left:1.6rem; color:var(--text-primary); line-height:1.5; }
-  .points li::before { content:''; position:absolute; left:0; top:.5em; width:.7rem; height:.4rem; border-left:2px solid var(--accent); border-bottom:2px solid var(--accent); transform:rotate(-45deg); }
-</style>

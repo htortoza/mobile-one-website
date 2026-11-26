@@ -2,6 +2,7 @@
 // src/components/Header.astro
 // Chrome global del sitio. Lee contracts/site.json (fuente única de marca + navegación).
 import site from '../../contracts/site.json';
+import Button from './Button.astro';
 import { withBase } from '../utils/base.js';
 
 const { siteName } = site.site;
@@ -10,37 +11,101 @@ const loginUrl = site.loginUrl ?? '#';
 // Enlace principal de navegación (por ahora solo Producto, la única página
 // del menú planificado que existe). aria-current marca la página activa.
 const here = Astro.url.pathname.replace(/\/$/, '');
+// Cada link del desplegable: icono de trazo (paths separados por "|",
+// viewBox 24) + descripción corta bajo el nombre.
 const MENUS = {
+  // Módulos de Mobile One (fuente: catálogo interno de módulos). Cada uno enlaza a su
+  // capítulo en /producto. "Plataforma DOT" se omite: es administración interna, no del cliente.
+  '/producto': [
+    { heading: 'Vender', links: [
+      { label: 'Ventas y POS', href: '/producto#armar-venta', desc: 'Vende y cobra en la sala',
+        icon: 'M5 8h14l-1 13H6L5 8Z|M9 8V6a3 3 0 0 1 6 0v2' },
+      { label: 'Cajas y cierre', href: '/producto#cerrar-venta', desc: 'Apertura y cierre de caja',
+        icon: 'M4 12h16v8H4Z|M7 12V8h10v4|M9 4h6v4H9Z|M8 16h.01|M12 16h.01|M16 16h.01' },
+      { label: 'Promociones y cupones', href: '/producto#cerrar-venta', desc: 'Descuentos que se aplican solos',
+        icon: 'M3 12V4h8l10 10-8 8L3 12Z|M7.5 7.5h.01' },
+      { label: 'Giftcards y medios de pago', href: '/producto#cerrar-venta', desc: 'Giftcards y pagos mixtos',
+        icon: 'M4 9h16v4H4Z|M5 13h14v8H5Z|M12 9v12|M12 9C10.5 6 7 6 7 8s3 1 5 1Zm0 0c1.5-3 5-3 5-1s-3 1-5 1Z' },
+      { label: 'Clientes', href: '/producto#armar-venta', desc: 'Identifica al cliente al vender',
+        icon: 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z|M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5' },
+    ] },
+    { heading: 'Operar', links: [
+      { label: 'Recepción de mercadería', href: '/producto#recepcion', desc: 'Un escaneo por bulto',
+        icon: 'M3 13h5l1.5 3h5L16 13h5|M3 13l3-8h12l3 8v6H3Z' },
+      { label: 'Inventario y kardex', href: '/producto#red-completa', desc: 'Stock por bodega, en línea',
+        icon: 'M3 7l9-4 9 4-9 4-9-4Z|M3 7v10l9 4 9-4V7|M12 11v10' },
+      { label: 'Catálogo y productos', href: '/producto#red-completa', desc: 'Artículos y kits sincronizados',
+        icon: 'M4 4h7v7H4Z|M13 4h7v7h-7Z|M4 13h7v7H4Z|M13 13h7v7h-7Z' },
+      { label: 'Listas de precio e impuestos', href: '/producto#red-completa', desc: 'Precios por tienda o empresa',
+        icon: 'M5 19 19 5|M7 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z|M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z' },
+      { label: 'Facturación electrónica', href: '/integraciones/facturacion', desc: 'Boleta o factura al cobrar',
+        icon: 'M6 2h12v20l-3-2-3 2-3-2-3 2Z|M9 7h6|M9 11h6|M9 15h4' },
+    ] },
+    { heading: 'Administrar', links: [
+      { label: 'Reportes e insights', href: '/producto#en-la-tienda', desc: 'Tu negocio en un tablero',
+        icon: 'M4 20h16|M7 16v-5|M12 16V7|M17 16V8' },
+      { label: 'Tiendas y dispositivos', href: '/producto#red-completa', desc: 'Activa tiendas y terminales',
+        icon: 'M3 5h13v10H3Z|M7 19h5|M9.5 15v4|M18 9h3v11h-3Z' },
+      { label: 'Acceso, usuarios y permisos', href: '/producto#control-sistema', desc: 'Roles y accesos por usuario',
+        icon: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3Z|M9 12l2 2 4-4' },
+    ] },
+  ],
   '/integraciones': [
     { heading: 'Tu ERP', links: [
-      { label: 'SAP Business One', href: '/integraciones/erp/sap-business-one' },
-      { label: 'Retail Pro', href: '/integraciones/erp/retail-pro' },
-      { label: 'Retail Pro Prism', href: '/integraciones/erp/retail-pro-prism' },
+      { label: 'SAP Business One', href: '/integraciones/erp/sap-business-one', desc: 'Stock y ventas sincronizados',
+        icon: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3Z|M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6|M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3' },
+      { label: 'Retail Pro', href: '/integraciones/erp/retail-pro', desc: 'El stock de toda tu red',
+        icon: 'M4 10v10h16V10|M3 10l2-6h14l2 6H3Z|M10 20v-5h4v5' },
+      { label: 'Retail Pro Prism', href: '/integraciones/erp/retail-pro-prism', desc: 'Ventas sin digitar dos veces',
+        icon: 'M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-1 9H7Z' },
     ] },
     { heading: 'Medios de pago', links: [
-      { label: 'Transbank', href: '/integraciones/medios-de-pago/transbank' },
-      { label: 'Getnet', href: '/integraciones/medios-de-pago/getnet' },
-      { label: 'Mercado Pago', href: '/integraciones/medios-de-pago/mercado-pago' },
-      { label: 'Niubiz', href: '/integraciones/medios-de-pago/niubiz' },
+      { label: 'Transbank', href: '/integraciones/medios-de-pago/transbank', desc: 'Cobra con el terminal que ya usas',
+        icon: 'M3 6h18v12H3Z|M3 10h18|M7 15h3' },
+      { label: 'Getnet', href: '/integraciones/medios-de-pago/getnet', desc: 'Tu terminal Getnet, sin cambios',
+        icon: 'M7 2h10v20H7Z|M10 6h4|M10 11h.01|M14 11h.01|M10 15h.01|M14 15h.01' },
+      { label: 'Mercado Pago', href: '/integraciones/medios-de-pago/mercado-pago', desc: 'Cobros en Chile y Perú',
+        icon: 'M4 4h6v6H4Z|M14 4h6v6h-6Z|M4 14h6v6H4Z|M14 14h2v2h-2Z|M18 18h2v2h-2Z' },
+      { label: 'Niubiz', href: '/integraciones/medios-de-pago/niubiz', desc: 'Cobra en tus tiendas de Perú',
+        icon: 'M6 9a4 4 0 0 1 0 6|M10 6a8 8 0 0 1 0 12|M14 3a12 12 0 0 1 0 18' },
     ] },
     { heading: 'Documentos', links: [
-      { label: 'Facturación electrónica', href: '/integraciones/facturacion' },
+      { label: 'Facturación electrónica', href: '/integraciones/facturacion', desc: 'Boleta o factura al cobrar',
+        icon: 'M6 2h12v20l-3-2-3 2-3-2-3 2Z|M9 7h6|M9 11h6|M9 15h4' },
     ] },
   ],
   '/recursos': [
     { heading: 'Aprende', links: [
-      { label: 'Casos de uso', href: '/recursos#casos-de-uso' },
-      { label: 'Guía de uso', href: '/recursos#guia-de-uso' },
-      { label: 'Perfiles de usuario', href: '/recursos#perfiles' },
+      { label: 'Casos de uso', href: '/recursos#casos-de-uso', desc: 'Cómo lo usan otras tiendas',
+        icon: 'M9 18h6|M10 22h4|M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2Z' },
+      { label: 'Guía de uso', href: '/recursos#guia-de-uso', desc: 'Paso a paso para tu equipo',
+        icon: 'M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4Z|M20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6Z' },
+      { label: 'Perfiles de usuario', href: '/recursos#perfiles', desc: 'Qué puede hacer cada rol',
+        icon: 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z|M2 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5|M16 4.3a3.5 3.5 0 0 1 0 6.4|M18 14.8c2.4.7 4 2.6 4 5.2' },
     ] },
     { heading: 'Por industria', links: [
-      { label: 'Moda y calzado', href: '/recursos/industrias/moda-y-calzado' },
-      { label: 'Electrónica y tecnología', href: '/recursos/industrias/electronica-y-tecnologia' },
-      { label: 'Multitienda y holdings', href: '/recursos/industrias/multitienda-y-holdings' },
-      { label: 'Retail con ERP', href: '/recursos/industrias/retail-con-erp' },
+      { label: 'Moda y calzado', href: '/recursos/industrias/moda-y-calzado', desc: 'La talla de otra tienda, vendida',
+        icon: 'M8 3 3 6l2 4 2-1v12h10V9l2 1 2-4-5-3a4 4 0 0 1-8 0Z' },
+      { label: 'Electrónica y tecnología', href: '/recursos/industrias/electronica-y-tecnologia', desc: 'Venta asistida y pago dividido',
+        icon: 'M3 4h18v12H3Z|M8 20h8|M12 16v4' },
+      { label: 'Multitienda y holdings', href: '/recursos/industrias/multitienda-y-holdings', desc: 'Toda tu red conectada',
+        icon: 'M3 21h18|M5 21V7l7-4v18|M19 21V10l-7-3|M9 9h.01|M9 13h.01|M9 17h.01' },
+      { label: 'Retail con ERP', href: '/recursos/industrias/retail-con-erp', desc: 'Tu ERP, ahora en el piso de venta',
+        icon: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1|M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1' },
+    ] },
+    { heading: 'Compara', links: [
+      { label: 'Comparativas', href: '/comparativas', desc: 'Mobile One frente a otros POS',
+        icon: 'M4 6h7v12H4Z|M13 6h7v12h-7Z|M7 10h1|M16 10h1|M7 14h1|M16 14h1' },
+      { label: 'POS para SAP Business One', href: '/soluciones/pos-para-sap-business-one', desc: 'Tu SAP conectado a la tienda',
+        icon: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3Z|M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6|M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3' },
+      { label: 'POS móvil para retail', href: '/soluciones/pos-movil-para-retail', desc: 'Vende y cobra en la sala',
+        icon: 'M7 2h10v20H7Z|M11 18h2' },
+      { label: 'POS para tiendas de ropa', href: '/soluciones/pos-para-tiendas-de-ropa', desc: 'Tallas de toda la red',
+        icon: 'M8 3 3 6l2 4 2-1v12h10V9l2 1 2-4-5-3a4 4 0 0 1-8 0Z' },
     ] },
     { heading: 'Conócenos', links: [
-      { label: 'Equipo', href: '/recursos#equipo' },
+      { label: 'Equipo', href: '/recursos#equipo', desc: 'Quiénes estamos detrás',
+        icon: 'M12 21s-7-4.5-9.5-9A5 5 0 0 1 12 6a5 5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z' },
     ] },
   ],
 };
@@ -59,26 +124,39 @@ const ICON_USER = 'M12 8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z|M5 20c0-3.5 3-6 7-
 const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17.5V13Z|M21 13h-4v6h2.5a1.5 1.5 0 0 0 1.5-1.5V13Z|M19 19v1a3 3 0 0 1-3 3h-3';
 ---
 
-<header class="site-header" data-header>
+<header class="site-header" data-header transition:persist="site-header" transition:name="site-header" transition:animate="none">
   <div class="container site-header__inner">
     <a href={withBase('/')} class="logo" aria-label={`${siteName}: Inicio`}>
       <img src={withBase('/brand/Imagotipo-logo.svg')} alt={siteName} class="logo__img" />
     </a>
 
-    <div class="header-actions">
-      <nav class="header-nav" aria-label="Menú principal">
+    <nav class="header-nav" aria-label="Menú principal" data-nav>
+      <!-- Fondo compartido de los desplegables: se desliza/redimensiona al panel
+           activo, así al pasar de un menú a otro no se cruzan dos paneles. -->
+      <div class="dd-bg" aria-hidden="true" data-dd-bg></div>
         {navItems.map((i) => i.groups.length ? (
           <div class="nav-item">
-            <a href={i.url} class="header-link has-menu" aria-current={i.current ? 'page' : undefined} aria-haspopup="true">
+            <a href={i.url} class="header-link has-menu" data-nav-link aria-current={i.current ? 'page' : undefined} aria-haspopup="true">
               {i.label}
               <svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" /></svg>
             </a>
             <div class="dd" role="group" aria-label={i.label}>
               <div class="dd__panel" style={`--cols:${i.groups.length}`}>
+                <span class="dd__hl" aria-hidden="true"></span>
                 {i.groups.map((g) => (
                   <div class="dd__group">
                     <p class="dd__head">{g.heading}</p>
-                    {g.links.map((l) => <a class="dd__link" href={l.url}>{l.label}</a>)}
+                    {g.links.map((l) => (
+                      <a class="dd__link" href={l.url}>
+                        <svg class="dd__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          {l.icon.split('|').map((d) => <path d={d} />)}
+                        </svg>
+                        <span class="dd__txt">
+                          <span class="dd__label">{l.label}</span>
+                          <span class="dd__desc">{l.desc}</span>
+                        </span>
+                      </a>
+                    ))}
                   </div>
                 ))}
                 <a class="dd__all" href={i.url}>Ver {i.label.toLowerCase()} →</a>
@@ -86,22 +164,23 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
             </div>
           </div>
         ) : (
-          <a href={i.url} class="header-link" aria-current={i.current ? 'page' : undefined}>{i.label}</a>
+          <a href={i.url} class="header-link" data-nav-link aria-current={i.current ? 'page' : undefined}>{i.label}</a>
         ))}
-      </nav>
-      <span class="header-sep" aria-hidden="true"></span>
+    </nav>
+
+    <div class="header-actions">
       <a href={loginUrl} class="header-login">
         <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           {ICON_USER.split('|').map((d) => <path d={d} />)}
         </svg>
         Iniciar sesión
       </a>
-      <a href={orderUrl} class="header-cta">
-        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <Button href={orderUrl} size="sm" track="header">
+        <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           {ICON_HEADSET.split('|').map((d) => <path d={d} />)}
         </svg>
         Agendar demo
-      </a>
+      </Button>
     </div>
 
     <button
@@ -122,7 +201,7 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
      Panel lateral (no full-screen) + backdrop clickeable + botón cerrar
      propio, visible siempre dentro del panel (no depende del toggle del
      header, que quedaba tapado detrás del overlay). -->
-<div class="mobile-overlay" id="mobile-overlay" data-overlay hidden>
+<div class="mobile-overlay" id="mobile-overlay" data-overlay hidden transition:persist="mobile-overlay">
   <button
     class="mobile-overlay__backdrop"
     data-overlay-backdrop
@@ -144,7 +223,7 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
 
     <nav class="overlay-actions" aria-label="Menú principal">
       {navItems.map((i) => i.groups.length ? (
-        <details class="overlay-acc" open={i.current}>
+        <details class="overlay-acc" open={i.current} data-nav-acc={i.url}>
           <summary class="overlay-link overlay-link--sum">{i.label}</summary>
           <div class="overlay-sub">
             {i.groups.map((g) => (
@@ -157,7 +236,7 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
           </div>
         </details>
       ) : (
-        <a href={i.url} class="overlay-link" data-overlay-link aria-current={i.current ? 'page' : undefined}>{i.label}</a>
+        <a href={i.url} class="overlay-link" data-overlay-link data-nav-link aria-current={i.current ? 'page' : undefined}>{i.label}</a>
       ))}
       <span class="overlay-sep" aria-hidden="true"></span>
       <a href={loginUrl} class="overlay-login" data-overlay-link>
@@ -166,93 +245,161 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
         </svg>
         Iniciar sesión
       </a>
-      <a href={orderUrl} class="overlay-cta" data-overlay-link>
-        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <Button href={orderUrl} block track="menu_movil" class="overlay-cta" data-overlay-link>
+        <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           {ICON_HEADSET.split('|').map((d) => <path d={d} />)}
         </svg>
         Agendar demo
-      </a>
+      </Button>
     </nav>
   </div>
 </div>
 
 <script>
-  // Astro usa View Transitions (<ClientRouter/>): el DOM se reemplaza en
-  // cada navegación interna pero un <script> de módulo solo se evalúa una
-  // vez, así que el listener del toggle quedaba enganchado a los nodos de
-  // la PRIMERA carga — al navegar a otra página (o volver) el menú móvil
-  // dejaba de responder. Por eso todo va dentro de una función reenganchada
-  // en cada astro:page-load (mismo patrón que el resto de componentes:
-  // ProductoChapterNav, SolutionSlide, BrandCompat, etc.).
-  function initHeader() {
-    const header  = document.querySelector('[data-header]');
-    const toggle  = document.querySelector('[data-nav-toggle]');
-    const overlay = document.querySelector('[data-overlay]');
+  // ── Header único y persistente ──
+  // El <header> y el drawer móvil llevan transition:persist: es el MISMO DOM en todas las
+  // páginas (el ClientRouter no lo reemplaza). Por eso los listeners se enganchan UNA sola
+  // vez, al cargar este módulo, y en cada navegación solo se sincroniza aria-current.
+  const header = document.querySelector('[data-header]');
+  const nav = header.querySelector('[data-nav]');
+  const bg = nav.querySelector('[data-dd-bg]');
+  const items = [...nav.querySelectorAll('.nav-item')];
+  const toggle = header.querySelector('[data-nav-toggle]');
+  const overlay = document.querySelector('[data-overlay]');
 
-    // Header se vuelve sólido al hacer scroll
-    if (header) {
-      const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 40);
-      onScroll();
-      window.addEventListener('scroll', onScroll, { passive: true });
-      document.addEventListener('astro:before-swap', () => window.removeEventListener('scroll', onScroll), { once: true });
-    }
+  // Header sólido al hacer scroll
+  const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 40);
+  window.addEventListener('scroll', onScroll, { passive: true });
 
-    // Toggle del overlay móvil
-    if (toggle && overlay) {
-      // Debe coincidir con --transition-smooth (panel) en la duración más
-      // larga de las dos transiciones (panel/backdrop).
-      const CLOSE_MS = 600;
-      let closeTimeout;
-
-      const setOpen = (open) => {
-        clearTimeout(closeTimeout);
-
-        if (open) {
-          // Quitar "hidden" y agregar "is-open" en el mismo tick no anima
-          // nada: el navegador nunca pinta el estado inicial (display:none →
-          // abierto en un solo frame), así que el drawer solo "aparece".
-          // Se fuerza un reflow entre ambos pasos para que sí anime.
-          overlay.removeAttribute('hidden');
-          void overlay.offsetHeight;
-          overlay.classList.add('is-open');
-        } else {
-          overlay.classList.remove('is-open');
-          closeTimeout = setTimeout(() => overlay.setAttribute('hidden', ''), CLOSE_MS);
-        }
-
-        toggle.classList.toggle('is-active', open);
-        toggle.setAttribute('aria-expanded', String(open));
-        toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
-        document.body.style.overflow = open ? 'hidden' : '';
-        // El sitio usa Lenis para el scroll suave — solo bloquear
-        // overflow del body no lo frena (Lenis intercepta wheel/touch
-        // aparte), así que hay que pausarlo/reanudarlo explícitamente.
-        const lenis = window.__lenis;
-        if (lenis) open ? lenis.stop() : lenis.start();
-      };
-
-      toggle.addEventListener('click', () => setOpen(overlay.hasAttribute('hidden')));
-      overlay.querySelector('[data-overlay-close]')?.addEventListener('click', () => setOpen(false));
-      overlay.querySelector('[data-overlay-backdrop]')?.addEventListener('click', () => setOpen(false));
-      overlay.querySelectorAll('[data-overlay-link]').forEach((a) =>
-        a.addEventListener('click', () => setOpen(false))
-      );
-
-      const onKeydown = (e) => {
-        if (e.key === 'Escape' && !overlay.hasAttribute('hidden')) setOpen(false);
-      };
-      document.addEventListener('keydown', onKeydown);
-
-      document.addEventListener('astro:before-swap', () => {
-        clearTimeout(closeTimeout);
-        document.removeEventListener('keydown', onKeydown);
-        document.body.style.overflow = '';
-        window.__lenis?.start();
-      }, { once: true });
-    }
+  // Página activa: el header persiste, así que aria-current se recalcula en cada navegación.
+  function syncCurrent() {
+    const here = location.pathname.replace(/\/$/, '');
+    const isCur = (href) => { const b = new URL(href, location.href).pathname.replace(/\/$/, ''); return here === b || here.startsWith(b + '/'); };
+    document.querySelectorAll('[data-nav-link]').forEach((a) => (isCur(a.href) ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
+    document.querySelectorAll('[data-nav-acc]').forEach((d) => { d.open = isCur(d.dataset.navAcc); });
   }
 
-  document.addEventListener('astro:page-load', initHeader);
+  // ── Mega-menú ──
+  // El estado (menú abierto, link resaltado) lo maneja JS con clases (.is-open, .is-hot),
+  // NO :hover. Motivo: durante la View Transition entre páginas el navegador deja de
+  // detectar hover (~250ms) y el menú parpadeaba. Mientras se navega el estado queda
+  // congelado; al terminar se resincroniza con el elemento bajo el puntero.
+  let openItem = null, hot = null, hideT = 0, frozen = false, px = -1, py = -1;
+  // Resaltado del link activo: UN solo fondo (.dd__hl) por panel que se desliza de un link
+  // a otro. Antes cada link tenía su propio fondo con transición: al pasar de uno a otro,
+  // el anterior seguía resaltado ~300ms mientras se apagaba (parecía un hover fantasma).
+  let hotT = 0;
+  const setHot = (a) => {
+    clearTimeout(hotT); hotT = 0;
+    if (a === hot) return;
+    hot?.classList.remove('is-hot');
+    const prevPanel = hot?.closest('.dd__panel');
+    hot = a;
+    a?.classList.add('is-hot');
+    const panel = a?.closest('.dd__panel');
+    if (prevPanel && prevPanel !== panel) prevPanel.querySelector('.dd__hl')?.classList.remove('is-on');
+    if (!a || !a.classList.contains('dd__link')) { panel?.querySelector('.dd__hl')?.classList.remove('is-on'); return; }
+    const hl = panel.querySelector('.dd__hl');
+    const p = panel.getBoundingClientRect(), r = a.getBoundingClientRect();
+    const first = !hl.classList.contains('is-on');
+    if (first) hl.classList.add('no-move'); // aparece en su lugar; entre links, viaja
+    hl.style.width = `${r.width}px`;
+    hl.style.height = `${r.height}px`;
+    hl.style.transform = `translate(${r.left - p.left}px, ${r.top - p.top}px)`;
+    if (first) { void hl.offsetWidth; hl.classList.remove('no-move'); }
+    hl.classList.add('is-on');
+  };
+  // Cruzar el hueco entre dos links no apaga el resaltado (evita un parpadeo intermedio).
+  const clearHotSoon = () => { if (hot && !hotT) hotT = setTimeout(() => setHot(null), 120); };
+  const open = (item) => {
+    clearTimeout(hideT); hideT = 0;
+    if (item === openItem) return;
+    const n = nav.getBoundingClientRect();
+    const r = item.querySelector('.dd__panel').getBoundingClientRect();
+    const first = !openItem;
+    // Primera apertura: el fondo aparece en su lugar; entre menús, viaja y se redimensiona.
+    if (first) bg.classList.add('no-move');
+    bg.style.width = `${r.width}px`;
+    bg.style.height = `${r.height}px`;
+    bg.style.transform = `translate(${r.left - n.left}px, ${r.top - n.top}px)`;
+    if (first) { void bg.offsetWidth; bg.classList.remove('no-move'); }
+    items.forEach((it) => it.classList.toggle('is-open', it === item));
+    bg.classList.add('is-open');
+    header.classList.add('is-menu-open');
+    openItem = item;
+  };
+  const close = () => {
+    clearTimeout(hideT); hideT = 0;
+    items.forEach((it) => it.classList.remove('is-open'));
+    bg.classList.remove('is-open');
+    header.classList.remove('is-menu-open');
+    setHot(null);
+    openItem = null;
+  };
+  // Margen corto: cruzar el hueco entre dos ítems no debe cerrar el menú.
+  // Congelado (navegando) nada cierra el menú: ni el puntero ni la pérdida de foco que
+  // provoca el cambio de página (focusout del link clicado).
+  const closeSoon = () => { if (!frozen && openItem && !hideT) hideT = setTimeout(close, 80); };
+  const sync = (target) => {
+    if (frozen) return;
+    const item = target?.closest?.('.nav-item');
+    const link = item && target.closest('.dd__link, .dd__all');
+    link ? setHot(link) : item ? clearHotSoon() : setHot(null);
+    item ? open(item) : closeSoon();
+  };
+  document.addEventListener('pointermove', (e) => { px = e.clientX; py = e.clientY; sync(e.target); }, { passive: true });
+  document.documentElement.addEventListener('mouseleave', () => { if (!frozen) closeSoon(); });
+  // Teclado: abre con foco visible, Escape cierra.
+  nav.addEventListener('focusin', (e) => { const it = e.target.closest('.nav-item'); if (it && e.target.matches(':focus-visible')) open(it); });
+  nav.addEventListener('focusout', () => setTimeout(() => { if (!nav.querySelector(':focus-visible') && !nav.matches(':hover')) closeSoon(); }));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { close(); setDrawer(false); } });
+
+  // Congelar desde que empieza la navegación hasta que la View Transition TERMINA
+  // (viewTransition.finished, que Astro expone en before-swap). Descongelar antes —p. ej. en
+  // page-load— falla: la transición sigue activa, el hit-test devuelve <html> y el menú se cierra.
+  let vtDone = Promise.resolve();
+  document.addEventListener('astro:before-preparation', () => { frozen = true; });
+  document.addEventListener('astro:before-swap', (e) => { vtDone = e.viewTransition?.finished ?? Promise.resolve(); });
+  document.addEventListener('astro:page-load', () => {
+    syncCurrent();
+    onScroll();
+    vtDone.catch(() => {}).finally(() => {
+      frozen = false;
+      if (px >= 0) sync(document.elementFromPoint(px, py));
+    });
+  });
+
+  // ── Drawer móvil ──
+  // Debe coincidir con --transition-smooth (panel), la más larga de las dos transiciones.
+  const CLOSE_MS = 600;
+  let drawerT;
+  function setDrawer(isOpen) {
+    if (!overlay || !toggle) return;
+    if (!isOpen && overlay.hasAttribute('hidden')) return;
+    clearTimeout(drawerT);
+    if (isOpen) {
+      // reflow entre quitar hidden y abrir: si no, el navegador no pinta el estado inicial y no anima
+      overlay.removeAttribute('hidden');
+      void overlay.offsetHeight;
+      overlay.classList.add('is-open');
+    } else {
+      overlay.classList.remove('is-open');
+      drawerT = setTimeout(() => overlay.setAttribute('hidden', ''), CLOSE_MS);
+    }
+    toggle.classList.toggle('is-active', isOpen);
+    toggle.setAttribute('aria-expanded', String(isOpen));
+    toggle.setAttribute('aria-label', isOpen ? 'Cerrar menú' : 'Abrir menú');
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    // Lenis intercepta wheel/touch aparte: hay que pausarlo explícitamente.
+    const lenis = window.__lenis;
+    if (lenis) isOpen ? lenis.stop() : lenis.start();
+  }
+  toggle?.addEventListener('click', () => setDrawer(overlay.hasAttribute('hidden')));
+  overlay?.querySelector('[data-overlay-close]')?.addEventListener('click', () => setDrawer(false));
+  overlay?.querySelector('[data-overlay-backdrop]')?.addEventListener('click', () => setDrawer(false));
+  overlay?.querySelectorAll('[data-overlay-link]').forEach((a) => a.addEventListener('click', () => setDrawer(false)));
+  // body se reemplaza al navegar: restaurar overflow/Lenis por si el drawer quedó abierto
+  document.addEventListener('astro:after-swap', () => { if (overlay && !overlay.hasAttribute('hidden')) setDrawer(false); document.body.style.overflow = ''; });
 </script>
 
 <style>
@@ -272,10 +419,12 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
     box-shadow: var(--shadow-sm);
   }
 
+  /* 3 zonas: logo izq · menú centrado · acciones der. Las columnas 1fr
+     laterales iguales mantienen el menú en el centro exacto. */
   .site-header__inner {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     gap: var(--space-md);
     padding-block: var(--space-sm);
   }
@@ -296,12 +445,13 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
   .header-actions {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: var(--space-sm);
   }
   .header-icon { width: 16px; height: 16px; flex-shrink: 0; }
 
   /* Enlace de navegación: subrayado que se dibuja al hover; fijo en la página activa */
-  .header-nav { display: flex; align-items: center; gap: 1.6rem; }
+  .header-nav { display: flex; align-items: center; gap: 1.6rem; position: relative; }
   .header-link {
     position: relative;
     font-family: var(--font-body);
@@ -327,9 +477,9 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
     transition: transform var(--transition-fast);
   }
   .header-link:hover::after,
+  .nav-item.is-open .header-link::after,
   .header-link[aria-current='page']::after { transform: scaleX(1); }
   .header-link[aria-current='page'] { color: var(--accent); }
-  .header-sep { width: 1px; height: 18px; background-color: var(--border); }
 
   .header-login {
     display: inline-flex;
@@ -349,23 +499,6 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
   }
   .header-login:hover { color: var(--text-primary); border-color: var(--border); }
 
-  .header-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: var(--bg-primary);
-    background-color: var(--accent);
-    padding: var(--space-xs) var(--space-md);
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    white-space: nowrap;
-    transition: background-color var(--transition-fast), transform var(--transition-fast);
-  }
-  .header-cta:hover { background-color: var(--accent-hover); transform: translateY(-2px); }
 
   /* ── Toggle móvil ── */
   .nav-toggle {
@@ -505,40 +638,54 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
     transition: background-color var(--transition-fast), color var(--transition-fast);
   }
   .overlay-login:hover { color: var(--text-primary); background-color: var(--bg-secondary); }
-  .overlay-cta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    box-sizing: border-box;
-    margin-top: auto;
-    white-space: nowrap;
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--bg-primary);
-    background-color: var(--accent);
-    padding: var(--space-sm) var(--space-xs);
-    border-radius: var(--radius-full);
-    text-decoration: none;
-  }
+  /* Layout del CTA en el drawer: anclado abajo (el estilo es el .btn global) */
+  .overlay-cta { margin-top: auto; }
 
   /* ── Desplegable (escritorio) ── */
-  .nav-item { position: relative; }
+  /* static: los paneles (.dd) se posicionan respecto a .header-nav (centrado en pantalla), no
+     al ítem. Centrados bajo su ítem, el de Producto se salía por la izquierda en ~1000px. */
+  .nav-item { position: static; }
   .has-menu { display: inline-flex; align-items: center; gap: 5px; }
   .chev { width: 10px; height: 10px; transition: transform var(--transition-fast); }
-  .nav-item:hover .chev, .nav-item:focus-within .chev { transform: rotate(180deg); }
-  .dd { position: absolute; top: 100%; left: 50%; padding-top: 14px; opacity: 0; visibility: hidden; transform: translate(-50%, 6px); transition: opacity .25s, transform .35s var(--ease-expo), visibility 0s linear .25s; z-index: 5; }
-  .nav-item:hover .dd, .nav-item:focus-within .dd { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s; }
-  .dd__panel { display: grid; grid-template-columns: repeat(var(--cols), auto); gap: 1.6rem; padding: 1.2rem 1.4rem; min-width: max-content; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: 0 24px 50px -20px color-mix(in srgb, var(--accent-grad-start) 35%, transparent), var(--shadow-md); position: relative; }
-  .dd__panel::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: var(--grad-brand); }
+  /* Abierto = hover, o foco de TECLADO (:focus-visible). Antes era :focus-within:
+     tras un clic el link quedaba con foco, su menú seguía abierto y al pasar el
+     mouse por otro se abrían los dos encimados. */
+  .nav-item.is-open .chev { transform: rotate(180deg); }
+  /* El panel solo lleva el contenido (sin fondo propio) y se funde con opacidad;
+     el fondo visible es .dd-bg, compartido. Sin translate: así nada sube/baja
+     al cambiar de menú. Sale rápido (.12s) y entra con leve retraso para que
+     el contenido viejo no se superponga al nuevo. */
+  .dd { position: absolute; top: 100%; left: 50%; padding-top: 14px; opacity: 0; visibility: hidden; transform: translateX(-50%); transition: opacity .12s, visibility 0s linear .12s; z-index: 5; }
+  .nav-item.is-open .dd { opacity: 1; visibility: visible; transition: opacity .22s .06s, visibility 0s; }
+  .dd__panel { position: relative; display: grid; grid-template-columns: repeat(var(--cols), auto); gap: 1.6rem; padding: 1.2rem 1.4rem; min-width: max-content; border: 1px solid transparent; }
+  /* Resaltado único que se desliza entre links (ver setHot). Detrás del texto. */
+  .dd__hl { position: absolute; top: 0; left: 0; width: 0; height: 0; border-radius: var(--radius-md); background: var(--tint-strong); opacity: 0; pointer-events: none; z-index: 0; transition: opacity .18s, transform .3s var(--ease-expo), width .3s var(--ease-expo), height .3s var(--ease-expo); }
+  .dd__hl.is-on { opacity: 1; }
+  .dd__hl.no-move { transition: opacity .18s; }
+  .dd__group, .dd__all { position: relative; z-index: 1; }
+  .dd-bg { position: absolute; top: 0; left: 0; width: 0; height: 0; z-index: 4; pointer-events: none; overflow: hidden; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: 0 24px 50px -20px color-mix(in srgb, var(--accent-grad-start) 35%, transparent), var(--shadow-md); opacity: 0; translate: 0 6px; transition: opacity .2s, translate .35s var(--ease-expo), transform .35s var(--ease-expo), width .35s var(--ease-expo), height .35s var(--ease-expo); }
+  .dd-bg::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--grad-brand); }
+  /* Foco en el menú: la página bajo el header se oscurece mientras hay un desplegable abierto.
+     Absolute (no fixed): el backdrop-filter del header atraparía un fixed dentro de él.
+     Sin pointer-events: salir del menú hacia la página lo sigue cerrando. */
+  .site-header::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 100vh; background: color-mix(in srgb, var(--navy) 22%, transparent); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+  .site-header.is-menu-open::after { opacity: 1; }
+  .dd-bg.is-open { opacity: 1; translate: 0 0; }
+  .dd-bg.no-move { transition: opacity .2s, translate .35s var(--ease-expo); }
   .dd__group { display: grid; gap: 2px; align-content: start; min-width: 11rem; }
   .dd__head { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 500; padding: 0 .6rem .4rem; }
-  .dd__link { font-size: var(--text-sm); color: var(--navy); text-decoration: none; padding: .45rem .6rem; border-radius: var(--radius-md); white-space: nowrap; transition: background-color var(--transition-fast), color var(--transition-fast); }
-  .dd__link:hover, .dd__link:focus-visible { background: var(--tint-strong); color: var(--accent); }
+  .dd__link { font-size: var(--text-sm); color: var(--text-primary); text-decoration: none; padding: .45rem .6rem; border-radius: var(--radius-md); white-space: nowrap; transition: background-color .15s, color .15s; }
+  .dd__link.is-hot { color: var(--accent); }
+  .dd__link:focus-visible { background: var(--tint-strong); color: var(--accent); }
+  .dd__link { display: flex; align-items: flex-start; gap: .65rem; }
+  /* Icono y descripción en tono más claro que el nombre; el icono toma el acento al hover */
+  .dd__icon { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: color-mix(in srgb, var(--navy) 45%, transparent); transition: color .15s, transform .3s var(--ease-expo); }
+  .dd__link.is-hot .dd__icon, .dd__link:focus-visible .dd__icon { color: var(--accent); transform: translateX(1px) scale(1.06); }
+  .dd__txt { display: grid; gap: 1px; }
+  .dd__label { line-height: 1.3; }
+  .dd__desc { font-size: var(--text-xs); line-height: 1.35; color: var(--text-secondary); }
   .dd__all { grid-column: 1 / -1; font-size: var(--text-sm); color: var(--accent); text-decoration: none; padding: .6rem .6rem 0; border-top: 1px solid var(--border); font-weight: 500; }
-  .dd__all:hover { text-decoration: underline; }
+  .dd__all.is-hot, .dd__all:focus-visible { text-decoration: underline; }
 
   /* ── Acordeón (móvil) ── */
   .overlay-acc > summary { list-style: none; cursor: pointer; }
@@ -552,8 +699,9 @@ const ICON_HEADSET = 'M4 13v-2a8 8 0 0 1 16 0v2|M3 13h4v6H4.5A1.5 1.5 0 0 1 3 17
   .overlay-sub__link--all { color: var(--accent); font-weight: 500; }
 
   /* ── Responsive ── */
-  @media (max-width: 860px) {
-    .header-actions { display: none; }
+  @media (max-width: 1000px) { /* menú centrado + acciones necesitan ~985px */
+    .header-actions, .header-nav { display: none; }
+    .site-header__inner { display: flex; justify-content: space-between; }
     .nav-toggle { display: flex; }
 
     .site-header .container { padding-inline: 20px; }

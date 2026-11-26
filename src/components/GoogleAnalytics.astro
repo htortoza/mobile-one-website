@@ -37,8 +37,6 @@ const CTA_LOCATIONS = {
   'header-login': 'header',
   'overlay-cta': 'menu_movil',
   'overlay-login': 'menu_movil',
-  'hero-split__btn': 'hero',
-  'cta-close__btn': 'cierre',
   'sticky-cta': 'boton_flotante',
 };
 ---
@@ -107,9 +105,10 @@ const CTA_LOCATIONS = {
         return;
       }
 
+      // Botones del design system declaran su ubicación con data-cta (<Button track="...">)
       const cls = [...a.classList].find((c) => c in CTA_LOCATIONS);
       gtag('event', name, {
-        ubicacion: cls ? CTA_LOCATIONS[cls] : 'otro',
+        ubicacion: a.dataset.cta || (cls ? CTA_LOCATIONS[cls] : 'otro'),
         texto: a.textContent.trim().replace(/\s+/g, ' ').slice(0, 100),
         page_location: location.href,
       });

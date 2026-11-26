@@ -2,6 +2,7 @@
 // src/components/recursos/ResourcesHero.astro
 // Hero de /recursos: titular + una cascada de tarjetas de vidrio, una por apartado, que enlazan
 // a su sección. Flotan, se elevan al pasar el mouse y entran escalonadas.
+import Button from '../Button.astro';
 import { withBase } from '../../utils/base.js';
 const { crumbs = [], title, accent = '', lead, ctaText, ctaHref, items = [] } = Astro.props;
 ---
@@ -12,7 +13,7 @@ const { crumbs = [], title, accent = '', lead, ctaText, ctaHref, items = [] } = 
       {crumbs.length > 0 && <nav class="rhero__crumbs" aria-label="Migas de pan"><a href={withBase('/')}>Inicio</a>{crumbs.map((c) => (<><span aria-hidden="true">/</span><span aria-current="page">{c.label}</span></>))}</nav>}
       <h1 class="rhero__title" data-rr>{title}{accent && <> <span class="rhero__accent">{accent}</span></>}</h1>
       <p class="rhero__lead" data-rr>{lead}</p>
-      <div class="rhero__cta" data-rr><a class="rhero__btn" href={withBase(ctaHref)}>{ctaText}</a></div>
+      <div class="btn-group rhero__cta" data-rr><Button href={withBase(ctaHref)}>{ctaText}</Button></div>
     </div>
     <ul class="rhero__stack" role="list">
       {items.map((it, i) => (
@@ -56,7 +57,6 @@ const { crumbs = [], title, accent = '', lead, ctaText, ctaHref, items = [] } = 
   .rhero__title { font-family: var(--font-heading); font-size: clamp(2.3rem, 4.4vw, 3.6rem); letter-spacing: -.035em; line-height: 1.02; font-weight: 500; text-wrap: balance; color: var(--navy); }
   .rhero__accent { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .08em; }
   .rhero__lead { font-size: clamp(1.05rem, 1.5vw, 1.25rem); line-height: 1.55; color: var(--text-secondary); max-width: 44ch; }
-  .rhero__btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 1.5rem; border-radius: var(--radius-full); text-decoration: none; font-weight: 500; background: var(--grad-brand); color: var(--on-accent); box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--accent-grad-start) 60%, transparent); transition: transform var(--transition-fast), box-shadow var(--transition-fast); } .rhero__btn:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -8px color-mix(in srgb, var(--accent-grad-start) 65%, transparent); }
 
   .rhero__stack { list-style: none; display: grid; gap: .6rem; justify-self: center; width: min(100%, 440px); }
   .rhero__stack li { margin-left: calc(var(--i) * 0px); animation: rh-float 6s ease-in-out infinite; animation-delay: var(--d); }

@@ -16,7 +16,9 @@ export default defineConfig({
       filter: (page) =>
         !page.includes('/draft/') && !page.includes('/admin/') &&
         !page.includes('/clientes') && !page.includes('/propuesta') &&
-        !page.includes('/privacidad') && !page.includes('/terminos'),
+        !page.includes('/privacidad') && !page.includes('/terminos') &&
+        // noindex hasta que exista Mobile One para gastronomía (ver src/data/comparativas.js)
+        !page.includes('/comparativas/alternativa-a-toteat'),
     }),
   ],
 

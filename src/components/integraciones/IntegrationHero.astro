@@ -2,6 +2,7 @@
 // src/components/integraciones/IntegrationHero.astro
 // Hero inmersivo de /integraciones: titular + un hub animado. El isotipo de Mobile One al centro,
 // conectado por cables con paquetes de datos a ERP, medios de pago y documento electrónico.
+import Button from '../Button.astro';
 import { withBase } from '../../utils/base.js';
 import IntegrationHub from './IntegrationHub.astro';
 const { crumbs = [], title, accent = '', lead, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref, facts = [], focus = '' } = Astro.props;
@@ -16,9 +17,9 @@ const { crumbs = [], title, accent = '', lead, ctaText, ctaHref, ctaSecondaryTex
       )}
       <h1 class="ihero__title" data-ih="rise">{title}{accent && <> <span class="ihero__accent">{accent}</span></>}</h1>
       <p class="ihero__lead" data-ih="rise">{lead}</p>
-      <div class="ihero__cta" data-ih="rise">
-        <a class="ihero__btn ihero__btn--primary" href={withBase(ctaHref)}>{ctaText}</a>
-        {ctaSecondaryText && <a class="ihero__btn ihero__btn--ghost" href={withBase(ctaSecondaryHref)}>{ctaSecondaryText}</a>}
+      <div class="btn-group ihero__cta" data-ih="rise">
+        <Button href={withBase(ctaHref)}>{ctaText}</Button>
+        {ctaSecondaryText && <Button href={withBase(ctaSecondaryHref)} variant="ghost">{ctaSecondaryText}</Button>}
       </div>
       {facts.length > 0 && <ul class="ihero__facts" data-ih="rise" role="list">{facts.map((f) => <li>{f}</li>)}</ul>}
     </div>
@@ -54,10 +55,7 @@ const { crumbs = [], title, accent = '', lead, ctaText, ctaHref, ctaSecondaryTex
   .ihero__title { font-family: var(--font-heading); font-size: clamp(2.4rem, 5vw, 4.1rem); letter-spacing: -.035em; line-height: 1.02; font-weight: 500; text-wrap: balance; color: var(--navy); }
   .ihero__accent { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .08em; }
   .ihero__lead { font-size: clamp(1.05rem, 1.5vw, 1.25rem); line-height: 1.55; color: var(--text-secondary); max-width: 44ch; }
-  .ihero__cta { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-xs); }
-  .ihero__btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 1.5rem; border-radius: var(--radius-full); text-decoration: none; font-weight: 500; white-space: nowrap; transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast); }
-  .ihero__btn:active { transform: scale(.98); } .ihero__btn--primary { background: var(--grad-brand); color: var(--on-accent); box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--accent-grad-start) 60%, transparent); } .ihero__btn--primary:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -8px color-mix(in srgb, var(--accent-grad-start) 65%, transparent); }
-  .ihero__btn--ghost { color: var(--navy); border: 1px solid var(--border); background: var(--bg-primary); } .ihero__btn--ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .ihero__cta { margin-top: var(--space-xs); }
   .ihero__facts { list-style: none; display: flex; flex-wrap: wrap; gap: .6rem; margin-top: var(--space-xs); } .ihero__facts li { font-size: var(--text-sm); padding: .35rem .9rem; border-radius: var(--radius-full); border: 1px solid var(--border); background: var(--bg-primary); color: var(--navy); }
 
   @media (min-width: 900px) { .ihero__inner { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } .ihero { padding-block: var(--space-md); } }

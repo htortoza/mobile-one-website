@@ -1,6 +1,7 @@
 ---
 // src/components/pages/PageHero.astro
 // Cabecera común de las páginas interiores: migas, titular (h1), bajada y CTAs.
+import Button from '../Button.astro';
 import { withBase } from '../../utils/base.js';
 const { crumbs = [], title, lead, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref, tone = 'light' } = Astro.props;
 ---
@@ -15,22 +16,13 @@ const { crumbs = [], title, lead, ctaText, ctaHref, ctaSecondaryText, ctaSeconda
     <h1 class="phero__title">{title}</h1>
     {lead && <p class="phero__lead">{lead}</p>}
     {(ctaText || ctaSecondaryText) && (
-      <div class="phero__cta">
-        {ctaText && <a class="pbtn pbtn--primary" href={withBase(ctaHref)}>{ctaText}</a>}
-        {ctaSecondaryText && <a class="pbtn pbtn--ghost" href={withBase(ctaSecondaryHref)}>{ctaSecondaryText}</a>}
+      <div class="btn-group phero__cta">
+        {ctaText && <Button href={withBase(ctaHref)}>{ctaText}</Button>}
+        {ctaSecondaryText && <Button href={withBase(ctaSecondaryHref)} variant={tone === 'dark' ? 'outline-light' : 'ghost'}>{ctaSecondaryText}</Button>}
       </div>
     )}
   </div>
 </section>
-<style is:global>
-  .pbtn { display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:0 1.5rem; border-radius:var(--radius-full); font-size:var(--text-base); font-weight:500; text-decoration:none; white-space:nowrap; transition:transform var(--transition-fast), background-color var(--transition-fast); }
-  .pbtn:active { transform: translateY(1px) scale(0.98); }
-  .pbtn--primary { background:var(--accent-gradient); color:var(--on-accent); }
-  .pbtn--primary:hover { transform:translateY(-2px); box-shadow:var(--shadow-lg); }
-  .pbtn--ghost { color:var(--navy); border:1px solid var(--border); background:var(--bg-primary); }
-  .pbtn--ghost:hover { border-color:var(--accent); }
-  .phero--dark .pbtn--ghost { color:var(--on-accent); border-color:color-mix(in srgb, var(--on-accent) 45%, transparent); background:color-mix(in srgb, var(--on-accent) 8%, transparent); }
-</style>
 <style>
   .phero { padding-block: var(--space-xl) var(--space-lg); }
   .phero--dark { background: var(--grad-brand); color: var(--on-accent); }
@@ -42,5 +34,5 @@ const { crumbs = [], title, lead, ctaText, ctaHref, ctaSecondaryText, ctaSeconda
   .phero__crumbs a:hover { text-decoration:underline; }
   .phero__title { font-family:var(--font-heading); font-size:clamp(2.2rem,5.4vw,4.2rem); letter-spacing:-0.03em; line-height:1.04; font-weight:500; max-width:20ch; }
   .phero__lead { font-size:clamp(1.05rem,1.6vw,1.3rem); line-height:1.55; max-width:56ch; opacity:.88; }
-  .phero__cta { display:flex; flex-wrap:wrap; gap:var(--space-sm); margin-top:var(--space-xs); }
+  .phero__cta { margin-top:var(--space-xs); }
 </style>

@@ -3,6 +3,7 @@
 // 7 secciones: hero, logos de clientes, módulos (principales + más módulos), integraciones, cifras, equipo, cierre-demo.
 // Motion: init en astro:page-load, reduced-motion respetado. Solo variables de theme.css.
 // Los datos que se ven dentro de las pantallas (tienda, folios, montos) son ficticios.
+import Button from '../components/Button.astro';
 import Layout from '../layouts/Layout.astro';
 import ModuleShowcase from '../components/showcase/ModuleShowcase.astro';
 import MoreModules from '../components/showcase/MoreModules.astro';
@@ -53,9 +54,9 @@ const stats = [
         <div class="hero__copy">
           <h1 class="hero__title" data-rise>Vende y cobra en sala <span class="hero__accent">y en caja.</span></h1>
           <p class="hero__sub" data-rise>Un servicio integral para tu retail: vendedor, caja y ERP en una sola plataforma.</p>
-          <div class="hero__cta" data-rise>
-            <a class="btn btn--primary" href={withBase('/contacto')}>Agendar demo</a>
-            <a class="btn btn--ghost" href="#modulos">Ver módulos</a>
+          <div class="btn-group hero__cta" data-rise>
+            <Button href={withBase('/contacto')} track="hero">Agendar demo</Button>
+            <Button href="#modulos" variant="ghost">Ver módulos</Button>
           </div>
           <dl class="hero__stats" data-rise>
             {stats.map((st) => (
@@ -114,7 +115,7 @@ const stats = [
             <li><a href={withBase('/integraciones/medios-de-pago')}><b>Pagos</b><span>Transbank, Getnet, Mercado Pago y Niubiz</span></a></li>
             <li><a href={withBase('/integraciones/facturacion')}><b>Documentos</b><span>Boleta en Chile, comprobante en Perú</span></a></li>
           </ul>
-          <a class="btn btn--primary" href={withBase('/integraciones')}>Ver todas las integraciones</a>
+          <Button href={withBase('/integraciones')}>Ver todas las integraciones</Button>
         </div>
         <div class="integ__hub" data-reveal><IntegrationHub /></div>
       </div>
@@ -143,7 +144,7 @@ const stats = [
       <div class="container close__inner" data-reveal>
         <h2 class="close__title">¿Listo para potenciar a tu equipo de venta?</h2>
         <p class="close__sub">Agenda una demo de 30 minutos con tu catálogo.</p>
-        <a class="btn btn--light" href={withBase('/contacto')}>Agendar demo</a>
+        <Button href={withBase('/contacto')} variant="light" track="cierre">Agendar demo</Button>
       </div>
     </section>
   </main>
@@ -216,11 +217,6 @@ const stats = [
 
 <style>
   .pp { background: var(--bg-primary); }
-  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 1.6rem; border-radius: var(--radius-full); font-size: var(--text-base); font-weight: 500; text-decoration: none; white-space: nowrap; transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast); }
-  .btn:active { transform: translateY(1px) scale(0.98); }
-  .btn--primary { background: var(--grad-brand); color: var(--on-accent); box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--accent-grad-start) 60%, transparent); } .btn--primary:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -8px color-mix(in srgb, var(--accent-grad-start) 65%, transparent); }
-  .btn--ghost { color: var(--navy); border: 1px solid var(--border); background: var(--bg-primary); } .btn--ghost:hover { border-color: var(--accent); color: var(--accent); }
-  .btn--light { background: var(--on-accent); color: var(--navy); } .btn--light:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 
   /* ── 1. Hero ── */
   .hero { position: relative; min-height: calc(100svh - 70px); display: grid; align-items: center; overflow: clip; background: var(--grad-soft); isolation: isolate; }
@@ -237,7 +233,6 @@ const stats = [
   .hero__title { font-family: var(--font-heading); font-size: clamp(2.5rem, 5vw, 3.9rem); line-height: 1.02; letter-spacing: -0.035em; color: var(--navy); font-weight: 500; }
   .hero__accent { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 0.08em; }
   .hero__sub { font-size: clamp(1.05rem, 1.6vw, 1.3rem); color: var(--text-secondary); line-height: 1.5; max-width: 34ch; }
-  .hero__cta { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
   .hero__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm) var(--space-md); padding-top: var(--space-sm); border-top: 1px solid var(--border); margin: 0; }
   .hstat { display: grid; gap: .2rem; align-content: start; margin: 0; }
   .hstat__num { font-family: var(--font-heading); font-size: clamp(1.9rem, 3vw, 2.5rem); letter-spacing: -.035em; line-height: 1; font-weight: 500; font-variant-numeric: tabular-nums; background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .08em; white-space: nowrap; }

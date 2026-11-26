@@ -1,0 +1,59 @@
+---
+// src/pages/comparativas/index.astro — Hub de comparativas y soluciones por necesidad (SEO).
+// Sin CSS propio (CLAUDE.md §22).
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/pages/PageHero.astro';
+import Section from '../../components/pages/Section.astro';
+import CtaBand from '../../components/pages/CtaBand.astro';
+import { withBase } from '../../utils/base.js';
+import { graph, breadcrumbSchema, orgSchema } from '../../utils/seo.js';
+import { comparativas } from '../../data/comparativas.js';
+import { soluciones } from '../../data/soluciones.js';
+
+const trail = [{ label: 'Inicio', href: '/' }, { label: 'Comparativas', href: '/comparativas' }];
+const schemaData = graph(orgSchema, breadcrumbSchema(trail));
+---
+
+<Layout
+  title="Comparativas de POS para retail en Chile y Perú | Mobile One"
+  description="Compara Mobile One con Bsale, relBase, Defontana, Lightspeed, Shopify POS y Toteat. Qué ofrece cada punto de venta y cuál conviene según tu operación."
+  image="/images/og-default.jpg"
+  schemaData={schemaData}
+>
+  <PageHero
+    crumbs={[{ label: 'Comparativas' }]}
+    title="¿Qué punto de venta le conviene a tu retail?"
+    lead="Comparamos Mobile One con los sistemas que más se evalúan en Chile y Perú. Con datos públicos y fuentes, para que veas qué cambia con Mobile One."
+    ctaText="Agendar demo"
+    ctaHref="/contacto"
+  />
+
+  <Section title="Mobile One frente a otros sistemas">
+    <div class="card-grid">
+      {comparativas.map((c) => (
+        <a href={withBase(`/comparativas/${c.slug}`)} data-rv>
+          <span class="tag">{c.segment}</span>
+          <h3>Alternativa a {c.name}</h3>
+          <p>{c.card}</p>
+        </a>
+      ))}
+    </div>
+  </Section>
+
+  <Section bg="light" title="Según lo que necesitas">
+    <div class="card-grid">
+      {soluciones.map((s) => (
+        <a href={withBase(`/soluciones/${s.slug}`)} data-rv>
+          <h3>{s.name}</h3>
+          <p>{s.card}</p>
+        </a>
+      ))}
+    </div>
+  </Section>
+
+  <CtaBand title="¿Lo vemos con tu operación?" text="Una demo de 30 minutos con tu catálogo, y comparas con datos reales." />
+</Layout>
+
+<script>
+  import '../../scripts/reveal.js';
+</script>

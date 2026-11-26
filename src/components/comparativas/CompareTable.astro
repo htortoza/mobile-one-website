@@ -1,0 +1,51 @@
+---
+// src/components/comparativas/CompareTable.astro
+// Tabla "Mobile One vs <competidor>". Escritorio: tabla real (accesible, SEO). Móvil: cada fila
+// se apila como tarjeta con las dos respuestas. Los datos del competidor llevan su fuente.
+// rows: [{ k: 'Criterio', mo: 'Mobile One', c: 'Competidor', src?: índice de fuente (1..n) }]
+const { rows = [], name, verifiedAt } = Astro.props;
+---
+<div class="ctab" data-rv>
+  <table>
+    <caption class="sr-only">Comparación entre Mobile One y {name}</caption>
+    <thead>
+      <tr><th scope="col">Criterio</th><th scope="col" class="ctab__mo">Mobile One</th><th scope="col">{name}</th></tr>
+    </thead>
+    <tbody>
+      {rows.map((r) => (
+        <tr>
+          <th scope="row">{r.k}</th>
+          <td class="ctab__mo" data-label="Mobile One">{r.mo}</td>
+          <td data-label={name}>{r.c}{r.src && <sup><a href={`#fuente-${r.src}`} aria-label={`Fuente ${r.src}`}>[{r.src}]</a></sup>}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  {verifiedAt && <p class="ctab__note">Información de {name} revisada en su sitio oficial y fuentes públicas en {verifiedAt}. Puede haber cambiado: confírmala con {name}.</p>}
+</div>
+
+<style>
+  .ctab { display: grid; gap: var(--space-xs); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; font-size: var(--text-base); }
+  th, td { text-align: left; vertical-align: top; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  tbody tr:last-child > * { border-bottom: 0; }
+  thead th { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--text-secondary); font-weight: 500; background: var(--bg-secondary); }
+  tbody th { color: var(--navy); font-weight: 500; width: 24%; }
+  td { color: var(--text-secondary); }
+  .ctab__mo { background: color-mix(in srgb, var(--tint-strong) 55%, transparent); color: var(--navy); }
+  thead .ctab__mo { color: var(--accent); }
+  sup a { color: var(--accent); text-decoration: none; font-size: .75em; margin-left: .2em; }
+  .ctab__note { font-size: var(--text-sm); color: var(--text-secondary); }
+
+  /* Móvil: fila = tarjeta (criterio arriba, dos respuestas etiquetadas) */
+  @media (max-width: 720px) {
+    table, tbody, tr, th, td { display: block; width: 100%; }
+    thead { display: none; }
+    table { border: 0; background: none; display: grid; gap: var(--space-sm); }
+    tbody { display: grid; gap: var(--space-sm); }
+    tr { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    tbody th { width: 100%; background: var(--bg-secondary); }
+    td::before { content: attr(data-label); display: block; font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: .25rem; }
+    .ctab__mo::before { color: var(--accent); }
+  }
+</style>

@@ -1,0 +1,121 @@
+/* ==========================================================================
+   src/styles/components.css — Componentes globales del design system
+   --------------------------------------------------------------------------
+   Capa 2 de 2 del CSS global (se importa en BaseHead, después de theme.css):
+     1. theme.css       → tokens (colores, tipografía, espacios, radios) + base
+     2. components.css  → piezas reutilizables (botón, grupos de botones…)
+   Reglas (ver CLAUDE.md §22): todo lo que se repite en 2+ lugares vive aquí,
+   solo con variables del tema. Las páginas no redefinen estas clases.
+   ========================================================================== */
+
+/* ── Botón ─────────────────────────────────────────────────────────────────
+   Uso: <Button> (src/components/Button.astro). No crear botones ad-hoc.
+   Variantes:  primary (degradado de marca) · ghost (claro con borde)
+               light (blanco sobre fondo de marca) · outline-light (contorno sobre fondo de marca)
+   Tamaños:    md (48px, por defecto) · sm (36px, header)
+   Modificador: block (ancho completo)                                        */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(1px) scale(0.98); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.btn--primary {
+  background: var(--grad-brand);
+  color: var(--on-accent);
+  box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--accent-grad-start) 60%, transparent);
+}
+.btn--primary:hover { box-shadow: 0 16px 30px -8px color-mix(in srgb, var(--accent-grad-start) 70%, transparent); }
+
+.btn--ghost {
+  background: var(--bg-primary);
+  color: var(--navy);
+  border-color: var(--border);
+}
+.btn--ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Sobre fondos de marca (paneles azules) */
+.btn--light {
+  background: var(--on-accent);
+  color: var(--accent-hover);
+}
+.btn--light:hover { box-shadow: var(--shadow-lg); }
+
+.btn--outline-light {
+  background: transparent;
+  color: var(--on-accent);
+  border-color: color-mix(in srgb, var(--on-accent) 45%, transparent);
+}
+.btn--outline-light:hover { background: color-mix(in srgb, var(--on-accent) 12%, transparent); }
+
+.btn--sm { min-height: 36px; padding: 0 1rem; font-size: var(--text-sm); }
+.btn--block { width: 100%; }
+.btn__icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* Grupo de botones: fila que envuelve; en móvil se apila a ancho completo */
+.btn-group { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+@media (max-width: 480px) {
+  .btn-group { flex-direction: column; }
+  .btn-group > .btn { width: 100%; }
+}
+
+/* ── Patrones de contenido (páginas interiores) ────────────────────────────
+   Antes estaban copiados en el <style> de 9 páginas de integraciones.       */
+.text-lead { font-size: var(--text-lg); line-height: 1.6; color: var(--text-primary); max-width: 62ch; margin-bottom: var(--space-sm); }
+
+/* Etiqueta neutra y badge de marca */
+.tag { display: inline-flex; padding: 2px 12px; border-radius: var(--radius-full); border: 1px solid var(--border); font-size: var(--text-sm); color: var(--text-secondary); background: var(--bg-primary); }
+.badge { margin-left: .6rem; font-style: normal; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full); background: var(--accent-gradient); color: var(--on-accent); }
+
+/* Fila de logos de marcas (chip oscuro o claro según el logo oficial) */
+.logo-strip { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); }
+.logo-chip { display: inline-flex; align-items: center; min-height: 64px; padding: .9rem 1.4rem; border-radius: var(--radius-lg); border: 1px solid var(--border); }
+.logo-chip--dark { background: var(--accent-grad-start); border-color: var(--accent-grad-start); }
+.logo-chip--light { background: var(--bg-primary); }
+.logo-chip img { height: 34px; width: auto; display: block; }
+.logo-chip__text { font-family: var(--font-heading); font-size: var(--text-xl); color: var(--on-accent); letter-spacing: -0.01em; font-weight: 500; }
+
+/* Grilla de tarjetas: hijos <div> (informativas) o <a> (con hover de enlace) */
+.card-grid { display: grid; gap: var(--space-sm); grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.card-grid > * { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-md); display: grid; gap: var(--space-xs); align-content: start; text-decoration: none; min-width: 0; transition: transform var(--transition-fast), border-color var(--transition-fast); }
+.card-grid > a:hover { transform: translateY(-3px); border-color: var(--accent); }
+.card-grid .tag { justify-self: start; }
+
+/* Pasos numerados (contador automático) */
+.step-list { list-style: none; display: grid; gap: var(--space-sm); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); counter-reset: s; }
+.step-list li { counter-increment: s; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-md); display: grid; gap: var(--space-xs); align-content: start; }
+.step-list li::before { content: counter(s); font-size: var(--text-sm); font-weight: 500; color: var(--accent); }
+
+.card-grid h3, .step-list h3 { font-family: var(--font-heading); font-size: var(--text-xl); letter-spacing: -0.01em; color: var(--navy); font-weight: 500; }
+.card-grid p, .step-list p { color: var(--text-secondary); line-height: 1.55; }
+
+/* Lista con check */
+.check-list { list-style: none; display: grid; gap: .7rem; max-width: 52rem; }
+.check-list li { position: relative; padding-left: 1.6rem; color: var(--text-primary); line-height: 1.5; }
+.check-list li::before { content: ''; position: absolute; left: 0; top: .5em; width: .7rem; height: .4rem; border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(-45deg); }
+
+/* ── Utilidades ─────────────────────────────────────────────────────────── */
+/* Solo para lectores de pantalla (captions de tablas, etiquetas extra) */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

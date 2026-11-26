@@ -1,0 +1,83 @@
+---
+// src/pages/comparativas/[slug].astro — Una página "Alternativa a <competidor>" por cada entrada de
+// src/data/comparativas.js. SEO: captura búsquedas tipo "alternativa a X", "X vs", "X opiniones".
+// Reglas (no negociables): datos del competidor solo verificados y con fuente + fecha; sin logos de
+// terceros; sin descalificar. La página vende Mobile One: no recomienda al competidor.
+// Sin CSS propio: compone componentes y clases del design system (CLAUDE.md §22).
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/pages/PageHero.astro';
+import Section from '../../components/pages/Section.astro';
+import FaqList from '../../components/pages/FaqList.astro';
+import CtaBand from '../../components/pages/CtaBand.astro';
+import CompareTable from '../../components/comparativas/CompareTable.astro';
+import { withBase } from '../../utils/base.js';
+import { graph, faqSchema, breadcrumbSchema, orgSchema } from '../../utils/seo.js';
+import { comparativas } from '../../data/comparativas.js';
+
+export function getStaticPaths() {
+  return comparativas.map((c) => ({ params: { slug: c.slug }, props: { c } }));
+}
+const { c } = Astro.props;
+const others = comparativas.filter((o) => o.slug !== c.slug).slice(0, 4);
+const trail = [
+  { label: 'Inicio', href: '/' },
+  { label: 'Comparativas', href: '/comparativas' },
+  { label: `Alternativa a ${c.name}`, href: `/comparativas/${c.slug}` },
+];
+const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(c.faqs));
+---
+
+<Layout title={c.seo.title} description={c.seo.description} image="/images/og-default.jpg" schemaData={schemaData} noindex={c.noindex}>
+  <PageHero
+    crumbs={[{ label: 'Comparativas', href: '/comparativas' }, { label: `Alternativa a ${c.name}` }]}
+    title={c.h1}
+    lead={c.lead}
+    ctaText="Agendar demo"
+    ctaHref="/contacto"
+    ctaSecondaryText="Ver la comparación"
+    ctaSecondaryHref={`/comparativas/${c.slug}#comparacion`}
+  />
+
+  <Section title={`Mobile One y ${c.name}, en corto`} intro={c.summary}>
+    <div class="card-grid">
+      {c.highlights.map((h) => (
+        <div data-rv><h3>{h.title}</h3><p>{h.text}</p></div>
+      ))}
+    </div>
+  </Section>
+
+  <Section id="comparacion" bg="light" title={`Mobile One vs ${c.name}`} intro="Lo que importa al elegir un punto de venta para retail con tiendas físicas.">
+    <CompareTable rows={c.rows} name={c.name} verifiedAt={c.verifiedAt} />
+  </Section>
+
+  <Section title={`Por qué elegir Mobile One en vez de ${c.name}`}>
+    <ul class="check-list">{c.fitMO.map((t) => <li data-rv>{t}</li>)}</ul>
+  </Section>
+
+  <Section bg="light" title="Preguntas frecuentes">
+    <FaqList items={c.faqs} />
+  </Section>
+
+  <Section title="Fuentes" intro={`${c.name} y las demás marcas mencionadas pertenecen a sus respectivos dueños. Esta comparación usa información pública y no implica relación con ellos.`}>
+    <ol class="check-list">
+      {c.sources.map((s, i) => (
+        <li id={`fuente-${i + 1}`}>[{i + 1}] <a href={s.url} rel="nofollow noopener" target="_blank">{s.label}</a></li>
+      ))}
+    </ol>
+  </Section>
+
+  <Section bg="light" title="Otras comparativas">
+    <div class="card-grid">
+      {others.map((o) => (
+        <a href={withBase(`/comparativas/${o.slug}`)}><h3>Alternativa a {o.name}</h3><p>{o.card}</p></a>
+      ))}
+      <a href={withBase('/comparativas')}><h3>Todas las comparativas</h3><p>POS para retail en Chile y Perú, lado a lado.</p></a>
+    </div>
+  </Section>
+
+  <CtaBand title={`¿Comparando con ${c.name}?`} text="Te mostramos Mobile One con tu catálogo en una demo de 30 minutos." ctaText="Agendar demo" ctaHref="/contacto" />
+</Layout>
+
+<script>
+  import '../../scripts/reveal.js';
+</script>

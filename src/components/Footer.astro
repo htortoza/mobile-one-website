@@ -18,6 +18,8 @@ const LIVE_ROUTES = new Set([
   '/integraciones/medios-de-pago/mercado-pago', '/integraciones/medios-de-pago/niubiz', '/recursos', '/contacto',
   '/recursos/industrias/moda-y-calzado', '/recursos/industrias/electronica-y-tecnologia',
   '/recursos/industrias/multitienda-y-holdings', '/recursos/industrias/retail-con-erp',
+  '/comparativas', '/soluciones/pos-para-sap-business-one', '/soluciones/pos-movil-para-retail',
+  '/soluciones/pos-para-tiendas-de-ropa',
 ]);
 const isLive = (href) => LIVE_ROUTES.has(href);
 
@@ -43,6 +45,7 @@ const allColumns = [
     title: 'Compañía',
     links: [
       { label: 'Recursos', href: '/recursos' },
+      { label: 'Comparativas', href: '/comparativas' },
       { label: 'Contacto', href: '/contacto' },
     ],
   },
@@ -53,6 +56,15 @@ const allColumns = [
       { label: 'Electrónica y tecnología', href: '/recursos/industrias/electronica-y-tecnologia' },
       { label: 'Multitienda y holdings',  href: '/recursos/industrias/multitienda-y-holdings' },
       { label: 'Retail con ERP',          href: '/recursos/industrias/retail-con-erp' },
+    ],
+  },
+  {
+    title: 'Soluciones',
+    links: [
+      { label: 'POS para SAP Business One', href: '/soluciones/pos-para-sap-business-one' },
+      { label: 'POS móvil para retail',     href: '/soluciones/pos-movil-para-retail' },
+      { label: 'POS para tiendas de ropa',  href: '/soluciones/pos-para-tiendas-de-ropa' },
+      { label: 'Comparativas',              href: '/comparativas' },
     ],
   },
 ];

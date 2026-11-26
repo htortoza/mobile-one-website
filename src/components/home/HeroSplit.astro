@@ -1,6 +1,7 @@
 ---
 // src/components/home/HeroSplit.astro
 // Home §4.1 — Split blue(izq)/claro(der). Mockup real de carrito + card BackOffice.
+import Button from '../Button.astro';
 import { withBase } from '../../utils/base.js';
 const {
   eyebrow,
@@ -65,9 +66,9 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
 
       <p class="hero-split__sub" data-gsap-animate="fade-up">{subheadline}</p>
 
-      <div class="hero-split__cta" data-gsap-animate="fade-up-delay">
-        <a href={withBase(ctaHref)} class="hero-split__btn hero-split__btn--primary">{ctaText}</a>
-        <a href={withBase(ctaSecondaryHref)} class="hero-split__btn hero-split__btn--ghost">{ctaSecondaryText}</a>
+      <div class="btn-group hero-split__cta" data-gsap-animate="fade-up-delay">
+        <Button href={withBase(ctaHref)} variant="light" track="hero" data-magnetic>{ctaText}</Button>
+        <Button href={withBase(ctaSecondaryHref)} variant="outline-light" track="hero">{ctaSecondaryText}</Button>
       </div>
 
       {logoList.length > 0 && (
@@ -134,7 +135,7 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     if (mockups) tl.to(mockups, { scale: 1, duration: 1.4 }, '-=1.0');
 
     // CTA magnético — desktop (pointer: fine) only
-    const primaryBtn = section.querySelector('.hero-split__btn--primary');
+    const primaryBtn = section.querySelector('[data-magnetic]');
     if (primaryBtn && window.matchMedia('(pointer: fine)').matches) {
       const qx = gsap.quickTo(primaryBtn, 'x', { duration: 0.5, ease: 'power3.out' });
       const qy = gsap.quickTo(primaryBtn, 'y', { duration: 0.5, ease: 'power3.out' });
@@ -212,35 +213,7 @@ const isAccent = (i) => accentStart >= 0 && i >= accentStart && i < accentStart 
     color: color-mix(in srgb, var(--on-accent) 88%, transparent);
     max-width: 46ch;
   }
-  .hero-split__cta { display: flex; flex-wrap: nowrap; gap: var(--space-sm); }
-
-  .hero-split__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 1 auto;
-    white-space: nowrap;
-    text-align: center;
-    font-family: var(--font-body);
-    font-weight: 500;
-    /* Fluido en vez de un salto brusco a los 560px: nunca envuelve texto
-       ("Ver cómo funciona" en una sola línea) y se lee bien desde ~340px. */
-    font-size: clamp(0.8125rem, 3.4vw, 1rem);
-    padding: var(--space-sm) clamp(0.85rem, 4vw, var(--space-lg));
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    transition: transform var(--transition-fast), background-color var(--transition-fast);
-  }
-  .hero-split__btn--primary {
-    background-color: var(--on-accent);
-    color: var(--accent-hover);
-  }
-  .hero-split__btn--primary:hover { transform: translateY(-2px); }
-  .hero-split__btn--ghost {
-    color: var(--on-accent);
-    border: 1px solid color-mix(in srgb, var(--on-accent) 45%, transparent);
-  }
-  .hero-split__btn--ghost:hover { background-color: color-mix(in srgb, var(--on-accent) 12%, transparent); }
+  
 
   /* ── Barra de logos de clientes — pequeña, dentro del panel azul,
      acotada a su ancho (min-width:0 + overflow:hidden) para que el

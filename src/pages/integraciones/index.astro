@@ -165,7 +165,7 @@ const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(faqs));
     <FaqList items={faqs} />
   </Section>
   <Section title="Más sobre el producto" bg="light">
-    <div class="rel">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
+    <div class="card-grid">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
   </Section>
   <CtaBand title="¿Quieres verlo con tu operación?" text="Agenda una demo de 30 minutos con tu catálogo." />
 </Layout>
@@ -187,13 +187,7 @@ const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(faqs));
     if (big) gsap.from(big, { clipPath: 'inset(0 100% 0 0)', duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: big, start: 'top 85%', once: true } });
   });
 </script>
-
 <style>
-  .rel { display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
-  .rel > a { background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); text-decoration:none; transition:transform var(--transition-fast), border-color var(--transition-fast); }
-  .rel > a:hover { transform:translateY(-3px); border-color:var(--accent); }
-  .rel h3 { font-family:var(--font-heading); font-size:var(--text-xl); color:var(--navy); font-weight:500; } .rel p { color:var(--text-secondary); }
-
   /* ── Tres frentes (asimétrico) ── */
   .fr { background: var(--bg-primary); padding-block: var(--space-xl); }
   .fr__inner { display: grid; gap: var(--space-lg); }

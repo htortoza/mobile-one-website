@@ -38,12 +38,121 @@ fill, nunca reconstruidos).
 
 ## Header / Footer
 
-- **Header**: se retiró el menú de navegación (páginas del sitemap aún no construidas:
-  `/soluciones`, `/por-que-mobile-one`, `/integraciones`, `/casos-de-exito`, `/nosotros`).
-  Quedan solo "Iniciar sesión" (→ `mobile-one-dev.dotsolutions.io/login`) y "Agendar demo"
-  (→ `/contacto`), ambos con ícono.
-- **Footer**: los links a esas mismas páginas no construidas quedaron **desactivados**
-  (texto plano, sin `href`) en vez de eliminados — fácil de reactivar cuando existan.
+- **Header** (actualizado 2026-11-26, `src/components/Header.astro`): layout de 3 zonas
+  con grid `1fr auto 1fr` — logo izquierda · menú **centrado exacto** (Producto ·
+  Integraciones · Recursos) · acciones derecha ("Iniciar sesión" → `loginUrl`, "Agendar
+  demo" → `orderUrl`). Se quitó el separador vertical entre menú y login.
+  - Hamburguesa ahora desde **≤1000px** (antes 860): las 3 zonas necesitan ~985px; entre
+    860–1000 desbordaba en horizontal.
+  - Desplegables (mega-menú) de Integraciones y Recursos: cada link lleva **ícono de
+    trazo** (18px, navy al 45%, pasa a `--accent` al hover) + **descripción corta** debajo
+    (`--text-xs`, `--text-secondary`). Datos en el objeto `MENUS` del frontmatter: campos
+    `icon` (paths SVG separados por `|`, viewBox 24) y `desc`.
+  - Las descripciones las redactó el agente a partir de los `description` de cada página
+    — **pendiente que el usuario las valide**.
+  - Íconos genéricos de línea (no logos de marca): en el repo solo hay logos completos
+    (wordmark) de SAP/Transbank/Getnet/Mercado Pago, no isotipos; reconstruirlos está
+    prohibido. Si el cliente entrega isotipos oficiales, reemplazar solo en Integraciones.
+  - **Fondo compartido del mega-menú** (`.dd-bg`, patrón Stripe): un solo fondo se
+    desliza/redimensiona al panel activo y solo el contenido se cruza. Corrige el "salto" al
+    pasar de un menú a otro (antes se veían dos paneles de distinto ancho a la vez).
+  - Apertura por hover o foco de **teclado** (`:has(:focus-visible)`), ya no `:focus-within`:
+    tras un clic el menú quedaba abierto y se encimaba con el siguiente. Si hay hover, solo
+    se ve el menú bajo el mouse.
+  - **Header único y persistente** (`transition:persist`): mismo DOM en todas las páginas,
+    scripts enganchados una vez, `aria-current` se sincroniza en `astro:page-load`. El estado
+    del mega-menú lo maneja JS (`.is-open`, `.is-hot`), no `:hover`, y se congela durante la
+    View Transition hasta `viewTransition.finished` → sin parpadeo al navegar desde el menú
+    (verificado cuadro a cuadro: 0 caídas de opacidad, un solo header en 3 navegaciones).
+  - **Resaltado único dentro del desplegable** (`.dd__hl`): un solo fondo por panel que se
+    desliza entre links. Antes cada link tenía su fondo con fade de 300ms y al pasar de uno a
+    otro el anterior seguía resaltado (hover "fantasma"). Cruzar el hueco entre links no apaga
+    el resaltado (120ms de margen).
+
+### Hub de integraciones — continuidad entre páginas (2026-11-26)
+`src/components/integraciones/IntegrationHub.astro`: al navegar entre páginas de integración
+(SAP → Retail Pro → …) el diagrama ya no se rearma desde cero (antes: giro de entrada desde
+otro ángulo + nodos creciendo = "salto"). En `astro:before-preparation` se guarda ángulo y
+focos del hub si está a la vista; en `astro:after-swap` el hub nuevo nace en ese estado con
+`view-transition-name: ihub`, y luego solo gira a su foco. Las animaciones CSS en bucle
+(flotar, anillos, pulso) van en fase con `performance.now()` (vars `--ph*`) para no reiniciarse.
+Si el hub estaba fuera de pantalla, entrada normal.
+
+## Design System (CLAUDE.md §22) — 2026-11-26
+
+Hecho:
+- `src/styles/components.css` (capa global 2, importada en `BaseHead`): `.btn` + variantes
+  (`primary`, `ghost`, `light`, `outline-light`, `sm`, `block`), `.btn-group`, y patrones de
+  contenido (`.card-grid`, `.step-list`, `.check-list`, `.tag`, `.badge`, `.logo-chip`,
+  `.text-lead`).
+- `Button.astro` reescrito como único botón. Migrados: Header (escritorio + drawer), Home,
+  HeroSplit, CtaClose, PageHero, IntegrationHero, ResourcesHero, CtaBand, industrias/[slug].
+  9 implementaciones de botón → 1.
+- Analítica: ubicación del CTA por `data-cta` (`<Button track="...">`) en vez de clases.
+  Motion: `data-magnetic` / `data-pulse` en vez de clases.
+- Integraciones: 8 páginas quedaron **sin `<style>`** (el bloque estaba copiado en 9
+  páginas). Solo conservan CSS propio `/integraciones`, `/integraciones/erp` y `/facturacion`
+  (secciones únicas).
+
+Deuda pendiente (migrar con las normas de §22):
+- [ ] `StickyCTA.astro`: botón flotante propio → variante de `<Button>` (p. ej. `floating`).
+- [ ] `header-login` / `overlay-login`: enlace con ícono → evaluar variante `text` de Button.
+- [ ] Páginas con `<style>` grande: `recursos/industrias/[slug].astro` (~110 líneas),
+      `index.astro` (~90), `recursos/index.astro` (~65), `integraciones/index.astro` (~45):
+      revisar qué es único y qué es patrón (títulos de sección, tarjetas) → capa 2.
+- [ ] Títulos de sección (`h2` con `clamp(2rem, 4.2vw, 3.2rem)` repetido en varios archivos)
+      → clase global `.section-title`.
+- [ ] Componentes muertos que usan la API vieja de Button: `Hero.astro`, `CTA.astro`,
+      `VideoHero.astro` (no los usa ninguna página; borrar tras confirmar).
+
+### Mega-menú Producto (2026-11-26)
+- Desplegable de **Producto** con 13 módulos (fuente: catálogo interno `localhost:4200/modulos`)
+  en 3 columnas: Vender (5) · Operar (5) · Administrar (3). Cada uno enlaza a su capítulo de
+  `/producto` (`#armar-venta`, `#cerrar-venta`, `#recepcion`, `#red-completa`, `#en-la-tienda`,
+  `#control-sistema`); Facturación va a `/integraciones/facturacion`.
+- Omitido "Plataforma DOT" (administración interna cross-tenant, no es del cliente).
+- Descripciones reescritas en lenguaje de cliente (las del catálogo interno eran técnicas).
+- Paneles ahora centrados bajo el menú (`.nav-item { position: static }`): el de Producto se
+  salía por la izquierda a ~1000px.
+- [ ] Varios módulos comparten capítulo (p. ej. Promociones/Giftcards → `#cerrar-venta`): si
+      se quiere un destino propio por módulo, hacen falta secciones o páginas nuevas.
+
+## SEO competitivo: comparativas y soluciones (2026-11-26)
+
+Páginas nuevas (plantillas sin CSS propio, datos en `src/data/`):
+- `/comparativas` (página que agrupa todas las comparaciones) + 6 páginas `/comparativas/alternativa-a-{bsale, relbase,
+  defontana-tivendo, lightspeed, shopify-pos, toteat}` (`src/data/comparativas.js`).
+- 3 páginas por necesidad `/soluciones/{pos-para-sap-business-one, pos-movil-para-retail,
+  pos-para-tiendas-de-ropa}` (`src/data/soluciones.js`), solo con afirmaciones ya publicadas.
+- Componente nuevo `CompareTable.astro` (tabla en escritorio, tarjetas en móvil) y módulo
+  compartido `src/scripts/reveal.js` (entrada al hacer scroll con `[data-rv]`).
+- Enlaces: grupo "Compara" en el menú Recursos y columna "Soluciones" en el footer.
+- SEO: title/description propios, JSON-LD de preguntas frecuentes y migas (FAQPage + BreadcrumbList), og:image absoluto, sitemap.
+
+Reglas de contenido (en la cabecera de `comparativas.js`): datos del competidor verificados en
+su sitio oficial con fuente numerada y fecha (revisión: 26-11-2026), "no lo menciona en su
+sitio" en vez de "no tiene", sin logos de terceros, y siempre "cuándo conviene más el otro".
+
+Pendiente:
+- [ ] **Toteat** va con `noindex` (y fuera del sitemap) porque Mobile One para gastronomía
+      (TCPOS) aún no existe. Quitar `noindex` en `comparativas.js` y el filtro en
+      `astro.config.mjs` al lanzar.
+- Decisión comercial (26-11-2026): las comparativas **no recomiendan al competidor** (se quitó
+  "X puede ser mejor si…"). Se sumó caja fija con pantalla táctil (sin POS móvil) y venta +
+  facturación offline. Roadmap NO publicado como disponible: e-commerce, tótem de autoatención
+  (hardware propio), gastronomía/TCPOS.
+- [ ] **Precio de Mobile One**: hoy dice "según tu operación, se cotiza en una demo"
+      (DATO PENDIENTE: confirmar con comercial).
+- [ ] Revisión legal de las comparativas antes de publicar.
+- [ ] Revisar precios de la competencia cada trimestre (cambian sin aviso).
+- [ ] Migrar el reveal copiado en las páginas de integraciones e industrias a `src/scripts/reveal.js`.
+
+### Pendiente header
+- [ ] Validar/ajustar copy de las descripciones del mega-menú.
+- [ ] Menú móvil (acordeón del drawer) aún **sin** íconos ni descripciones — igualarlo si
+      se aprueba el desktop.
+- [ ] Isotipos oficiales de ERP/medios de pago (si el cliente los tiene).
+- [ ] Cambios del 2026-11-26 **sin commit** (solo local, `npm run dev` en :4321).
 
 ## Formulario de contacto — integración real
 

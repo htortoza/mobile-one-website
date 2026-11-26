@@ -93,7 +93,12 @@ const pos = nodes.map((n) => {
       const cables = [...hub.querySelectorAll('.hub__cable')];
       const motions = [...hub.querySelectorAll('animateMotion')];
       const st = { th: theta0 };
+      hub.__st = st;
       let selected = -1;
+      // Continuidad entre páginas (ver 'Continuidad del hub' abajo): si venimos de otra página con el
+      // hub a la vista, este hub ya nació en el ángulo y focos del anterior.
+      const cont = hub.dataset.cont === '1';
+      if (cont) st.th = Number(hub.dataset.contTh);
 
       const apply = (th) => {
         data.forEach((d, i) => {
@@ -132,16 +137,30 @@ const pos = nodes.map((n) => {
         nodes.forEach((n, i) => n.addEventListener('click', (e) => { if (selected === i) return; e.preventDefault(); select(i); }));
         core?.addEventListener('click', reset);
         hub.addEventListener('keydown', (e) => { if (e.key === 'Escape') reset(); });
-      } else if (theta0 !== 0 && !reduce) {
+      }
+      if (cont) {
+        // Parte donde quedó el anterior y gira a su propio foco; los focos pasan con transición CSS.
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          nodes.forEach((n) => {
+            n.classList.toggle('is-focus', n.dataset.focus === '1');
+            n.classList.toggle('is-dim', n.dataset.dim === '1');
+          });
+          delete hub.dataset.cont;
+        }));
+        spinTo(theta0);
+      } else if (!interactive && theta0 !== 0 && !reduce) {
         // páginas de una integración: el anillo gira hasta dejar su nodo arriba
         st.th = theta0 - 70; apply(st.th);
         gsap.to(st, { th: theta0, duration: 1.8, delay: 0.5, ease: 'power3.out', onUpdate: () => apply(st.th) });
       }
 
       if (reduce) return;
+      // sin animación de entrada si viene de otra página: el hub ya estaba en pantalla
+      if (!cont) {
       gsap.from(core, { scale: 0.4, opacity: 0, duration: 1.2, ease: 'back.out(1.5)', delay: 0.3 });
       gsap.from(nodes, { scale: 0.5, opacity: 0, duration: 0.9, stagger: 0.1, ease: 'expo.out', delay: 0.6 });
       gsap.from(cables, { opacity: 0, duration: 1.2, stagger: 0.08, delay: 0.7 });
+      }
       // los nodos siguen ligeramente al cursor (profundidad), solo en escritorio
       if (window.matchMedia('(min-width: 900px) and (hover: hover)').matches) {
         hub.addEventListener('pointermove', (e) => {
@@ -153,6 +172,55 @@ const pos = nodes.map((n) => {
       }
     });
   }
+  // ── Continuidad del hub entre páginas de integración (ClientRouter) ──
+  // Antes cada página armaba su hub desde cero (giro de entrada desde otro ángulo, nodos
+  // creciendo): ir de Retail Pro a SAP y volver se veía como un salto. Ahora, si el hub
+  // estaba a la vista, la página nueva lo recibe en el mismo estado y solo gira.
+  let prevHub = null;
+  document.addEventListener('astro:before-preparation', () => {
+    prevHub = null;
+    const hub = document.querySelector('[data-hub]');
+    if (!hub?.__st) return;
+    const r = hub.getBoundingClientRect();
+    // fuera de pantalla: entrada normal (y sin nombre, para que no "vuele" desde abajo)
+    if (r.bottom < 0 || r.top > innerHeight) { hub.style.viewTransitionName = ''; return; }
+    prevHub = {
+      th: hub.__st.th,
+      focus: [...hub.querySelectorAll('.hub__node')].map((n) => (n.classList.contains('is-focus') ? 'f' : n.classList.contains('is-dim') ? 'd' : '')),
+    };
+    hub.style.viewTransitionName = 'ihub'; // la View Transition lo trata como el mismo objeto
+  });
+  document.addEventListener('astro:after-swap', () => {
+    const hub = document.querySelector('[data-hub]');
+    if (hub) {
+      // Las animaciones CSS en bucle (flotar, anillos, pulso) arrancan en fase con el reloj
+      // de la pestaña, así el hub nuevo sigue el mismo ritmo que el anterior sin reiniciarse.
+      const t = performance.now() / 1000;
+      for (const P of [6, 60, 90, 3.2]) hub.style.setProperty(`--ph${String(P).replace('.', '')}`, `${-(t % P)}s`);
+    }
+    if (!prevHub || !hub) { prevHub = null; return; }
+    const nodes = [...hub.querySelectorAll('.hub__node')];
+    const data = JSON.parse(hub.dataset.nodes || '[]');
+    // guarda los focos propios y muestra los del hub anterior
+    nodes.forEach((n, i) => {
+      n.dataset.focus = n.classList.contains('is-focus') ? '1' : '';
+      n.dataset.dim = n.classList.contains('is-dim') ? '1' : '';
+      n.classList.toggle('is-focus', prevHub.focus[i] === 'f');
+      n.classList.toggle('is-dim', prevHub.focus[i] === 'd');
+    });
+    // misma geometría que el anterior antes de que la transición capture la página nueva
+    const slots = [...hub.querySelectorAll('.hub__slot')];
+    const cables = [...hub.querySelectorAll('.hub__cable')];
+    data.forEach((d, i) => {
+      const g = geo(d.angle + prevHub.th, i);
+      slots[i].style.left = g.x + '%'; slots[i].style.top = g.y + '%';
+      cables[i].setAttribute('d', g.fwd);
+    });
+    hub.dataset.cont = '1';
+    hub.dataset.contTh = String(prevHub.th);
+    hub.style.viewTransitionName = 'ihub';
+    prevHub = null;
+  });
   document.addEventListener('astro:page-load', initHub);
 </script>
 
@@ -167,16 +235,16 @@ const pos = nodes.map((n) => {
     mask-image: radial-gradient(circle at 50% 50%, #000 40%, rgba(0,0,0,.35) 100%); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 40%, rgba(0,0,0,.35) 100%); }
   .hub__lines { z-index: 1; position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
   .hub__ring circle { fill: none; stroke: color-mix(in srgb, var(--accent-grad-start) 28%, transparent); stroke-width: .25; stroke-dasharray: 1 2.2; vector-effect: non-scaling-stroke; transform-origin: 50% 50%; }
-  .hub__ring circle:first-child { animation: ih-spin 60s linear infinite; } .hub__ring circle:last-child { animation: ih-spin 90s linear infinite reverse; }
+  .hub__ring circle:first-child { animation: ih-spin 60s linear infinite var(--ph60, 0s); } .hub__ring circle:last-child { animation: ih-spin 90s linear infinite reverse var(--ph90, 0s); }
   @keyframes ih-spin { to { transform: rotate(360deg); } }
   .hub__cable { fill: none; stroke: url(#hubg); stroke-width: .5; vector-effect: non-scaling-stroke; stroke-linecap: round; }
   .hub__pkt { fill: var(--accent-grad-start); filter: drop-shadow(0 0 3px var(--accent-grad-end)); }
   .hub__core { position: absolute; left: 50%; top: 50%; width: 27%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: var(--on-accent); display: grid; place-items: center; box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent-grad-start) 9%, transparent), 0 0 0 1px var(--border), 0 24px 50px -10px color-mix(in srgb, var(--accent-grad-start) 40%, transparent); z-index: 3; }
   .hub__core img { width: 52%; height: auto; }
-  .hub__pulse { position: absolute; inset: 0; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--accent-grad-end) 70%, transparent); animation: ih-pulse 3.2s ease-out infinite; z-index: -1; } .hub__pulse--b { animation-delay: 1.6s; }
+  .hub__pulse { position: absolute; inset: 0; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--accent-grad-end) 70%, transparent); animation: ih-pulse 3.2s ease-out infinite var(--ph32, 0s); z-index: -1; } .hub__pulse--b { animation-delay: calc(1.6s + var(--ph32, 0s)); }
   @keyframes ih-pulse { from { transform: scale(1); opacity: .9; } to { transform: scale(1.9); opacity: 0; } }
   .hub__slot { position: absolute; transform: translate(-50%, -50%); z-index: 2; }
-  .hub__node { position: relative; text-decoration: none; color: inherit; display: grid; justify-items: center; gap: .4rem; z-index: 2; animation: ih-float 6s ease-in-out infinite; animation-delay: var(--d); }
+  .hub__node { position: relative; text-decoration: none; color: inherit; display: grid; justify-items: center; gap: .4rem; z-index: 2; animation: ih-float 6s ease-in-out infinite; animation-delay: calc(var(--d) + var(--ph6, 0s)); }
   @keyframes ih-float { 50% { translate: 0 -7px; } }
   .hub__chip { display: grid; place-items: center; min-width: 96px; height: 54px; padding: 0 .9rem; border-radius: var(--radius-lg); background: var(--accent-grad-start); border: 1px solid color-mix(in srgb, var(--on-accent) 35%, transparent); box-shadow: 0 14px 28px -6px color-mix(in srgb, var(--accent-grad-start) 70%, transparent); }
   /* Logo oficial a color directamente sobre el fondo claro de la página (fondo blanco permitido por la marca), sin chip */

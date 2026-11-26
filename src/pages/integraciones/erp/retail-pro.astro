@@ -140,21 +140,21 @@ const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(faqs));
 
 <Layout title="Mobile One con Retail Pro: POS integrado al ERP" description="Mobile One consulta el stock en Retail Pro y registra cada venta, sin digitar dos veces. POS móvil y caja de pago. Chile y Perú." image="/images/og-default.jpg" schemaData={schemaData}>
   <IntegrationHero crumbs={crumbs} title="Mobile One con" accent="Retail Pro" lead="El punto de venta que se integra a Retail Pro. Consulta el stock y registra cada venta, sin duplicar datos ni reemplazar tu sistema." ctaText="Agendar demo" ctaHref="/contacto" ctaSecondaryText="Ver el producto" ctaSecondaryHref="/producto" focus="erp2" />
-  <Section title="Sobre Retail Pro" bg="light"><p class="what">Retail Pro es un sistema de gestión retail que centraliza ventas, inventario y análisis para tiendas físicas. Existe en dos versiones con las que Mobile One se integra: Retail Pro y Retail Pro Prism.</p><div class="logo-strip"><span class="logo-chip logo-chip--light"><img src={withBase("/images/logo-retailpro.png")} alt="Retail Pro" loading="lazy" /></span><span class="tag">Chile y Perú</span></div></Section>
+  <Section title="Sobre Retail Pro" bg="light"><p class="text-lead">Retail Pro es un sistema de gestión retail que centraliza ventas, inventario y análisis para tiendas físicas. Existe en dos versiones con las que Mobile One se integra: Retail Pro y Retail Pro Prism.</p><div class="logo-strip"><span class="logo-chip logo-chip--light"><img src={withBase("/images/logo-retailpro.png")} alt="Retail Pro" loading="lazy" /></span><span class="tag">Chile y Perú</span></div></Section>
   <Section title="Cómo se conectan Mobile One y tu ERP" bg="white">
-    <ol class="steps">{steps.map((s) => (<li><h3>{s.t}</h3><p>{s.d}</p></li>))}</ol>
+    <ol class="step-list">{steps.map((s) => (<li><h3>{s.t}</h3><p>{s.d}</p></li>))}</ol>
   </Section>
   <Section title="Qué módulos usan el ERP" bg="light">
-    <div class="mods">{modules.map((m) => (<div><h3>{m.name}</h3><p>{m.text}</p></div>))}</div>
+    <div class="card-grid">{modules.map((m) => (<div><h3>{m.name}</h3><p>{m.text}</p></div>))}</div>
   </Section>
   <Section title={extra.title} intro={extra.intro} bg={'white'}>
-    <ul class="points">{extra.points.map((t) => (<li set:html={t} />))}</ul>
+    <ul class="check-list">{extra.points.map((t) => (<li set:html={t} />))}</ul>
   </Section>
   <Section title="Preguntas frecuentes" bg="light">
     <FaqList items={faqs} />
   </Section>
   <Section title="Más integraciones" bg="white">
-    <div class="rel">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
+    <div class="card-grid">{related.map((r) => (<a href={withBase(r.href)}><h3>{r.name}</h3><p>{r.text}</p></a>))}</div>
   </Section>
   <CtaBand title="¿Quieres verlo con tu operación?" text="Agenda una demo de 30 minutos con tu catálogo." />
 </Layout>
@@ -170,37 +170,3 @@ const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(faqs));
     gsap.utils.toArray('[data-rv]').forEach((el, i) => { if (el.dataset.rvDone) return; el.dataset.rvDone = '1'; gsap.from(el, { opacity: 0, y: 32, duration: 1, ease: 'expo.out', delay: (i % 3) * 0.08, scrollTrigger: { trigger: el, start: 'top 88%', once: true } }); });
   });
 </script>
-
-<style>
-  .what { font-size: var(--text-lg); line-height: 1.6; color: var(--text-primary); max-width: 62ch; margin-bottom: var(--space-sm); }
-  .logo-badge { margin-left: .6rem; font-style: normal; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full); background: var(--accent-gradient); color: var(--on-accent); }
-  .erpcards { background: var(--bg-primary); padding-block: var(--space-xl); } .erpcards__in { display: grid; gap: var(--space-lg); }
-  .erpcards__head h2 { font-family: var(--font-heading); font-size: clamp(2rem, 4.2vw, 3.2rem); letter-spacing: -.03em; line-height: 1.05; color: var(--navy); font-weight: 500; } .erpcards__head p { margin-top: .6rem; font-size: var(--text-lg); color: var(--text-secondary); }
-  .erpcards__grid { display: grid; gap: var(--space-sm); grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-  .erpc { display: grid; gap: .8rem; align-content: start; padding: var(--space-md); border-radius: calc(var(--radius-lg) * 1.5); background: var(--bg-secondary); border: 1px solid var(--border); text-decoration: none; transition: transform .6s var(--ease-expo), box-shadow .6s var(--ease-expo), border-color .4s; }
-  .erpc:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--accent); }
-  .erpc__logo { display: inline-flex; align-items: center; gap: .6rem; justify-self: start; background: var(--on-accent); border: 1px solid var(--border); border-radius: var(--radius-md); padding: .7rem 1.1rem; } .erpc__logo img { height: 34px; width: auto; max-width: 180px; object-fit: contain; display: block; }
-  .erpc__logo em { font-style: normal; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; padding: 3px 9px; border-radius: var(--radius-full); background: var(--accent-gradient); color: var(--on-accent); }
-  .erpc h3 { font-family: var(--font-heading); font-size: var(--text-xl); letter-spacing: -.02em; color: var(--navy); font-weight: 500; } .erpc p { color: var(--text-secondary); line-height: 1.55; }
-  .erpc__go { margin-top: auto; padding-top: .6rem; color: var(--accent); font-weight: 500; } .erpc__go i { font-style: normal; display: inline-block; transition: transform .5s var(--ease-expo); } .erpc:hover .erpc__go i { transform: translateX(8px); }
-
-  .logo-strip { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-sm); }
-  .logo-chip { display:inline-flex; align-items:center; min-height:64px; padding:.9rem 1.4rem; border-radius:var(--radius-lg); border:1px solid var(--border); }
-  .logo-chip--dark { background:var(--accent-grad-start); border-color:var(--accent-grad-start); }
-  .logo-chip--light { background:var(--bg-primary); }
-  .logo-chip img { height:34px; width:auto; display:block; }
-  .logo-chip__text { font-family:var(--font-heading); font-size:var(--text-xl); color:var(--on-accent); letter-spacing:-0.01em; font-weight:500; }
-  .tag { display:inline-flex; padding:2px 12px; border-radius:var(--radius-full); border:1px solid var(--border); font-size:var(--text-sm); color:var(--text-secondary); background:var(--bg-primary); }
-  .steps { list-style:none; display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); counter-reset:s; }
-  .steps li { counter-increment:s; background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; }
-  .steps li::before { content:counter(s); font-size:var(--text-sm); font-weight:500; color:var(--accent); }
-  .steps h3, .cards h3, .mods h3, .rel h3 { font-family:var(--font-heading); font-size:var(--text-xl); letter-spacing:-0.01em; color:var(--navy); font-weight:500; }
-  .steps p, .cards p, .mods p, .rel p { color:var(--text-secondary); line-height:1.55; }
-  .mods, .cards, .rel { display:grid; gap:var(--space-sm); grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
-  .mods > div, .cards > a, .rel > a { background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-md); display:grid; gap:var(--space-xs); align-content:start; text-decoration:none; transition:transform var(--transition-fast), border-color var(--transition-fast); min-width:0; }
-  .cards > a:hover, .rel > a:hover { transform:translateY(-3px); border-color:var(--accent); }
-  .cards .tag { justify-self:start; }
-  .points { list-style:none; display:grid; gap:.7rem; max-width:52rem; }
-  .points li { position:relative; padding-left:1.6rem; color:var(--text-primary); line-height:1.5; }
-  .points li::before { content:''; position:absolute; left:0; top:.5em; width:.7rem; height:.4rem; border-left:2px solid var(--accent); border-bottom:2px solid var(--accent); transform:rotate(-45deg); }
-</style>

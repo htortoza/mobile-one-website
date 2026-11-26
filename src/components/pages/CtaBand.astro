@@ -1,5 +1,6 @@
 ---
 // src/components/pages/CtaBand.astro — cierre con degradado de marca y botón único de demo.
+import Button from '../Button.astro';
 import { withBase } from '../../utils/base.js';
 const { title = '¿Listo para ver Mobile One con tu catálogo?', text = 'Agenda una demo de 30 minutos.', ctaText = 'Agendar demo', ctaHref = '/contacto' } = Astro.props;
 ---
@@ -7,7 +8,7 @@ const { title = '¿Listo para ver Mobile One con tu catálogo?', text = 'Agenda 
   <div class="container cband__inner">
     <h2 class="cband__title">{title}</h2>
     <p class="cband__text">{text}</p>
-    <a class="cband__btn" href={withBase(ctaHref)}>{ctaText}</a>
+    <Button href={withBase(ctaHref)} variant="light">{ctaText}</Button>
   </div>
 </section>
 <style>
@@ -15,6 +16,4 @@ const { title = '¿Listo para ver Mobile One con tu catálogo?', text = 'Agenda 
   .cband__inner { display:grid; gap:var(--space-sm); justify-items:start; }
   .cband__title { font-family:var(--font-heading); font-size:clamp(2rem,4.6vw,3.6rem); letter-spacing:-0.03em; line-height:1.06; font-weight:500; max-width:20ch; }
   .cband__text { font-size:var(--text-lg); opacity:.88; }
-  .cband__btn { display:inline-flex; align-items:center; min-height:48px; padding:0 1.6rem; border-radius:var(--radius-full); background:var(--on-accent); color:var(--navy); text-decoration:none; font-weight:500; transition:transform var(--transition-fast); }
-  .cband__btn:hover { transform:translateY(-2px); box-shadow:var(--shadow-lg); }
 </style>

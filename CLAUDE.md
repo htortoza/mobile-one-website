@@ -88,7 +88,8 @@ src/
 │   └── Layout.astro   ← Plantilla maestra — no modificar el motor Lenis/GSAP
 ├── pages/          ← Rutas físicas del sitio
 ├── styles/
-│   └── theme.css   ← ÚNICO archivo donde el Agente UI toca el diseño
+│   ├── theme.css       ← tokens (colores, tipografía, espacios) + base
+│   └── components.css  ← componentes globales del design system (§22)
 └── utils/
     └── validate.js ← Ejecutar SIEMPRE antes de generar código
 contracts/
@@ -303,7 +304,7 @@ Cuando Claude Code abra este repositorio, responde con exactamente esto:
 
 ---
 
-*Versión del contrato: 1.3 — Actualizar este número ante cualquier cambio estructural. (1.3: §19 Diseño Narrativo, §20 Catálogo de Escenas + Dirección de Arte, §21 Correcciones/Gotchas; refuerzo anti-repetición y narrativa en §16.)*
+*Versión del contrato: 1.4 — Actualizar este número ante cualquier cambio estructural. (1.4: §22 Design System y componentes únicos. 1.3: §19 Diseño Narrativo, §20 Catálogo de Escenas + Dirección de Arte, §21 Correcciones/Gotchas; refuerzo anti-repetición y narrativa en §16.)*
 
 ---
 
@@ -887,3 +888,67 @@ que falte ANTES de reportar.
 ### 21.5 Init / re-init (recordatorio §15.6.1 #7)
 - Motion en `astro:page-load` (corre en carga, F5 y View Transitions). `ScrollTrigger.config({
   ignoreMobileResize: true })`. Revertir `matchMedia` antes de recrear. Limpiar en `astro:before-swap`.
+
+---
+
+## 22. Design System — componentes únicos y CSS global (OBLIGATORIO)
+
+> Origen (2026-11-26): había 9 implementaciones distintas de botón, el mismo bloque CSS
+> copiado en 9 páginas y un header que se recreaba en cada navegación (parpadeaba). Esta
+> sección es la norma para que no vuelva a pasar. Prevalece sobre cualquier hábito de
+> "estilizar en la página".
+
+### 22.1 Capas de CSS (global, no por página)
+| Capa | Archivo | Contiene |
+|---|---|---|
+| 1. Tokens + base | `src/styles/theme.css` | variables (`--accent`, `--space-*`, `--radius-*`…), reset, `.container` |
+| 2. Componentes | `src/styles/components.css` | `.btn`, `.btn-group`, patrones de contenido (`.card-grid`, `.step-list`, `.check-list`, `.tag`, `.badge`, `.logo-chip`, `.text-lead`) |
+| 3. Componente Astro | `<style>` scoped del `.astro` | estilos de UN componente que no se reutilizan fuera de él |
+| 4. Página | `<style>` en `src/pages/*` | **por defecto ninguno** (ver 22.4) |
+
+Ambas capas globales se importan UNA vez en `BaseHead.astro`. Prohibido `<style is:global>`
+en páginas o componentes: si algo es global, va a `components.css`.
+
+### 22.2 Chrome único: Header, Footer, StickyCTA
+- Viven SOLO en `Layout.astro`. Ninguna página los importa ni los duplica.
+- `Header` y su drawer móvil llevan `transition:persist`: **es el mismo DOM en todas las
+  páginas**. Sus scripts se enganchan una sola vez al cargar el módulo; en `astro:page-load`
+  solo se sincroniza estado que depende de la URL (`aria-current`).
+- Estado interactivo que debe sobrevivir a la navegación (mega-menú abierto, link activo) se
+  maneja con JS + clases de estado (`.is-open`, `.is-hot`), no con `:hover`: durante la View
+  Transition el navegador no detecta hover y el CSS `:hover` parpadea. El estado se congela de
+  `astro:before-preparation` hasta `viewTransition.finished` (evento `astro:before-swap`).
+
+### 22.3 Componentes: uno por patrón
+- **Botones/CTA = `<Button>`** (`src/components/Button.astro`). Variantes: `primary`, `ghost`,
+  `light`, `outline-light`; tamaños `md`/`sm`; `block`; `track` (ubicación para analítica →
+  `data-cta`). Nunca `<a class="mi-boton">` ad-hoc ni redefinir `.btn`.
+- Agrupar botones con `.btn-group` (envuelve y en móvil se apila).
+- Si un patrón aparece en **2+ lugares** → componente en `src/components/` y/o clase en
+  `components.css`. Copiar y pegar CSS entre archivos está prohibido.
+- ¿Necesitas otro aspecto? Se agrega una **variante al sistema** (y se documenta aquí), no un
+  override local.
+
+### 22.4 CSS en páginas
+- Por defecto, una página no tiene `<style>`: compone componentes y clases del sistema.
+- Excepción: una sección realmente única de esa página (p. ej. `.fr`/`.mean` en
+  `/integraciones`). Debe llevar un comentario con el motivo. Si luego se reutiliza → se
+  mueve a la capa 2 o 3.
+- El contexto puede **posicionar** un componente (margin, grid placement) pero no cambiar su
+  color, tamaño ni tipografía.
+
+### 22.5 Hooks de JS y analítica
+- JS y analítica seleccionan por `data-*` (`data-magnetic`, `data-pulse`, `data-cta`,
+  `data-nav`…), **nunca por clases visuales**: renombrar una clase no debe romper motion ni GA.
+
+### 22.6 Nombres
+- BEM (`bloque__elemento--modificador`). Clases globales con nombres explícitos del sistema
+  (`card-grid`, no `cards`/`mods`/`rel`) para no chocar con clases scoped de componentes.
+
+### 22.7 Checklist antes de reportar
+- [ ] ¿Algún botón que no sea `<Button>`? (`grep -rn "class=\"[^\"]*btn" src/pages`)
+- [ ] ¿Alguna página con `<style>` nuevo? ¿Está justificado y comentado?
+- [ ] ¿CSS repetido en 2+ archivos? → moverlo a `components.css`.
+- [ ] ¿Header/Footer importados fuera de `Layout.astro`? (debe ser no)
+- [ ] ¿JS/GA atado a una clase visual? → cambiar a `data-*`.
+

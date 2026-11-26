@@ -2,6 +2,7 @@
 // src/pages/recursos/industrias/[slug].astro
 // Una página por rubro (moda, electrónica, multitienda, retail con ERP). Contenido en src/data/industrias.js.
 // Estructura narrativa: hero con "ticket en vivo" -> antes/ahora -> un día en tu tienda -> lo que más usa tu rubro -> FAQ -> otros rubros -> demo.
+import Button from '../../../components/Button.astro';
 import Layout from '../../../layouts/Layout.astro';
 import Section from '../../../components/pages/Section.astro';
 import FaqList from '../../../components/pages/FaqList.astro';
@@ -39,9 +40,9 @@ const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(ind.faqs)
         <p class="ih__pill" data-rv>{ind.eyebrow}</p>
         <h1 class="ih__title" data-rv>{ind.h1}</h1>
         <p class="ih__lead" data-rv>{ind.lead}</p>
-        <div class="ih__cta" data-rv>
-          <a class="ih__btn ih__btn--primary" href={withBase('/contacto')}>Agendar demo</a>
-          <a class="ih__btn ih__btn--ghost" href={withBase('/producto')}>Ver el producto</a>
+        <div class="btn-group ih__cta" data-rv>
+          <Button href={withBase('/contacto')}>Agendar demo</Button>
+          <Button href={withBase('/producto')} variant="ghost">Ver el producto</Button>
         </div>
       </div>
 
@@ -182,11 +183,7 @@ const schemaData = graph(orgSchema, breadcrumbSchema(trail), faqSchema(ind.faqs)
   .ih__pill { font-size: var(--text-sm); font-weight: 500; color: var(--accent); background: var(--tint-strong); border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent); padding: .4rem .9rem; border-radius: var(--radius-full); }
   .ih__title { font-family: var(--font-heading); font-size: clamp(2.3rem, 5vw, 4rem); line-height: 1.03; letter-spacing: -.035em; color: var(--navy); font-weight: 500; max-width: 16ch; text-wrap: balance; }
   .ih__lead { font-size: clamp(1.05rem, 1.5vw, 1.25rem); line-height: 1.55; color: var(--text-secondary); max-width: 46ch; }
-  .ih__cta { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-xs); }
-  .ih__btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 1.5rem; border-radius: var(--radius-full); font-weight: 500; text-decoration: none; white-space: nowrap; transition: transform var(--transition-fast), box-shadow var(--transition-fast); }
-  .ih__btn--primary { background: var(--grad-brand); color: var(--on-accent); box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--accent-grad-start) 70%, transparent); }
-  .ih__btn--ghost { color: var(--navy); background: var(--bg-primary); border: 1px solid var(--border); }
-  .ih__btn:hover { transform: translateY(-2px); }
+  .ih__cta { margin-top: var(--space-xs); }
 
   /* Tarjeta ticket */
   .tk { position: relative; margin: 0; display: grid; place-items: center; min-width: 0; padding: var(--space-md) var(--space-sm); }

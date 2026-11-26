@@ -3,6 +3,7 @@
 // Home §4.9 — CTA de cierre. Bookend azul con Hero/4.3 (mismo bg-pattern-m).
 // Opcional: franja de logos de clientes bajo los botones (marquee sutil, con
 // fade en los bordes), eco del strip del hero.
+import Button from '../Button.astro';
 import { withBase } from '../../utils/base.js';
 const { title, body, ctaText, ctaHref, ctaSecondaryText, ctaSecondaryHref, logos, logosLabel } = Astro.props;
 const logoList = logos ?? [];
@@ -12,9 +13,9 @@ const logoList = logos ?? [];
   <div class="container cta-close__inner" data-gsap-animate="cta-content">
     <h2 class="cta-close__title">{title}</h2>
     <p class="cta-close__body">{body}</p>
-    <div class="cta-close__actions">
-      <a href={withBase(ctaHref)} class="cta-close__btn cta-close__btn--primary">{ctaText}</a>
-      {ctaSecondaryText && <a href={withBase(ctaSecondaryHref)} class="cta-close__btn cta-close__btn--ghost">{ctaSecondaryText}</a>}
+    <div class="btn-group cta-close__actions">
+      <Button href={withBase(ctaHref)} variant="light" track="cierre" data-pulse>{ctaText}</Button>
+      {ctaSecondaryText && <Button href={withBase(ctaSecondaryHref)} variant="outline-light" track="cierre">{ctaSecondaryText}</Button>}
     </div>
 
     {logoList.length > 0 && (
@@ -61,7 +62,7 @@ const logoList = logos ?? [];
         });
       }
 
-      const btn = section.querySelector('.cta-close__btn--primary');
+      const btn = section.querySelector('[data-pulse]');
       if (btn) {
         const pulse = () => {
           gsap.timeline()
@@ -97,25 +98,7 @@ const logoList = logos ?? [];
     letter-spacing: -0.03em;
   }
   .cta-close__body { font-size: var(--text-lg); color: color-mix(in srgb, var(--on-accent) 88%, transparent); max-width: 50ch; }
-  .cta-close__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
 
-  .cta-close__btn {
-    display: inline-flex;
-    align-items: center;
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: var(--text-base);
-    padding: var(--space-sm) var(--space-lg);
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    transition: transform var(--transition-fast);
-  }
-  .cta-close__btn--primary { background-color: var(--on-accent); color: var(--accent-hover); }
-  .cta-close__btn--primary:hover { transform: translateY(-2px); }
-  .cta-close__btn--ghost {
-    color: var(--on-accent);
-    border: 1px solid color-mix(in srgb, var(--on-accent) 45%, transparent);
-  }
 
   /* Franja de clientes: separada por una regla fina, marquee lento con fade
      en los bordes; logos blancos atenuados (se encienden al pasar el cursor). */
@@ -159,7 +142,5 @@ const logoList = logos ?? [];
   @media (max-width: 640px) {
     .cta-close__track { gap: var(--space-lg); }
     .cta-close__logo { height: 18px; }
-    .cta-close__actions { flex-direction: column; width: 100%; }
-    .cta-close__btn { justify-content: center; }
   }
 </style>
